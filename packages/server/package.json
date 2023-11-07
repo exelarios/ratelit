@@ -10,7 +10,7 @@
     "@types/cookie-parser": "^1.4.5"
   },
   "scripts": {
-    "start": "bun run index.ts",
+    "start": "bun --watch run index.ts",
     "prisma:migrate": "bunx prisma migrate dev --name init",
     "prisma:push": "bunx prisma db push",
     "prisma:format": "bunx prisma format",

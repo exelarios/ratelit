@@ -9,7 +9,7 @@ const Router = express.Router();
 
 const JWT_SECRET = secrets.JWT();
 
-Router.post("/login", (request, response) => {
+Router.post("/login", async (request, response) => {
   try {
     const body = z.object({
       email: z.string().email({
@@ -20,8 +20,28 @@ Router.post("/login", (request, response) => {
 
     const credentials = body.parse(request.body);
 
-    // const isValidToken = jwt.verify()
-    console.log(credentials);
+    const user = await prisma.user.findUniqueOrThrow({
+      select: {
+        id: true
+      },
+      where: {
+        email: credentials.email
+      }
+    });
+
+    const payload = {
+      email: credentials.email,
+      id: user.id
+    }
+
+    const accessToken = jwt.sign(payload, JWT_SECRET, {
+      expiresIn: "1h"
+    });
+
+    response.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      sameSite: true
+    });
 
     response.send({
       "success": true,
