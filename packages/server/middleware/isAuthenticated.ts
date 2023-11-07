@@ -5,6 +5,9 @@ import secrets from "@/server/utils/secrets";
 
 const JWT_SECRET = secrets.JWT();
 
+/**
+ * A middleware callback check if client is authenticated via access token.
+ */
 const isAuthenticated: RequestHandler = (request, response, next) => {
   try {
     const { accessToken } = request.cookies;

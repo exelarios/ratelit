@@ -121,7 +121,8 @@ Router.post("/signup", async (request, response) => {
   } catch(_error) {
     const error = _error as Error;
     console.log(error);
-    response.status(400).send({
+    response.status(400);
+    response.send({
       "success": false,
       "message": error instanceof z.ZodError ? error.issues : error.message
     });
