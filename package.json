@@ -1,0 +1,17 @@
+{
+  "name": "ratelit",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "server:start": "bun --cwd packages/server start",
+    "clean": "find . -type dir -name node_modules | xargs rm -rf",
+    "db:migrate": "bun --cwd packages/server prisma:migrate",
+    "db:push": "bun --cwd packages/server prisma:push",
+    "db:format": "bun --cwd packages/server prisma:format",
+    "db:validate": "bun --cwd packages/server prisma:validate",
+    "db:generate": "bun --cwd packages/server prisma:generate"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  }
+}

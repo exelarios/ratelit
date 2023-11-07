@@ -1,0 +1,31 @@
+{
+  "name": "@ratelit/server",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest",
+    "@types/cors": "^2.8.15",
+    "@types/express": "^4.17.20",
+    "@types/jsonwebtoken": "^9.0.4",
+    "@types/cookie-parser": "^1.4.5"
+  },
+  "scripts": {
+    "start": "bun run index.ts",
+    "prisma:migrate": "bunx prisma migrate dev --name init",
+    "prisma:push": "bunx prisma db push",
+    "prisma:format": "bunx prisma format",
+    "prisma:validate": "bunx prisma validate",
+    "prisma:generate": "bunx prisma generate"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0",
+    "prisma": "^5.5.2"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "@prisma/client": "^5.5.2",
+    "jsonwebtoken": "^9.0.2",
+    "cookie-parser": "^1.4.6"
+  }
+}

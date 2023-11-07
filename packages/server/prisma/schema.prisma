@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+enum Role {
+  OWNER
+  EDITOR // allows adding items onto the list and commenting.
+  VIEWER // allows view only for unpublished rankings.
+}
+
+model User {
+  id        String   @id @unique @default(uuid())
+  email     String   @unique
+  avatar    String
+  firstName String
+  lastName  String
+  password  String
+  createdAt DateTime @default(now())
+
+  // ownership of items created.
+  items Item[]
+
+  // comments posted by this user.
+  comments Comment[]
+
+  // lists where users have some sort of admin powers.
+  lists EditorsOfList[]
+}
+
+model List {
+  id        String   @id @unique @default(uuid())
+  title     String          @default("Untitled List")
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  published Boolean
+  editors   EditorsOfList[]
+  items     Item[]
+}
+
+model EditorsOfList {
+  role   Role
+  userId String
+  listId String
+  user   User   @relation(fields: [userId], references: [id])
+  list   List   @relation(fields: [listId], references: [id])
+
+  @@id([userId, listId])
+  @@index([userId])
+  @@index([listId])
+}
+
+model Item {
+  id        String   @id @unique @default(uuid())
+  rating    Float
+  thumbnail String
+  ownerId   String
+  createdBy User      @relation(fields: [ownerId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  listId    String
+  list      List      @relation(fields: [listId], references: [id])
+  comments  Comment[]
+
+  @@index([ownerId])
+  @@index([listId])
+}
+
+model Comment {
+  id        String   @id @unique @default(uuid())
+  content   String
+  ownerId   String
+  createdBy User     @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id])
+
+
+  @@index([ownerId])
+  @@index([itemId])
+}
