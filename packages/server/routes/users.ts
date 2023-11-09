@@ -2,6 +2,7 @@ import express from "express";
 const Router = express.Router();
 
 import isAuthenticated from "@/server/middleware/isAuthenticated";
+import { isTest } from "../middleware/test";
 
 Router.get("/", isAuthenticated, (request, response) => {
   try {
