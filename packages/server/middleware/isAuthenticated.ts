@@ -1,7 +1,6 @@
-import { RequestHandler, CookieOptions } from "express";
+import { RequestHandler } from "express";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
-import prisma from "@/server/utils/prisma";
 import secrets from "@/server/utils/secrets";
 import { generateTokens } from "@/server/utils/auth";
 
@@ -9,11 +8,6 @@ import jsonwebtoken from "@/server/utils/jwt";
 
 const ACCESS_TOKEN_SECRET = secrets.accessToken();
 const REFRESH_TOKEN_SECRET = secrets.refreshToken();
-
-interface RefreshToken extends jwt.JwtPayload {
-  id: string;
-  accessExpiration: string;
-}
 
 /**
  * A middleware callback check if client is authenticated via access token.
@@ -42,10 +36,7 @@ const isAuthenticated: RequestHandler = async (request, response, next) => {
     }
 
     if (token == null) {
-      return response.status(403).send({
-        "success": false,
-        "message": "No access token has been provided. Please log in"
-      });
+      throw new Error("No access token has been provided. Please log in");
     }
 
     try {
@@ -62,29 +53,14 @@ const isAuthenticated: RequestHandler = async (request, response, next) => {
         }
 
         console.log("@token verifying");
-        const payload = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
-
-        const refresh = payload as RefreshToken;
+        const refresh = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as jwt.RefreshTokenPayload;
         // todo: once verified, invalidate refresh token.
-
-        const user = await prisma.user.findUniqueOrThrow({
-          select: {
-            email: true
-          },
-          where: {
-            id: refresh.id
-          }
-        });
-
         const accessTokenPayload = {
-          email: user.email,
           id: refresh.id,
         }
 
         console.log("@token generate toksn");
         const tokens = generateTokens(accessTokenPayload);
-
-        console.log("@user", user);
 
         response.cookie("accessToken", tokens.access, {
           "httpOnly": true,

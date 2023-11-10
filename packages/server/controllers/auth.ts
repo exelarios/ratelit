@@ -1,9 +1,13 @@
 import { RequestHandler } from "express";
-import jwt from "jsonwebtoken";
 import { z } from "zod";
 
+import jwt, { JsonWebTokenError, NotBeforeError, TokenExpiredError } from "jsonwebtoken";
+import jsonwebtoken from "@/server/utils/jwt";
 import prisma from "@/server/utils/prisma";
 import { generateTokens } from "@/server/utils/auth";
+import secrets from "@/server/utils/secrets";
+
+const REFRESH_TOKEN_SECRET = secrets.refreshToken();
 
 export const login: RequestHandler = async (request, response) => {
   try {
@@ -140,13 +144,9 @@ export const signup: RequestHandler = async (request, response) => {
   }
 }
 
-interface RefreshTokenPayload extends jwt.JwtPayload {
-  accessExpiration: number;
-}
-
-export const refresh: RequestHandler = (request, response) => {
+export const refresh: RequestHandler = async (request, response) => {
+  const headers = request.headers;
   try {
-    const headers = request.headers;
     let authorization = headers.authorization;
 
     if (!authorization) {
@@ -154,9 +154,49 @@ export const refresh: RequestHandler = (request, response) => {
     }
 
     // Get the second element since the first element is the prefix `bearer`.
-    authorization = authorization?.split(" ")[1];
+    const refreshToken = authorization.split(" ")[1];
+
+    const result = await jsonwebtoken.verify(refreshToken, REFRESH_TOKEN_SECRET) as jwt.RefreshTokenPayload;
+
+    const tokenPayload = {
+      id: result.id
+    }
+
+    const tokens = generateTokens(tokenPayload);
+
+    response.send({
+      "accessToken": tokens.access,
+      "refreshToken": tokens.refresh
+    });
 
   } catch(error) {
+    if (error instanceof NotBeforeError) {
+      response.status(403).send({
+        "success": false,
+        "message": "Access token associated with the access token hasn't expired."
+      });
+    }
 
+    if (error instanceof TokenExpiredError) {
+      response.status(403).send({
+        "success": false,
+        "message": "The session has expired. Please relog in."
+      });
+    }
+
+    if (error instanceof JsonWebTokenError) {
+      console.log(error);
+      response.status(403).send({
+        "success": false,
+        "message": "The token is either invalid or malformed."
+      });
+    }
+
+    if (error instanceof Error) {
+      response.status(403).send({
+        "success": false,
+        "message": error.message
+      });
+    }
   }
 }

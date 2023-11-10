@@ -6,13 +6,12 @@ const ACCESS_TOKEN_SECRET = secrets.accessToken();
 const REFRESH_TOKEN_SECRET = secrets.refreshToken();
 
 interface TokenPayload {
-  email: string;
   id: string;
 }
 
 export function generateTokens(payload: TokenPayload) {
   const access = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    "expiresIn": "5s",
+    "expiresIn": "1m",
   });
 
   // Using decode method is fine, since we just signed the token.
@@ -25,10 +24,12 @@ export function generateTokens(payload: TokenPayload) {
 
   const refresh = jwt.sign({
     "id": payload.id,
+    "refresh": true,
     "accessExpiration": decode.exp 
   }, 
     REFRESH_TOKEN_SECRET, {
-    "expiresIn": "10s"
+    "expiresIn": "5m",
+    "notBefore": "1m"
   });
 
   return {
