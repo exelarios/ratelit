@@ -4,6 +4,8 @@
   "workspaces": ["packages/*"],
   "scripts": {
     "server:start": "bun --cwd packages/server start",
+    "mobile:start": "bun --cwd packages/mobile start",
+    "mobile:ios": "bun --cwd packages/mobile ios",
     "clean": "find . -type dir -name node_modules | xargs rm -rf",
     "db:migrate": "bun --cwd packages/server prisma:migrate",
     "db:push": "bun --cwd packages/server prisma:push",

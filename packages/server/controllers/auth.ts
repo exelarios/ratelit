@@ -1,13 +1,9 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
 
-import jwt, { JsonWebTokenError, NotBeforeError, TokenExpiredError } from "jsonwebtoken";
-import jsonwebtoken from "@/server/utils/jwt";
 import prisma from "@/server/utils/prisma";
-import { generateTokens } from "@/server/utils/auth";
-import secrets from "@/server/utils/secrets";
-
-const REFRESH_TOKEN_SECRET = secrets.refreshToken();
+import { generateTokens, parseToken, verifyRefreshToken } from "@/server/utils/auth";
+import { NotBeforeError, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
 
 export const login: RequestHandler = async (request, response) => {
   try {
@@ -154,9 +150,9 @@ export const refresh: RequestHandler = async (request, response) => {
     }
 
     // Get the second element since the first element is the prefix `bearer`.
-    const refreshToken = authorization.split(" ")[1];
+    const refreshToken = parseToken(authorization);
 
-    const result = await jsonwebtoken.verify(refreshToken, REFRESH_TOKEN_SECRET) as jwt.RefreshTokenPayload;
+    const result = await verifyRefreshToken(refreshToken);
 
     const tokenPayload = {
       id: result.id

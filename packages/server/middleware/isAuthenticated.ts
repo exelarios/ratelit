@@ -1,13 +1,7 @@
 import { RequestHandler } from "express";
-import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
-import secrets from "@/server/utils/secrets";
-import { generateTokens } from "@/server/utils/auth";
-
-import jsonwebtoken from "@/server/utils/jwt";
-
-const ACCESS_TOKEN_SECRET = secrets.accessToken();
-const REFRESH_TOKEN_SECRET = secrets.refreshToken();
+import { generateTokens, parseToken, verifyAccessToken, verifyRefreshToken } from "@/server/utils/auth";
 
 /**
  * A middleware callback check if client is authenticated via access token.
@@ -26,10 +20,7 @@ const isAuthenticated: RequestHandler = async (request, response, next) => {
     let token: string | null = null;
     if (headers.authorization) {
       console.log("Authenicate with bearer");
-      let value = headers.authorization;
-      // Takes the second element and ignore the "bearer" prefix.
-      const [_, accessToken] = value.split(" ");
-      token = accessToken;
+      token = parseToken(headers.authorization);
     } else if (cookies?.accessToken) {
       console.log("Authenicate with cookies");
       token = cookies.accessToken;
@@ -41,7 +32,7 @@ const isAuthenticated: RequestHandler = async (request, response, next) => {
 
     try {
       // If there aren't any errors thrown, we move onto the next middleware.
-      await jsonwebtoken.verify(token, ACCESS_TOKEN_SECRET);
+      await verifyAccessToken(token);
     } catch(error) {
       if (error instanceof TokenExpiredError) {
         // Check if refresh token cookie exists, we throw an error if it doesn't exist.
@@ -53,7 +44,7 @@ const isAuthenticated: RequestHandler = async (request, response, next) => {
         }
 
         console.log("@token verifying");
-        const refresh = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as jwt.RefreshTokenPayload;
+        const refresh = await verifyRefreshToken(refreshToken);
         // todo: once verified, invalidate refresh token.
         const accessTokenPayload = {
           id: refresh.id,
