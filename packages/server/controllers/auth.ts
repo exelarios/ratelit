@@ -4,17 +4,12 @@ import { z } from "zod";
 import prisma from "@/server/utils/prisma";
 import { generateTokens, parseToken, verifyRefreshToken } from "@/server/utils/auth";
 import { NotBeforeError, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
+import * as validate from "@ratelit/shared/validate";
 
 export const login: RequestHandler = async (request, response) => {
   try {
-    const body = z.object({
-      email: z.string().email({
-        message: "Please provide a valid email address."
-      }),
-      password: z.string().min(4, "Password field must have a minimum of 4 characters.")
-    });
 
-    const credentials = body.parse(request.body);
+    const credentials = validate.login.parse(request.body);
 
     const user = await prisma.user.findUniqueOrThrow({
       select: {

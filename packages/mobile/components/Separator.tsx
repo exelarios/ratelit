@@ -8,7 +8,7 @@ import Text from "./Text";
 const Separator = React.forwardRef<RNView, ViewProps>((props, forwardedRef) => {
   const { style, children, ...otherProps } = props;
 
-  const composedStyles = StyleSheet.compose(styles.base, style);
+  const composedStyles = StyleSheet.compose(styles.container, style);
 
   if (!children) {
     return (
@@ -18,9 +18,9 @@ const Separator = React.forwardRef<RNView, ViewProps>((props, forwardedRef) => {
 
   return (
     <View ref={forwardedRef} style={styles.container}>
-      <View style={composedStyles} {...otherProps}/>
+      <View style={styles.base} {...otherProps}/>
       <Text color={styles.base.backgroundColor}>{children}</Text>
-      <View style={composedStyles} {...otherProps}/>
+      <View style={styles.base} {...otherProps}/>
     </View>
   );
 });
@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "100%",
     gap: 10,
+    paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
   },

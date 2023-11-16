@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   PressableProps,
   Pressable,
@@ -9,27 +9,41 @@ import {
 
 import Text from "../components/Text";
 import colors from "../design/colors";
+import composeStyles from "../utils/composeStyles";
 
 interface ButtonProps extends PressableProps {
+  icon?: any;
   color?: string;
   variant?: "fill" | "outline" | "none"
 }
 
 const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) => {
-  const { variant = "none", color, style, children, ...otherProps } = props;
+  const { variant = "none", icon, color, style, children, ...otherProps } = props;
 
-  const variants: Record<string, StyleProp<ViewStyle>>= {
-    fill,
-    outline,
-    none
-  };
+  const [hovering, setHovering] = useState(false);
 
-  if (!variants[variant]) {
+  const fill = useMemo(() => {
+    return composeStyles(styles.base, styles.fill, style);
+  }, [hovering]);
+
+  const outline = useMemo(() => {
+    return composeStyles(styles.base, styles.outline, style);
+  }, [hovering]);
+
+  const selection = useMemo(() => {
+    return {
+      fill,
+      outline,
+      none
+    }
+  }, [fill, outline]);
+
+  if (!selection[variant]) {
     throw new Error("The variant doesn't exist.");
   }
 
-  const currentVarient = variants[variant];
-  const composedStyles = StyleSheet.compose(currentVarient, style as StyleProp<ViewStyle>);
+  const currentVarient = selection[variant];
+  const composedStyles = composeStyles(currentVarient, style as StyleProp<ViewStyle>);
   const isText = !React.isValidElement(children) && typeof children === "string";
 
   const child = useMemo(() => {
@@ -51,6 +65,7 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
       style={composedStyles}
       ref={forwardedRef}
       {...otherProps}>
+      {icon}
       {child}
     </Pressable>
   );
@@ -60,21 +75,28 @@ Button.displayName = "Button";
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 5,
-  },
-  fill: {
     padding: 10,
     paddingVertical: 12,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    columnGap: 10,
+    minHeight: 50,
+    alignItems: "center",
+    borderRadius: 5
+  },
+  fill: {
     backgroundColor: colors.neutral[800],
   },
   outline: {
-    padding: 10,
-    paddingVertical: 12,
     borderWidth: 1.5,
-    borderColor: colors.neutral[800]
+    borderColor: colors.neutral[800],
   },
   none: {
     width: "auto"
+  },
+  hovering: {
+    backgroundColor: colors.neutral[700]
   }
 });
 
@@ -92,8 +114,6 @@ const textSyles = StyleSheet.create({
   none: {}
 });
 
-const fill = StyleSheet.compose(styles.base, styles.fill);
-const outline = StyleSheet.compose(styles.base, styles.outline);
-const none = styles.base;
+const none = styles.none;
 
 export default Button;
