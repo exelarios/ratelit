@@ -1,12 +1,17 @@
 import { Slot } from "expo-router";
 
 import { AuthContextProvider } from "../context/AuthContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 export default function Root() {
   return (
-    <AuthContextProvider>
-      <Slot>
-      </Slot>
-    </AuthContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthContextProvider>
+        <Slot>
+        </Slot>
+      </AuthContextProvider>
+    </QueryClientProvider>
   );
 }

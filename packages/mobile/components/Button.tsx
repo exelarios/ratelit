@@ -13,12 +13,13 @@ import composeStyles from "../utils/composeStyles";
 
 interface ButtonProps extends PressableProps {
   icon?: any;
+  iconAligin?: "start" | "end"
   color?: string;
   variant?: "fill" | "outline" | "none"
 }
 
 const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) => {
-  const { variant = "none", icon, color, style, children, ...otherProps } = props;
+  const { variant = "none", icon, iconAligin = "start", color, style, children, ...otherProps } = props;
 
   const [hovering, setHovering] = useState(false);
 
@@ -43,7 +44,13 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
   }
 
   const currentVarient = selection[variant];
-  const composedStyles = composeStyles(currentVarient, style as StyleProp<ViewStyle>);
+
+  const composedStyles = composeStyles(
+    currentVarient, 
+    iconAligin === "end" && { flexDirection: "row-reverse" }, 
+    style as StyleProp<ViewStyle>
+    );
+
   const isText = !React.isValidElement(children) && typeof children === "string";
 
   const child = useMemo(() => {

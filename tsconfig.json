@@ -4,9 +4,8 @@
       "ESNext"
     ],
     "paths": {
-      "@/*": [
-        "./packages/*"
-      ]
+      "@/*": ["./packages/*"],
+      "@/mobile/*": ["./packages/mobile/*"]
     },
     "module": "esnext",
     "target": "esnext",

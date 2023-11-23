@@ -1,8 +1,11 @@
+import { useCallback, useMemo } from "react";
 import { StyleSheet } from "react-native";
+import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 
 import { AntDesign } from '@expo/vector-icons';
 import * as validate from "@ratelit/shared/validate";
+import { LoginResponse } from "@ratelit/shared/types";
 
 import View from "../components/View";
 import Button from "../components/Button";
@@ -12,31 +15,61 @@ import TextInput from "../components/TextInput";
 import colors from "../design/colors";
 import Separator from "../components/Separator";
 import useForm from "../hooks/useForm";
-import { useMemo } from "react";
+import useStorage from "../hooks/useStorage";
 
 type Login = z.infer<typeof validate.login>
 
 export default function Login() {
+  // const mutation = useMutation({
+  //   mutationFn: (payload) => {
+  //     return 
+  //   }
+  // });
+
+  const [accessToken, setAccessToken] = useStorage("access");
+  const [refreshToken, setrefreshToken] = useStorage("access");
+
+  const handleOnLogin = useCallback(async (state: Login) => {
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: state.email,
+          password: state.password
+        })
+      });
+
+      const body = await response.json() as LoginResponse;
+
+      if (body.success) {
+        const tokens = body.payload;
+        setAccessToken(tokens.accessToken);
+        setrefreshToken(tokens.refreshToken);
+      }
+
+      console.log(JSON.stringify(body, null, 2));
+
+
+      // todo: implement return for input validation from the server.
+      // todo: put tokens into secure store
+
+      return body;
+    } catch(error) {
+      console.log(error);
+    }
+  }, []);
+
   const form = useForm<Login>({
     state: {
       email: "",
       password: ""
     },
     zodValidation: validate.login,
-    async onSubmit(state) {
-      console.log("@submit", state);
-      // const response = await fetch("http://localhost:3000/api/auth/login", {
-      //   method: "POST",
-      //   body: {
-      //     email: state.email,
-      //     password: state.password
-      //   }
-      // });
-
-      // const body = await response.json();
-
-      // console.log(body);
-    },
+    onSubmit: handleOnLogin
   });
 
   const GoogleLogo = useMemo(() => {

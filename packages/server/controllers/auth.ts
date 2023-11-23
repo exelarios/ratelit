@@ -8,7 +8,6 @@ import * as validate from "@ratelit/shared/validate";
 
 export const login: RequestHandler = async (request, response) => {
   try {
-
     const credentials = validate.login.parse(request.body);
 
     const user = await prisma.user.findUniqueOrThrow({
