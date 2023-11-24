@@ -1,11 +1,13 @@
 import { useCallback, useMemo } from "react";
 import { StyleSheet } from "react-native";
 import { useMutation } from "@tanstack/react-query";
+
 import { z } from "zod";
+
+import { LoginResponse } from "@ratelit/shared/types";
 
 import { AntDesign } from '@expo/vector-icons';
 import * as validate from "@ratelit/shared/validate";
-import { LoginResponse } from "@ratelit/shared/types";
 
 import View from "../components/View";
 import Button from "../components/Button";
@@ -15,21 +17,24 @@ import TextInput from "../components/TextInput";
 import colors from "../design/colors";
 import Separator from "../components/Separator";
 import useForm from "../hooks/useForm";
-import useStorage from "../hooks/useStorage";
+import { useAuth } from "../context/AuthContext";
 
 type Login = z.infer<typeof validate.login>
 
+/*
+
+1. Login views renders, checks if SecureStore exists tokens
+  a. tokens exist and valid, redirects protected views.
+  b. tokens doesn't exist and not valid
+      1. promots the user to log in via credentials 
+      2. In AuthContext call setAuth({ access, refresh })
+      3. Inside of setAuth(), we push the tokens into SecureStore
+*/
+
 export default function Login() {
-  // const mutation = useMutation({
-  //   mutationFn: (payload) => {
-  //     return 
-  //   }
-  // });
+  const { dispatch } = useAuth();
 
-  const [accessToken, setAccessToken] = useStorage("access");
-  const [refreshToken, setrefreshToken] = useStorage("access");
-
-  const handleOnLogin = useCallback(async (state: Login) => {
+  const getTokens = useCallback(async (payload: Login) => {
     try {
       const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
@@ -38,30 +43,37 @@ export default function Login() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          email: state.email,
-          password: state.password
+          email: payload.email,
+          password: payload.password
         })
       });
 
       const body = await response.json() as LoginResponse;
-
-      if (body.success) {
-        const tokens = body.payload;
-        setAccessToken(tokens.accessToken);
-        setrefreshToken(tokens.refreshToken);
+      if (!body.success) {
+        throw new Error(body.message);
       }
-
-      console.log(JSON.stringify(body, null, 2));
-
-
-      // todo: implement return for input validation from the server.
-      // todo: put tokens into secure store
-
-      return body;
+      
+      return body.payload;
     } catch(error) {
-      console.log(error);
+      if (error instanceof Error) {
+        console.log(error);
+      }
     }
   }, []);
+
+  const handleOnLogin = async (credentials: Login) => {
+      const tokens = await getTokens(credentials);
+
+      dispatch({
+        type: "SET_TOKENS",
+        payload: {
+          access: tokens.accessToken,
+          refresh: tokens.refreshToken
+        }
+      });
+      // todo: implement return for input validation from the server.
+      // todo: put tokens into secure store
+  };
 
   const form = useForm<Login>({
     state: {

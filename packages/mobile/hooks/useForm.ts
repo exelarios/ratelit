@@ -102,13 +102,14 @@ function useForm<T extends object>(props: UseFormParams<T>) {
       return formatZodError(state, parse);
     }
 
-    return {};
+    return null;
   }, []);
 
   const handleOnSubmit = useCallback(() => {
     // todo: if value passes validation using zod
     try {
       const issues = handleOnZodValidate(value);
+      console.log("@issues", issues);
       if (issues) {
         setMessage(issues);
         return;
@@ -117,8 +118,6 @@ function useForm<T extends object>(props: UseFormParams<T>) {
       console.log(value);
 
       const response = onSubmit(value);
-      if (response.success)
-      setMessage({});
     } catch(error) {
       if (error instanceof Error) {
         console.log(error);

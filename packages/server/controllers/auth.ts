@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { z } from "zod";
 
 import prisma from "@/server/utils/prisma";
-import { generateTokens, parseToken, verifyRefreshToken } from "@/server/utils/auth";
+import { generateTokens, parseToken, verifyAccessToken, verifyRefreshToken } from "@/server/utils/auth";
 import { NotBeforeError, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
 import * as validate from "@ratelit/shared/validate";
 
@@ -131,6 +131,66 @@ export const signup: RequestHandler = async (request, response) => {
       "success": false,
       "message": error instanceof z.ZodError ? error.issues : error.message
     });
+  }
+}
+
+export const verify: RequestHandler = async (request, response) => {
+  const headers = request.headers;
+  try {
+    const authorization = headers.authorization;
+    
+    if (!authorization) {
+      throw new Error("No authorization provided in request.");
+    }
+
+    const token = parseToken(authorization);
+    const session = await verifyAccessToken(token);
+    console.log({session});
+
+    const user = await prisma.user.findUniqueOrThrow({
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        email: true,
+        createdAt: true
+      },
+      where: {
+        email: session.email
+      }
+    });
+
+    response.send({
+      success: true,
+      payload: {
+        user,
+        token: session
+      }
+    });
+
+  } catch(error) {
+    if (error instanceof TokenExpiredError) {
+      response.status(403).send({
+        "success": false,
+        "message": "The session has expired. Please relog in."
+      });
+    }
+
+    if (error instanceof JsonWebTokenError) {
+      console.log(error);
+      response.status(403).send({
+        "success": false,
+        "message": error.message
+      });
+    }
+
+    if (error instanceof Error) {
+      response.status(403).send({
+        "success": false,
+        "message": error.message
+      });
+    }
   }
 }
 
