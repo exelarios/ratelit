@@ -1,10 +1,11 @@
 import { RequestHandler } from "express";
-import { z } from "zod";
+import { ZodError, z } from "zod";
 
 import prisma from "@/server/utils/prisma";
 import { generateTokens, parseToken, verifyAccessToken, verifyRefreshToken } from "@/server/utils/auth";
 import { NotBeforeError, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
 import * as validate from "@ratelit/shared/validate";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export const login: RequestHandler = async (request, response) => {
   try {
@@ -47,12 +48,27 @@ export const login: RequestHandler = async (request, response) => {
       },
     });
 
-  } catch(_error) {
-    const error = _error as Error;
-    response.status(400).send({
-      "success": false,
-      "message": error instanceof z.ZodError ? error.issues : error.message
-    });
+  } catch(error) {
+    if (error instanceof ZodError) {
+      response.status(400).send({
+        "success": false,
+        "message": error.issues
+      });
+    } else if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code == "P2025") {
+        response.status(404).send({
+          "success": false,
+          "code": 2025,
+          "message": "The credentials provided doesn't exist."
+        });
+      }
+    } else {
+      console.error(error);
+      response.status(400).send({
+        "success": false,
+        "message": "Something went wrong."
+      });
+    }
   }
 }
 
@@ -171,9 +187,9 @@ export const verify: RequestHandler = async (request, response) => {
 
   } catch(error) {
     if (error instanceof TokenExpiredError) {
-      response.status(403).send({
+      response.status(401).send({
         "success": false,
-        "message": "The session has expired. Please relog in."
+        "message": "The session has expired. Please relog in.",
       });
     }
 

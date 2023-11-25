@@ -5,11 +5,10 @@ import Text from "../../components/Text";
 import View from "../../components/View";
 
 export default function AppLayout() {
-  const { state } = useAuth();
-  const { user, loading } = state;
-  console.log("@from app layout", user);
+  const auth = useAuth();
+  const { user, isLoading } = auth.state;
 
-  if (loading) {
+  if (isLoading) {
     return <Text>Loading . . . </Text>
   }
 

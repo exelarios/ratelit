@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { StyleSheet } from "react-native";
+import { Image, StyleSheet } from "react-native";
 import { useMutation } from "@tanstack/react-query";
 
 import { z } from "zod";
@@ -18,6 +18,7 @@ import colors from "../design/colors";
 import Separator from "../components/Separator";
 import useForm from "../hooks/useForm";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 type Login = z.infer<typeof validate.login>
 
@@ -33,8 +34,9 @@ type Login = z.infer<typeof validate.login>
 
 export default function Login() {
   const { dispatch } = useAuth();
+  const toast = useToast();
 
-  const getTokens = useCallback(async (payload: Login) => {
+  const sendCredentials = useCallback(async (payload: Login) => {
     try {
       const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
@@ -50,11 +52,16 @@ export default function Login() {
 
       const body = await response.json() as LoginResponse;
       if (!body.success) {
+        toast.add({
+          type: "warning",
+          message: body.message
+        });
         throw new Error(body.message);
       }
       
       return body.payload;
     } catch(error) {
+      // if user isn't found
       if (error instanceof Error) {
         console.log(error);
       }
@@ -62,7 +69,8 @@ export default function Login() {
   }, []);
 
   const handleOnLogin = async (credentials: Login) => {
-      const tokens = await getTokens(credentials);
+    try {
+      const tokens = await sendCredentials(credentials);
 
       dispatch({
         type: "SET_TOKENS",
@@ -73,6 +81,9 @@ export default function Login() {
       });
       // todo: implement return for input validation from the server.
       // todo: put tokens into secure store
+    } catch(error) {
+      console.log(error);
+    }
   };
 
   const form = useForm<Login>({
@@ -89,6 +100,12 @@ export default function Login() {
       <AntDesign name="google" size={24} color="black" />
     );
   }, []);
+
+  const handleOnRegister = () => {
+    toast.add({
+      message: "urmom was here" + Math.random()
+    });
+  }
 
   return (
     <View safe style={styles.container}>
@@ -120,7 +137,7 @@ export default function Login() {
         <Separator>OR</Separator>
         <View style={styles.containerSpacing}>
           <Button variant="outline" icon={GoogleLogo}>Login with Google</Button>
-          <Button variant="outline">Sign up</Button>
+          <Button variant="outline" onPress={handleOnRegister}>Sign up</Button>
         </View>
         <Text color={colors.neutral[500]} size={13} style={{ paddingTop: 5 }}>
           By continuing, you are agree to our User Agreement

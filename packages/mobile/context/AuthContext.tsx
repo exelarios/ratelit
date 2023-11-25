@@ -8,7 +8,7 @@ interface State {
     access: string,
     refresh: string
   };
-  loading: boolean;
+  isLoading: boolean;
 }
 
 type Action = 
@@ -45,27 +45,37 @@ function reducer(state: State, action: Action) {
         if (access) {
           SecureStore.setItemAsync(ACCESS_TOKEN_KEY, access);
         }
+
+        if (refresh) {
+          SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refresh);
+        }
+
         return {
           ...state,
           tokens: {
             access: access,
             refresh: refresh
           },
-          loading: true
+          isLoading: true
         }
       case "SESSION":
         if (state.tokens.access) {
           SecureStore.setItemAsync(ACCESS_TOKEN_KEY, state.tokens.access);
         }
+
+        if (state.tokens.refresh) {
+          SecureStore.setItemAsync(REFRESH_TOKEN_KEY, state.tokens.refresh);
+        }
+
         return {
           ...state,
           user: action.payload,
-          loading: false
+          isLoading: false
         }
       case "LOADED":
         return {
           ...state,
-          loading: false
+          isLoading: false
         }
       default:
         throw new Error("Invalid action via AuthContext");
@@ -83,7 +93,7 @@ const initialState = {
     access: null,
     refresh: null
   },
-  loading: true
+  isLoading: true
 }
 
 export const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
@@ -121,7 +131,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
       router.replace("/");
     } catch(error) {
       if (error instanceof Error) {
-        // maybe ask for refresh token
+        // ask for refresh token, if token has expired
         console.log(error);
         dispatch({
           type: "LOADED"
