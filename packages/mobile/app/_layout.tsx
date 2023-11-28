@@ -1,4 +1,4 @@
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 
 import { AuthContextProvider } from "../context/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,8 +11,7 @@ export default function Root() {
     <QueryClientProvider client={queryClient}>
       <ToastContextProvider>
         <AuthContextProvider>
-          <Slot>
-          </Slot>
+          <Stack screenOptions={{ headerShown: false }}/>
         </AuthContextProvider>
       </ToastContextProvider>
     </QueryClientProvider>

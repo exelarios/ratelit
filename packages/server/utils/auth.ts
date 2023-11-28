@@ -3,18 +3,13 @@ import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
 import prisma from "@/server/utils/prisma";
 import secrets from "@/server/utils/secrets";
 
+import { AccessToken, RefreshToken } from "@/shared/types";
+
 const ACCESS_TOKEN_SECRET = secrets.accessToken();
 const REFRESH_TOKEN_SECRET = secrets.refreshToken();
 
-interface AccessToken extends JwtPayload {
-  id: string;
-  email: string;
-}
-
-interface RefreshToken extends JwtPayload {
-  id: string;
-  accessExpiration: number;
-}
+const ACCESS_TOKEN_DURATION = "30m";
+const REFRESH_TOKEN_DURATION = "1y"
 
 /**
  * verify jsonwebtoken asynchronously.
@@ -41,7 +36,7 @@ interface TokenPayload {
 
 export function generateTokens(payload: TokenPayload) {
   const access = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    "expiresIn": "1m",
+    "expiresIn": ACCESS_TOKEN_DURATION,
   });
 
   // Using decode method is fine, since we just signed the token.
@@ -58,8 +53,8 @@ export function generateTokens(payload: TokenPayload) {
     "accessExpiration": decode.exp 
   }, 
     REFRESH_TOKEN_SECRET, {
-    "expiresIn": "5m",
-    "notBefore": "1m"
+    "expiresIn": REFRESH_TOKEN_DURATION,
+    "notBefore": ACCESS_TOKEN_DURATION
   });
 
   return {

@@ -6,6 +6,7 @@ import { generateTokens, parseToken, verifyAccessToken, verifyRefreshToken } fro
 import { NotBeforeError, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
 import * as validate from "@ratelit/shared/validate";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import ClientError from "@/shared/ClientError";
 
 export const login: RequestHandler = async (request, response) => {
   try {
@@ -13,12 +14,21 @@ export const login: RequestHandler = async (request, response) => {
 
     const user = await prisma.user.findUniqueOrThrow({
       select: {
-        id: true
+        id: true,
+        password: true
       },
       where: {
         email: credentials.email
       }
     });
+
+    const isCorrectPassword = await Bun.password.verify(credentials.password, user.password);
+
+    if (!isCorrectPassword) {
+      throw new ClientError("Incorrect password", {
+        code: "INCORRECT_PASSWORD",
+      });
+    }
 
     const payload = {
       email: credentials.email,
@@ -52,16 +62,21 @@ export const login: RequestHandler = async (request, response) => {
     if (error instanceof ZodError) {
       response.status(400).send({
         "success": false,
+        "code": "INVALID_PAYLOAD",
         "message": error.issues
       });
     } else if (error instanceof PrismaClientKnownRequestError) {
-      if (error.code == "P2025") {
-        response.status(404).send({
-          "success": false,
-          "code": 2025,
-          "message": "The credentials provided doesn't exist."
-        });
-      }
+      if (error.code === "P2025")
+      response.status(404).send({
+        "success": false,
+        "message": "The credentials provided doesn't exist. Try creating an account."
+      });
+    } else if (error instanceof ClientError) {
+      response.status(404).send({
+        "success": false,
+        "message": error.message,
+        "code": error.code
+      });
     } else {
       console.error(error);
       response.status(400).send({
@@ -139,14 +154,14 @@ export const signup: RequestHandler = async (request, response) => {
       },
     });
 
-  } catch(_error) {
-    const error = _error as Error;
-    console.log(error);
-    response.status(400);
-    response.send({
-      "success": false,
-      "message": error instanceof z.ZodError ? error.issues : error.message
-    });
+  } catch(error) {
+    if (error instanceof Error) {
+      console.log(error);
+      response.status(400).send({
+        "success": false,
+        "message": error instanceof z.ZodError ? error.issues : error.message
+      });
+    }
   }
 }
 
@@ -161,7 +176,6 @@ export const verify: RequestHandler = async (request, response) => {
 
     const token = parseToken(authorization);
     const session = await verifyAccessToken(token);
-    console.log({session});
 
     const user = await prisma.user.findUniqueOrThrow({
       select: {
@@ -173,7 +187,7 @@ export const verify: RequestHandler = async (request, response) => {
         createdAt: true
       },
       where: {
-        email: session.email
+        id: session.id
       }
     });
 
@@ -186,15 +200,16 @@ export const verify: RequestHandler = async (request, response) => {
     });
 
   } catch(error) {
+    console.error("@verify", error);
     if (error instanceof TokenExpiredError) {
       response.status(401).send({
         "success": false,
-        "message": "The session has expired. Please relog in.",
+        "code": "EXPIRED_ACCESS_TOKEN",
+        "message": "Use refresh token to generate new token.",
       });
     }
 
     if (error instanceof JsonWebTokenError) {
-      console.log(error);
       response.status(403).send({
         "success": false,
         "message": error.message
@@ -231,8 +246,12 @@ export const refresh: RequestHandler = async (request, response) => {
     const tokens = generateTokens(tokenPayload);
 
     response.send({
-      "accessToken": tokens.access,
-      "refreshToken": tokens.refresh
+      success: true,
+      payload: {
+        "accessToken": tokens.access,
+        "refreshToken": tokens.refresh
+      },
+      message: "Tokens has been generated."
     });
 
   } catch(error) {
@@ -246,6 +265,7 @@ export const refresh: RequestHandler = async (request, response) => {
     if (error instanceof TokenExpiredError) {
       response.status(403).send({
         "success": false,
+        "code": "EXPIRED_REFRESH_TOKEN",
         "message": "The session has expired. Please relog in."
       });
     }

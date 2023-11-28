@@ -13,7 +13,7 @@ interface ValidationError<T> {
 
 interface UseFormParams<T> {
   state: T;
-  onSubmit: (state: T) => void;
+  onSubmit: (state: T) => Promise<any>;
   onValidate?: (state: T) => ValidationSuccess<T> | ValidationError<T>; // mannual validation
   zodValidation?: z.ZodObject<any>; // use zod to validate
 }
@@ -105,7 +105,7 @@ function useForm<T extends object>(props: UseFormParams<T>) {
     return null;
   }, []);
 
-  const handleOnSubmit = useCallback(() => {
+  const handleOnSubmit = useCallback(async () => {
     // todo: if value passes validation using zod
     try {
       const issues = handleOnZodValidate(value);
@@ -117,7 +117,13 @@ function useForm<T extends object>(props: UseFormParams<T>) {
 
       console.log(value);
 
-      const response = onSubmit(value);
+      const response = await onSubmit(value);
+      if (zodValidation) {
+        // todo: revalidate the response and display back to the user.
+        console.log(response);
+      } else {
+        // normal validation
+      }
     } catch(error) {
       if (error instanceof Error) {
         console.log(error);

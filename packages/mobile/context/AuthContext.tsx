@@ -1,6 +1,9 @@
-import { createContext, useContext, useMemo, useEffect, useReducer } from "react";
+import { createContext, useContext, useMemo, useEffect, useReducer, useCallback } from "react";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { TokensResponse, VerifyResponse } from "@ratelit/shared/types";
+import ClientError from "@ratelit/shared/ClientError";
+import { useToast } from "./ToastContext";
 
 interface State {
   user: any;
@@ -12,9 +15,10 @@ interface State {
 }
 
 type Action = 
-  | { type: "SET_TOKENS", payload: { access: string, refresh: string } }
-  | { type: "SESSION", payload: any }
+  | { type: "SET_TOKENS", payload: State["tokens"] }
+  | { type: "SET_USER", payload: any }
   | { type: "LOADED" }
+  | { type: "CLEAR_SESSION" }
 
 interface AuthContext {
   state: State;
@@ -58,7 +62,7 @@ function reducer(state: State, action: Action) {
           },
           isLoading: true
         }
-      case "SESSION":
+      case "SET_USER":
         if (state.tokens.access) {
           SecureStore.setItemAsync(ACCESS_TOKEN_KEY, state.tokens.access);
         }
@@ -72,6 +76,17 @@ function reducer(state: State, action: Action) {
           user: action.payload,
           isLoading: false
         }
+      case "CLEAR_SESSION": {
+
+        SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+        SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+
+        return {
+          ...state,
+          user: null,
+          isLoading: false
+        }
+      }
       case "LOADED":
         return {
           ...state,
@@ -82,7 +97,7 @@ function reducer(state: State, action: Action) {
     }
   } catch(error) {
     if (error instanceof Error) {
-      console.log(error.message);
+      console.error(error);
     }
   }
 }
@@ -98,6 +113,7 @@ const initialState = {
 
 export const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const toast = useToast();
 
   const value = useMemo(() => {
     return {
@@ -106,7 +122,51 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
     }
   }, [state]);
 
-  const handleVerifyToken = async () => {
+  const valdiateRefreshToken = useCallback(async () => {
+    try {
+      console.log("VALIDATING REFRESH TOKEN");
+      const refresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+      const response = await fetch("http://localhost:3000/api/auth/refresh", {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${refresh}`
+        }
+      });
+
+      const data = await response.json() as TokensResponse;
+      if (data.success === false) {
+        switch(data.code) {
+          case "EXPIRED_REFRESH_TOKEN":
+            throw new ClientError(data.message);
+          default:
+            throw new Error("Something went wrong.");
+        }
+      }
+
+      const tokens = data.payload;
+      console.log("@TOKENS", tokens);
+
+      dispatch({
+        type: "SET_TOKENS",
+        payload: {
+          access: tokens.accessToken,
+          refresh: tokens.refreshToken
+        }
+      });
+    } catch(error) {
+      console.log(error);
+      if (error instanceof ClientError) {
+        toast.add({
+          type: "warning",
+          message: error.message,
+        });
+      }
+    }
+  }, []);
+
+  const validateAccessToken = useCallback(async () => {
     try {
       const authorization = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
       const response = await fetch("http://localhost:3000/api/auth/verify", {
@@ -118,31 +178,47 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
         }
       });
 
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.message);
+      const result = await response.json() as VerifyResponse;
+      console.log({ result });
+      if (result.success == false) {
+        switch(result.code) {
+          case "EXPIRED_ACCESS_TOKEN":
+            console.log("expireeeeeeeeeeeeee");
+            await valdiateRefreshToken();
+            return;
+            // call /auth/refresh
+            // check for refresh token
+          default:
+            throw new Error(result.message);
+        }
       }
 
+      console.log("goign to dispatch");
+
       dispatch({
-        type: "SESSION",
+        type: "SET_USER",
         payload: result.payload.user
       });
 
-      router.replace("/");
+      router.replace("/home");
     } catch(error) {
-      if (error instanceof Error) {
-        // ask for refresh token, if token has expired
-        console.log(error);
-        dispatch({
-          type: "LOADED"
+      console.log("validateAccessToken()", error);
+      if (error instanceof ClientError) {
+        toast.add({
+          type: "warning",
+          message: error.message,
         });
       }
+
+      dispatch({
+        type: "LOADED"
+      });
     }
-  };
+  }, []);
 
   useEffect(() => {
     // todo: check secure store if tokens exist.
-    handleVerifyToken();
+    validateAccessToken();
   }, [state?.tokens]);
 
   return (

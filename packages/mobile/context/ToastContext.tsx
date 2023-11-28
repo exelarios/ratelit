@@ -1,14 +1,17 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { StyleSheet } from "react-native";
+import { AntDesign } from '@expo/vector-icons'; 
+
 import View from "../components/View";
 import Text from "../components/Text";
+
 import colors from "../design/colors";
-import { AntDesign } from '@expo/vector-icons'; 
 
 interface ToastMessage {
   timestamp: number;
   type?: "success" | "warning" | "error";
   message: string;
+  duration?: number;
 }
 
 interface ToastContext {
@@ -40,7 +43,7 @@ export function ToastContextProvider({ children }: { children: React.ReactNode }
 
     setTimeout(() => {
       setQueue((q) => q.filter(message => message.timestamp !== newMessage.timestamp));
-    }, 5000);
+    }, payload.duration || 3000);
   }, []);
 
   const value = useMemo(() => {
@@ -78,6 +81,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     rowGap: 15,
     top: 70,
+    paddingHorizontal: "5%",
     width: "100%",
     zIndex: 10000,
   },
@@ -89,7 +93,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     borderRadius: 100,
-    marginHorizontal: "5%",
     borderWidth: 1.5,
     borderColor: colors.neutral[600],
     backgroundColor: colors.neutral[100]
@@ -97,6 +100,7 @@ const styles = StyleSheet.create({
   message: {
     fontWeight: "500",
     fontSize: 15,
+    width: "90%",
     color: colors.neutral[600]
   }
 });

@@ -1,8 +1,7 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Stack, Tabs } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 
 import Text from "../../components/Text";
-import View from "../../components/View";
 
 export default function AppLayout() {
   const auth = useAuth();
@@ -14,13 +13,11 @@ export default function AppLayout() {
 
   if (!user) {
     return (
-      <Redirect href="/login"/>
+      <Redirect href="/"/>
     );
   }
 
   return (
-    <View safe>
-      <Text>logged in</Text>
-    </View>
-  )
+    <Tabs screenOptions={{ headerShown: false }}/>
+  );
 }

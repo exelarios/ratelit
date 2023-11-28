@@ -4,10 +4,12 @@ import { useMutation } from "@tanstack/react-query";
 
 import { z } from "zod";
 
-import { LoginResponse } from "@ratelit/shared/types";
+import { TokensResponse } from "@ratelit/shared/types";
 
 import { AntDesign } from '@expo/vector-icons';
 import * as validate from "@ratelit/shared/validate";
+
+import { router } from "expo-router";
 
 import View from "../components/View";
 import Button from "../components/Button";
@@ -37,7 +39,6 @@ export default function Login() {
   const toast = useToast();
 
   const sendCredentials = useCallback(async (payload: Login) => {
-    try {
       const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         headers: {
@@ -50,27 +51,28 @@ export default function Login() {
         })
       });
 
-      const body = await response.json() as LoginResponse;
-      if (!body.success) {
-        toast.add({
-          type: "warning",
-          message: body.message
-        });
-        throw new Error(body.message);
-      }
-      
-      return body.payload;
-    } catch(error) {
-      // if user isn't found
-      if (error instanceof Error) {
-        console.log(error);
-      }
-    }
+      return await response.json() as TokensResponse;
   }, []);
 
   const handleOnLogin = async (credentials: Login) => {
     try {
-      const tokens = await sendCredentials(credentials);
+      const data = await sendCredentials(credentials);
+
+      // Seems to be a lint issue where I can't express falsify through exclamation mark.
+      // https://www.reddit.com/r/typescript/comments/t0jpbc/why_doesnt_typescript_treat_respsuccess_as_an/
+      if (data.success === false) {
+        switch(data.code) {
+          case "INVALID_PAYLOAD":
+            // send the issues with the validation back to the form to be displayed.
+            return data.message;
+          case "INCORRECT_PASSWORD":
+            throw new Error(data.message);
+          default:
+            throw new Error(data.message);
+        }
+      }
+      
+      const tokens = data.payload;
 
       dispatch({
         type: "SET_TOKENS",
@@ -79,10 +81,17 @@ export default function Login() {
           refresh: tokens.refreshToken
         }
       });
+
       // todo: implement return for input validation from the server.
       // todo: put tokens into secure store
     } catch(error) {
-      console.log(error);
+      if (error instanceof Error) {
+        console.log(error.message);
+        toast.add({
+          type: "warning",
+          message: error.message
+        })
+      }
     }
   };
 
@@ -102,9 +111,7 @@ export default function Login() {
   }, []);
 
   const handleOnRegister = () => {
-    toast.add({
-      message: "urmom was here" + Math.random()
-    });
+    router.push("/register");
   }
 
   return (
