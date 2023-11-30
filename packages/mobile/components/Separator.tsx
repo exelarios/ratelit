@@ -1,9 +1,9 @@
 import React from "react";
 import { View as RNView, ViewProps, StyleSheet } from "react-native";
-import colors from "../design/colors";
+import colors from "@/mobile/design/colors";
 
-import View from "./View";
-import Text from "./Text";
+import View from "@/mobile/components/View";
+import Text from "@/mobile/components/Text";
 
 const Separator = React.forwardRef<RNView, ViewProps>((props, forwardedRef) => {
   const { style, children, ...otherProps } = props;

@@ -2,10 +2,10 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 import { StyleSheet } from "react-native";
 import { AntDesign } from '@expo/vector-icons'; 
 
-import View from "../components/View";
-import Text from "../components/Text";
+import View from "@/mobile/components/View";
+import Text from "@/mobile/components/Text";
 
-import colors from "../design/colors";
+import colors from "@/mobile/design/colors";
 
 interface ToastMessage {
   timestamp: number;

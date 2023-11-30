@@ -3,10 +3,11 @@ import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { TokensResponse, VerifyResponse } from "@ratelit/shared/types";
 import ClientError from "@ratelit/shared/ClientError";
-import { useToast } from "./ToastContext";
+import { useToast } from "@/mobile/context/ToastContext";
+import { User } from "@ratelit/shared/types";
 
 interface State {
-  user: any;
+  user: User;
   tokens: {
     access: string,
     refresh: string
@@ -124,7 +125,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
 
   const valdiateRefreshToken = useCallback(async () => {
     try {
-      console.log("VALIDATING REFRESH TOKEN");
       const refresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
       const response = await fetch("http://localhost:3000/api/auth/refresh", {
         method: "POST",
@@ -146,7 +146,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
       }
 
       const tokens = data.payload;
-      console.log("@TOKENS", tokens);
 
       dispatch({
         type: "SET_TOKENS",
@@ -179,11 +178,9 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
       });
 
       const result = await response.json() as VerifyResponse;
-      console.log({ result });
       if (result.success == false) {
         switch(result.code) {
           case "EXPIRED_ACCESS_TOKEN":
-            console.log("expireeeeeeeeeeeeee");
             await valdiateRefreshToken();
             return;
             // call /auth/refresh
@@ -193,8 +190,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
         }
       }
 
-      console.log("goign to dispatch");
-
       dispatch({
         type: "SET_USER",
         payload: result.payload.user
@@ -202,7 +197,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
 
       router.replace("/home");
     } catch(error) {
-      console.log("validateAccessToken()", error);
       if (error instanceof ClientError) {
         toast.add({
           type: "warning",

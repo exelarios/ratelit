@@ -5,7 +5,6 @@
     ],
     "paths": {
       "@/*": ["./packages/*"],
-      "@/mobile/*": ["./packages/mobile/*"]
     },
     "module": "esnext",
     "target": "esnext",

@@ -1,7 +1,7 @@
 import { Redirect, Stack, Tabs } from "expo-router";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/mobile/context/AuthContext";
 
-import Text from "../../components/Text";
+import Text from "@/mobile/components/Text";
 
 export default function AppLayout() {
   const auth = useAuth();
@@ -17,7 +17,22 @@ export default function AppLayout() {
     );
   }
 
+  /*
+  Tabs:
+  - Home
+    - This allows the user to search for lists.
+    - A feed of their follows
+  - Create
+    - A quick button to create a new ratelit list.
+  - Profile
+    - everything that concerns the user.
+  */
   return (
-    <Tabs screenOptions={{ headerShown: false }}/>
+    <Stack initialRouteName="tabs/feed/index" screenOptions={{
+      headerShown: false,
+    }}>
+      <Stack.Screen name="tabs"/>
+      <Stack.Screen name="list"/>
+    </Stack>
   );
 }

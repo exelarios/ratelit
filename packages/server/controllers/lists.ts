@@ -48,6 +48,52 @@ export async function create(request: Request, response: Response) {
 
 }
 
+export async function get(request: Request, response: Response) {
+  try {
+    const params = request.params;
+    const list = await prisma.list.findMany({
+      include: {
+        items: {
+          select: {
+            id: true,
+            comments: true,
+            rating: true,
+            thumbnail: true,
+            updatedAt: true,
+            ownerId: true,
+            createdAt: true,
+            createdBy: true,
+          }
+        },
+        editors: {
+          select: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true
+              }
+            },
+            role: true
+          }
+        }
+      }
+    });
+    
+    response.send({
+      "payload": list,
+      "success": true,
+    });
+
+  } catch(error) {
+    if (error instanceof Error) {
+      response.status(403).send({
+        "success": false,
+        "message": error.message
+      });
+    }
+  }
+}
+
 export async function update() {
 
 }

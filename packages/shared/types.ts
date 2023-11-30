@@ -5,6 +5,8 @@ import { JwtPayload } from "jsonwebtoken";
 import { z } from "zod";
 
 export type User = Omit<Prisma.User, "password">;
+// export type List = ;
+export type Editors = Prisma.EditorsOfList;
 
 export interface AccessToken extends JwtPayload {
   id: string;
@@ -39,8 +41,17 @@ interface Verify {
   token: AccessToken;
 }
 
+export interface List extends Prisma.List {
+  editors: {
+    user: Pick<User, "firstName" | "lastName">,
+    role: Editors["role"]
+  }[]
+}
+
 export type LoginRequestParams = z.infer<typeof login>;
 
 export type TokensResponse = SuccessResponse<Tokens> | FailedResponse<any>;
 
 export type VerifyResponse = SuccessResponse<Verify> | FailedResponse<any>;
+
+export type ListResponse = SuccessResponse<GetList[]> | FailedResponse<any>;

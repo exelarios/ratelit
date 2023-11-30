@@ -115,8 +115,6 @@ function useForm<T extends object>(props: UseFormParams<T>) {
         return;
       }
 
-      console.log(value);
-
       const response = await onSubmit(value);
       if (zodValidation) {
         // todo: revalidate the response and display back to the user.

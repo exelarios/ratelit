@@ -11,16 +11,16 @@ import * as validate from "@ratelit/shared/validate";
 
 import { router } from "expo-router";
 
-import View from "../components/View";
-import Button from "../components/Button";
-import Text from "../components/Text";
-import TextInput from "../components/TextInput";
+import View from "@/mobile/components/View";
+import Button from "@/mobile/components/Button";
+import Text from "@/mobile/components/Text";
+import TextInput from "@/mobile/components/TextInput";
 
-import colors from "../design/colors";
-import Separator from "../components/Separator";
-import useForm from "../hooks/useForm";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
+import colors from "@/mobile/design/colors";
+import Separator from "@/mobile/components/Separator";
+import useForm from "@/mobile/hooks/useForm";
+import { useAuth } from "@/mobile/context/AuthContext";
+import { useToast } from "@/mobile/context/ToastContext";
 
 type Login = z.infer<typeof validate.login>
 

@@ -7,9 +7,9 @@ import {
   ViewStyle
 } from "react-native";
 
-import Text from "../components/Text";
-import colors from "../design/colors";
-import composeStyles from "../utils/composeStyles";
+import Text from "@/mobile/components/Text";
+import colors from "@/mobile/design/colors";
+import composeStyles from "@/mobile/utils/composeStyles";
 
 interface ButtonProps extends PressableProps {
   icon?: any;

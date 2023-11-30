@@ -5,10 +5,10 @@ import {
   TextInputProps as RNTextInputProps,
 } from "react-native";
 
-import Text from "./Text";
-import View from "./View";
+import Text from "@/mobile/components/Text";
+import View from "@/mobile/components/View";
 
-import colors from "../design/colors";
+import colors from "@/mobile/design/colors";
 
 interface TextProps extends RNTextInputProps {
   label: string;

@@ -1,5 +1,5 @@
-import View from "../components/View";
-import { Text } from "react-native";
+import View from "@/mobile/components/View";
+import Text from "@/mobile/components/Text";
 
 function Sheet() {
   return (

@@ -1,8 +1,8 @@
 import React from "react";
 import { Text as RNText, TextProps as RNTextProps, StyleSheet } from "react-native";
 
-import colors from "../design/colors";
-import composeStyles from "../utils/composeStyles";
+import colors from "@/mobile/design/colors";
+import composeStyles from "@/mobile/utils/composeStyles";
 
 interface TextProps extends RNTextProps {
   color?: string;
