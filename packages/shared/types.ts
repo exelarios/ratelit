@@ -54,4 +54,6 @@ export type TokensResponse = SuccessResponse<Tokens> | FailedResponse<any>;
 
 export type VerifyResponse = SuccessResponse<Verify> | FailedResponse<any>;
 
-export type ListResponse = SuccessResponse<GetList[]> | FailedResponse<any>;
+export type ListsResponse = SuccessResponse<List[]> | FailedResponse<any>;
+
+export type ListResponse = SuccessResponse<List> | FailedResponse<any>;

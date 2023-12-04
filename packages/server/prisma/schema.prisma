@@ -41,7 +41,7 @@ model List {
   title     String          @default("Untitled List")
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
-  thumbnail String          @default("")
+  thumbnail String
   category String
   published Boolean
   editors   EditorsOfList[]

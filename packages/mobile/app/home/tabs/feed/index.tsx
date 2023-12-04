@@ -94,7 +94,7 @@ function Topbar() {
   // const { user } = auth.state;
 
   const handleOnSearch = useCallback(() => {
-    router.push("/home/feed/search");
+    router.push("/home/tabs/feed/search");
   }, []);
 
   return (

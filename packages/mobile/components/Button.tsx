@@ -111,7 +111,7 @@ const textSyles = StyleSheet.create({
   fill: {
     fontWeight: "bold",
     textAlign: "center",
-    color: colors.neutral[100]
+    color: colors.neutral[50]
   },
   outline: {
     fontWeight: "500",
