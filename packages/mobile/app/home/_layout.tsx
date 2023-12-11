@@ -1,5 +1,6 @@
 import { Redirect, Stack, Tabs } from "expo-router";
 import { useAuth } from "@/mobile/context/AuthContext";
+import { TransitionPresets } from "@react-navigation/stack";
 
 import Text from "@/mobile/components/Text";
 
@@ -28,11 +29,19 @@ export default function AppLayout() {
     - everything that concerns the user.
   */
   return (
-    <Stack initialRouteName="tabs/feed/index" screenOptions={{
-      headerShown: false,
-    }}>
+    <Stack
+      initialRouteName="tabs/feed/index"
+      screenOptions={{
+        headerShown: false,
+      }}>
       <Stack.Screen name="tabs"/>
       <Stack.Screen name="list"/>
+      <Stack.Screen
+        name="create" 
+        options={{
+          presentation: "modal",
+        }}
+      />
     </Stack>
   );
 }

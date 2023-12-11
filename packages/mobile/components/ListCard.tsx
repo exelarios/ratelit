@@ -18,7 +18,9 @@ function ListCard(props: ListProps) {
   }, [editors]);
 
   return (
-    <Link href={{
+    <Link 
+      style={styles.wrapper}
+      href={{
       pathname: "/home/list",
       params: {
         listId: id
@@ -33,10 +35,14 @@ function ListCard(props: ListProps) {
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    width: 150,
+    height: 150,
+  },
   container: {
     borderRadius: 10,
-    padding: 10,
     width: 150,
+    padding: 10,
     height: 150,
     display: "flex",
     flexDirection: "column",

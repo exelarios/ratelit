@@ -9,7 +9,7 @@ import { useAuth } from "@/mobile/context/AuthContext";
 
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from "@tanstack/react-query";
-import { ListResponse } from "@ratelit/shared/types";
+import { ListResponse, ListsResponse } from "@ratelit/shared/types";
 import { router } from "expo-router";
 
 function Following() {
@@ -65,7 +65,7 @@ function UserList() {
         }
       });
 
-      const data = await response.json() as ListResponse;
+      const data = await response.json() as ListsResponse;
       if (data.success === false) {
         throw new Error(data.message);
       }

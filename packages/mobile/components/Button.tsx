@@ -13,13 +13,23 @@ import composeStyles from "@/mobile/utils/composeStyles";
 
 interface ButtonProps extends PressableProps {
   icon?: any;
-  iconAligin?: "start" | "end"
+  textSize?: number;
+  iconAligin?: "start" | "end";
   color?: string;
-  variant?: "fill" | "outline" | "none"
+  variant?: "fill" | "outline" | "none";
 }
 
 const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) => {
-  const { variant = "none", icon, iconAligin = "start", color, style, children, ...otherProps } = props;
+  const { 
+    variant = "none",
+    textSize = 15, 
+    icon, 
+    iconAligin = "start", 
+    color, 
+    style, 
+    children, 
+    ...otherProps 
+  } = props;
 
   const [hovering, setHovering] = useState(false);
 
@@ -51,14 +61,17 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
     style as StyleProp<ViewStyle>
     );
 
+  const composedTextStyles = composeStyles(textSyles[variant], { fontSize: textSize });
+
   const isText = !React.isValidElement(children) && typeof children === "string";
+
 
   const child = useMemo(() => {
     if (isText) {
       return (
         <Text
           color={color}
-          style={textSyles[variant]}>
+          style={composedTextStyles}>
           {children}
         </Text> 
       );

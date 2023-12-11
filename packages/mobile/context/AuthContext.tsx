@@ -7,12 +7,13 @@ import { useToast } from "@/mobile/context/ToastContext";
 import { User } from "@ratelit/shared/types";
 
 interface State {
-  user: User;
+  user?: User;
   tokens: {
     access: string,
     refresh: string
   };
   isLoading: boolean;
+  isLoggedIn: boolean;
 }
 
 type Action = 
@@ -64,18 +65,11 @@ function reducer(state: State, action: Action) {
           isLoading: true
         }
       case "SET_USER":
-        if (state.tokens.access) {
-          SecureStore.setItemAsync(ACCESS_TOKEN_KEY, state.tokens.access);
-        }
-
-        if (state.tokens.refresh) {
-          SecureStore.setItemAsync(REFRESH_TOKEN_KEY, state.tokens.refresh);
-        }
-
         return {
           ...state,
           user: action.payload,
-          isLoading: false
+          isLoading: false,
+          isLoggedIn: true
         }
       case "CLEAR_SESSION": {
 
@@ -85,7 +79,8 @@ function reducer(state: State, action: Action) {
         return {
           ...state,
           user: null,
-          isLoading: false
+          isLoading: false,
+          isLoggedIn: false
         }
       }
       case "LOADED":
@@ -109,7 +104,8 @@ const initialState = {
     access: null,
     refresh: null
   },
-  isLoading: true
+  isLoading: true,
+  isLoggedIn: false
 }
 
 export const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
@@ -155,7 +151,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
         }
       });
     } catch(error) {
-      console.log(error);
+      console.log("valdiateRefreshToken", error);
       if (error instanceof ClientError) {
         toast.add({
           type: "warning",
@@ -183,8 +179,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
           case "EXPIRED_ACCESS_TOKEN":
             await valdiateRefreshToken();
             return;
-            // call /auth/refresh
-            // check for refresh token
           default:
             throw new Error(result.message);
         }
@@ -208,6 +202,25 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
         type: "LOADED"
       });
     }
+  }, []);
+
+  const checkForTokens = useCallback(async () => {
+    if (!state.tokens.access && !state.tokens.refresh) {
+      const access = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+      const refresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+
+      dispatch({
+        type: "SET_TOKENS",
+        payload: {
+          access,
+          refresh
+        }
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    checkForTokens();
   }, []);
 
   useEffect(() => {

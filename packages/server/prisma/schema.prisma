@@ -37,12 +37,12 @@ model User {
 }
 
 model List {
-  id        String   @id @unique @default(uuid())
+  id        String          @id @unique @default(uuid())
   title     String          @default("Untitled List")
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   thumbnail String
-  category String
+  category  String
   published Boolean
   editors   EditorsOfList[]
   items     Item[]
@@ -61,7 +61,7 @@ model EditorsOfList {
 }
 
 model Item {
-  id        String   @id @unique @default(uuid())
+  id        String    @id @unique @default(uuid())
   rating    Float
   thumbnail String
   ownerId   String
@@ -85,7 +85,6 @@ model Comment {
   updatedAt DateTime @updatedAt
   itemId    String
   item      Item     @relation(fields: [itemId], references: [id])
-
 
   @@index([ownerId])
   @@index([itemId])

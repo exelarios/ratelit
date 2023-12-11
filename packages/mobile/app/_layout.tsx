@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { AuthContextProvider } from "@/mobile/context/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastContextProvider } from "@/mobile/context/ToastContext";
+import { StatusBar } from "expo-status-bar";
 
 const queryClient = new QueryClient();
 

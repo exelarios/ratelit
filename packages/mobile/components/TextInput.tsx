@@ -41,14 +41,14 @@ const styles = StyleSheet.create({
     gap: 3
   },
   base: {
-    borderWidth: 1.5,
-    borderColor: colors.neutral[950],
     borderRadius: 5,
+    backgroundColor: colors.neutral[200],
     minHeight: 50,
     padding: 10
   },
   text: {
     fontWeight: "600",
+    color: colors.neutral[700]
   },
   message: {
     color: colors.red[400]

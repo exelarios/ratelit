@@ -7,7 +7,7 @@ function Layout() {
     }}>
       <Stack.Screen name="index"/>
       <Stack.Screen name="search" options={{
-        navigationBarHidden: true
+        navigationBarHidden: true,
       }}/>
     </Stack>
   );

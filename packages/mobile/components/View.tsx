@@ -2,7 +2,7 @@ import React from "react";
 import { View as RNView, ViewProps as RNViewProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-interface ViewProps extends RNViewProps {
+export interface ViewProps extends RNViewProps {
   safe?: boolean;
 }
 
