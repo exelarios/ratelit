@@ -42,7 +42,6 @@ function Tabbar({ state, navigation }) {
     <View style={styles.bar}>
       {icons.map(({ label, icon, type, path }, index) => {
         const handleOnPress = () => {
-          if (state.index === index) return;
           switch(type) {
             case "sheet":
               router.push(path || `/home/tabs/${label}`);

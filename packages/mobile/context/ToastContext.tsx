@@ -6,6 +6,7 @@ import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
 
 import colors from "@/mobile/design/colors";
+import FullWindowOverlay from "../components/FullWindowOverlay";
 
 interface ToastMessage {
   timestamp: number;
@@ -66,9 +67,13 @@ export function ToastContextProvider({ children }: { children: React.ReactNode }
 
   return (
     <ToastContext.Provider value={value}>
-      <View style={styles.portal}>
-        {messages}
-      </View>
+      {queue.length > 0 &&
+        <FullWindowOverlay size="contain">
+          <View style={styles.portal}>
+            {messages}
+          </View>
+        </FullWindowOverlay>
+      }
       {children} 
     </ToastContext.Provider>
   );

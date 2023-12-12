@@ -12,6 +12,8 @@ import { useQuery } from "@tanstack/react-query";
 import { ListResponse, ListsResponse } from "@ratelit/shared/types";
 import { router } from "expo-router";
 
+import { ENDPOINT } from "@/mobile/utils/constants";
+
 function Following() {
   const auth = useAuth();
   const tokens = auth.state.tokens;
@@ -19,7 +21,7 @@ function Following() {
   const query = useQuery({
     queryKey: ["lists"],
     queryFn: async () => {
-      const response = await fetch("http://localhost:3000/api/lists", {
+      const response = await fetch(`${ENDPOINT}/api/lists`, {
         method: "GET",
         headers: {
           "Authorization": `bearer ${tokens.access}`
@@ -58,7 +60,7 @@ function UserList() {
   const query = useQuery({
     queryKey: ["lists"],
     queryFn: async () => {
-      const response = await fetch("http://localhost:3000/api/lists", {
+      const response = await fetch(`${ENDPOINT}/api/lists`, {
         method: "GET",
         headers: {
           "Authorization": `bearer ${tokens.access}`

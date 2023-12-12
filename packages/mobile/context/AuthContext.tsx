@@ -5,6 +5,7 @@ import { TokensResponse, VerifyResponse } from "@ratelit/shared/types";
 import ClientError from "@ratelit/shared/ClientError";
 import { useToast } from "@/mobile/context/ToastContext";
 import { User } from "@ratelit/shared/types";
+import { ENDPOINT } from "../utils/constants";
 
 interface State {
   user?: User;
@@ -122,7 +123,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
   const valdiateRefreshToken = useCallback(async () => {
     try {
       const refresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-      const response = await fetch("http://localhost:3000/api/auth/refresh", {
+      const response = await fetch(`${ENDPOINT}/api/auth/refresh`, {
         method: "POST",
         headers: {
           "Accept": "application/json",
@@ -164,7 +165,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
   const validateAccessToken = useCallback(async () => {
     try {
       const authorization = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-      const response = await fetch("http://localhost:3000/api/auth/verify", {
+      const response = await fetch(`${ENDPOINT}/api/auth/verify`, {
         method: "POST",
         headers: {
           "Accept": "application/json",

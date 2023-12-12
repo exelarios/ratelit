@@ -22,6 +22,8 @@ import useForm from "@/mobile/hooks/useForm";
 import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
 
+import { ENDPOINT } from "@/mobile/utils/constants";
+
 type Login = z.infer<typeof validate.login>
 
 /*
@@ -39,7 +41,7 @@ export default function Login() {
   const toast = useToast();
 
   const sendCredentials = useCallback(async (payload: Login) => {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch(`${ENDPOINT}/api/auth/login`, {
         method: "POST",
         headers: {
           "Accept": "application/json",

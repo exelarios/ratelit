@@ -1,12 +1,13 @@
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Pressable, StyleSheet, ViewProps } from "react-native";
+
+import { AntDesign } from "@expo/vector-icons";
 
 import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
 import colors from "@/mobile/design/colors";
 import Sheet from "@/mobile/components/Sheet";
-
-import { AntDesign } from "@expo/vector-icons";
+import SelectItem from "@/mobile/components/SelectItem";
 
 interface SelectProps extends ViewProps {
   label: string;
@@ -19,6 +20,10 @@ function Select(props: SelectProps) {
   
   const [open, setOpen] = useState(false);
 
+  const snapPoints = useMemo(() => {
+    return ["25%", "50%", "75%", "100%"]
+  }, []);
+
   return (
     <Fragment>
       <View style={styles.wrapper}>
@@ -29,10 +34,23 @@ function Select(props: SelectProps) {
         </Pressable>
         <Text style={styles.message}>{message}</Text>
       </View>
-      <Sheet open={open} onClose={() => setOpen(false)}>
-        <View safe>
-          <Text>ur mom</Text>
-          <Text>ur mom</Text>
+      <Sheet open={open} snapPoints={snapPoints} onClose={() => setOpen(false)}>
+        <View safe style={styles.select}>
+          <SelectItem
+            icon="public"
+            label="Public"
+            description="Anyone can view to this list."
+          />
+          <SelectItem
+            icon="check-circle-outline"
+            label="Restricted"
+            description="Only approved can view this list."
+          />
+          <SelectItem
+            icon="lock-outline"
+            label="Private"
+            description="Only you have access to this list."
+          />
         </View>
       </Sheet>
     </Fragment>
@@ -61,6 +79,11 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: "600",
     color: colors.neutral[700]
+  },
+  select: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 25
   },
 })
 

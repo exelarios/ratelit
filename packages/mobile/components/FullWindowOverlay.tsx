@@ -9,17 +9,20 @@ const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 
 interface FullWindowOverflowProps extends ViewProps {
+  size?: "full" | "contain";
   children: React.ReactNode;
 }
 
-const FullWindowOverlay = forwardRef<FullWindowOverflowProps, ViewProps>((props, forwardedRef) => {
-  const { children, style, ...otherProps } = props;
+const FullWindowOverlay = forwardRef<FullWindowOverflowProps, FullWindowOverflowProps>((props, forwardedRef) => {
+  const { children, size = "full", style, ...otherProps } = props;
   const Component = Platform.OS === "ios" ? FullWindowOverlayNativeComponent : View;
 
-  const composedStyles = composeStyles(styles.container, style);
+  const composedStyles = composeStyles(size === "full" && styles.container, style);
 
+  // had to compose another View component within since 
+  // FullWindowOverlayNativeComponent doesn't have the full access of RN's css properties.
   return (
-    <Component style={styles.wrapper}>
+    <Component style={size === "full" ? styles.wrapper : {}}>
       <View ref={forwardedRef} style={composedStyles} {...otherProps}>
         {children}
       </View>

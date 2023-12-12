@@ -9,6 +9,8 @@ import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
 import colors from "@/mobile/design/colors";
 
+import { ENDPOINT } from "@/mobile/utils/constants";
+
 function List() {
   const auth = useAuth();
   const toast = useToast();
@@ -19,7 +21,7 @@ function List() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["lists", listId],
     queryFn: async () => {
-      const response = await fetch(`http://localhost:3000/api/lists?id=${listId}`, {
+      const response = await fetch(`${ENDPOINT}/api/lists?id=${listId}`, {
         headers: {
           "Authorization": `bearer ${tokens.access}`
         }
