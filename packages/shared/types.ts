@@ -1,4 +1,4 @@
-import { login } from "@/shared/validate";
+import { login, createList } from "@/shared/validate";
 import { ClientErrorCode } from "./ClientError";
 import Prisma from "prisma/prisma-client";
 import { JwtPayload } from "jsonwebtoken";
@@ -49,6 +49,8 @@ export interface List extends Prisma.List {
 }
 
 export type LoginRequestParams = z.infer<typeof login>;
+
+export type CreateListRequestParams = z.infer<typeof createList>;
 
 export type TokensResponse = SuccessResponse<Tokens> | FailedResponse<any>;
 

@@ -17,6 +17,12 @@ enum Role {
   VIEWER // allows view only for unpublished rankings.
 }
 
+enum Visibility {
+  PRIVATE
+  RESTRICTED
+  PUBLIC
+}
+
 model User {
   id        String   @id @unique @default(uuid())
   email     String   @unique
@@ -43,7 +49,7 @@ model List {
   updatedAt DateTime        @updatedAt
   thumbnail String
   category  String
-  published Boolean
+  visibility Visibility
   editors   EditorsOfList[]
   items     Item[]
 }

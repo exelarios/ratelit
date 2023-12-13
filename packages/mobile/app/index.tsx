@@ -15,6 +15,7 @@ import View from "@/mobile/components/View";
 import Button from "@/mobile/components/Button";
 import Text from "@/mobile/components/Text";
 import TextInput from "@/mobile/components/TextInput";
+import Logo from "@/mobile/components/Logo";
 
 import colors from "@/mobile/design/colors";
 import Separator from "@/mobile/components/Separator";
@@ -118,7 +119,10 @@ export default function Login() {
 
   return (
     <View safe style={styles.container}>
-      <Text size={50} style={styles.title}>Ratelit 🔥</Text>
+      {/* <Text size={50} style={styles.title}>Ratelit 🔥</Text> */}
+      <View style={{ paddingVertical: 20, justifyContent: "center", display: "flex", flexDirection: "row" }}>
+        <Logo/>
+      </View>
       <View style={styles.formContainer}>
         <TextInput
           textContentType="emailAddress"

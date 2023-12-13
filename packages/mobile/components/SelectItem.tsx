@@ -14,9 +14,9 @@ interface ItemProps extends PressableProps {
 }
 
 function Item(props: ItemProps) {
-  const { icon, label, description } = props;
+  const { icon, label, description, ...otherProps } = props;
   return (
-    <Pressable style={styles.container}>
+    <Pressable style={styles.container} {...otherProps}>
       <MaterialIcons name={icon} size={30} color={colors.neutral[700]} />
       <View>
         <Text style={styles.label}>{label}</Text>

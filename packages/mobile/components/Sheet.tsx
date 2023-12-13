@@ -1,10 +1,10 @@
+import { useMemo, useRef } from "react";
 import { useWindowDimensions, StyleSheet, TouchableWithoutFeedback, ViewProps } from "react-native";
 import View from "@/mobile/components/View";
 import colors from "@/mobile/design/colors";
 import FullWindowOverflow from "@/mobile/components/FullWindowOverlay";
 import Animated, { Easing, FadeIn, FadeOut, SlideInDown, SlideOutDown, runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
-import { useMemo } from "react";
 
 interface SheetProps extends ViewProps {
   snapPoints: string[],
@@ -16,6 +16,8 @@ function Sheet(props: SheetProps) {
   const { open = false, snapPoints, onClose, style, children, ...otherProps } = props;
 
   const height = useSharedValue(250);
+  const currentSnapPointIndex = useSharedValue(0);
+
   const dimensions = useWindowDimensions();
 
   const snaps = useMemo(() => {
@@ -52,25 +54,34 @@ function Sheet(props: SheetProps) {
       context.startY = height.value;
     },
     onActive: (event, context) => {
+      "worklet";
       height.value = context.startY - event.translationY;
 
       if (height.value < 100) {
         runOnJS(onClose)();
-        height.value = 230;
+        height.value = snaps[0].start
       }
     },
-    onFinish: (event, context) => {
+    onFinish: (event) => {
+      "worklet";
       const maxHeight = dimensions.height - 100;
+
+      // Bound the sheet to the max height.
       if (height.value > maxHeight) {
         height.value = withTiming(maxHeight, {
           duration: 100,
           easing: Easing.ease
         });
+        currentSnapPointIndex.value = snaps.length - 1;
         return;
       }
 
+      // Max threshold: [-3000, 3000]
+      // Takes the max height of the sheet via swipe up
+      // Closes the sheet via swipw down
       if (event.velocityY > 3000) { // swipe down
         runOnJS(onClose)();
+        currentSnapPointIndex.value = 0;
         return;
       }
       
@@ -79,16 +90,47 @@ function Sheet(props: SheetProps) {
           duration: 100,
           easing: Easing.ease
         });
+        currentSnapPointIndex.value = snaps.length - 1;
         return;
       }
 
-      for (const snap of snaps) {
+      // Theshold: [-300, 300]
+      // Snaps to the next snap point
+      if (event.velocityY > 300) { // down
+        const index = currentSnapPointIndex.value - 1;
+        if (index < 0) return;
+
+        height.value = withTiming(snaps[index].start, {
+          duration: 100,
+          easing: Easing.ease
+        });
+
+        currentSnapPointIndex.value = index;
+        return;
+      }
+
+      if (event.velocityY <= -300) { // up
+        const index = currentSnapPointIndex.value + 1;
+        if (index >= snaps.length) return;
+
+        height.value = withTiming(snaps[index].start, {
+          duration: 100,
+          easing: Easing.ease
+        });
+
+        currentSnapPointIndex.value = index;
+        return;
+      }
+
+      for (let i = 0; i < snaps.length; i++) {
+        const snap = snaps[i];
         const { start, end } = snap;
         if (start >= height.value && height.value < end) {
           height.value = withTiming(start, {
             duration: 100,
             easing: Easing.ease
           });
+          currentSnapPointIndex.value = i;
           break;
         }
       }
