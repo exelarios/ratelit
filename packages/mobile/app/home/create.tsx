@@ -54,18 +54,6 @@ function Create() {
                 onChangeText={(text) => form.handleOnChange("title", text)}
                 message={form.message?.title}
               />
-              <View style={{ marginBottom: 10 }}>
-                <Text style={{ fontWeight: "600", color: colors.neutral[700]}}>Category</Text>
-                <ScrollView showsHorizontalScrollIndicator={false} horizontal contentContainerStyle={{ display: "flex", flexDirection: "row", paddingVertical: 10, width: 400, gap: 5, height: 100, flexWrap: "wrap" }}>
-                  {Object.entries(categories).map(([key, value]) => {
-                    return (
-                      <Pressable style={{ height: 40, paddingVertical: 10, backgroundColor: colors.neutral[200], padding: 10, paddingHorizontal: 15, borderRadius: 20 }} key={value}>
-                        <Text>{value} {key}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-              </View>
               <Select
                 label="Visibility"
                 defaultValue="Private"
@@ -107,6 +95,7 @@ const styles = StyleSheet.create({
   },
   form: {
     display: "flex",
+    rowGap: 5,
     flexDirection: "column",
     justifyContent: "space-between"
   },

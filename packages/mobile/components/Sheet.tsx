@@ -1,5 +1,5 @@
-import { useMemo, useRef } from "react";
-import { useWindowDimensions, StyleSheet, TouchableWithoutFeedback, ViewProps } from "react-native";
+import { useCallback, useMemo, useRef } from "react";
+import { useWindowDimensions, StyleSheet, TouchableWithoutFeedback, ViewProps, GestureResponderEvent, LayoutChangeEvent } from "react-native";
 import View from "@/mobile/components/View";
 import colors from "@/mobile/design/colors";
 import FullWindowOverflow from "@/mobile/components/FullWindowOverlay";
@@ -17,6 +17,16 @@ function Sheet(props: SheetProps) {
 
   const height = useSharedValue(250);
   const currentSnapPointIndex = useSharedValue(0);
+
+  const containerLayout = useRef({
+    width: 0,
+    height: 0
+  });
+
+  const wrapperLayout = useRef({
+    width: 0,
+    height: 0
+  });
 
   const dimensions = useWindowDimensions();
 
@@ -47,7 +57,8 @@ function Sheet(props: SheetProps) {
     });
   }, [snapPoints]);
 
-  // todo: fix element from unmounting before exit animations stop playing.
+  // fix: element from unmounting before exit animations stop playing.
+  // fix: sheet doesn't seem to snap to points
 
   const handleOnGestureEvent = useAnimatedGestureHandler({
     onStart: (event, context: { startY: number }) => {
@@ -56,11 +67,6 @@ function Sheet(props: SheetProps) {
     onActive: (event, context) => {
       "worklet";
       height.value = context.startY - event.translationY;
-
-      if (height.value < 100) {
-        runOnJS(onClose)();
-        height.value = snaps[0].start
-      }
     },
     onFinish: (event) => {
       "worklet";
@@ -81,6 +87,7 @@ function Sheet(props: SheetProps) {
       // Closes the sheet via swipw down
       if (event.velocityY > 3000) { // swipe down
         runOnJS(onClose)();
+        height.value = snaps[1].start
         currentSnapPointIndex.value = 0;
         return;
       }
@@ -135,7 +142,7 @@ function Sheet(props: SheetProps) {
         }
       }
     }
-  }, [height]);
+  }, [height, snaps, dimensions, currentSnapPointIndex]);
 
   const animatedStyles = useAnimatedStyle(() => {
     return {
@@ -143,18 +150,53 @@ function Sheet(props: SheetProps) {
     }
   });
 
+  const handleOnPress = useCallback((event: GestureResponderEvent) => {
+    const target = event.nativeEvent;
+    const cursor = {
+      x: target.pageX,
+      y: target.pageY
+    }
+
+    const wrapper = wrapperLayout.current;
+    const container = containerLayout.current;
+
+    const pressableHeight = wrapper.height - container.height;
+    const pressableWidth = wrapper.width - container.width;
+    if (cursor.y < pressableHeight || cursor.x < pressableWidth) {
+      onClose();
+    }
+  }, [height]);
+
+  const handleOnWrapperLayout = useCallback((event: LayoutChangeEvent) => {
+    const layout = event.nativeEvent.layout;
+    wrapperLayout.current = {
+      width: layout.width,
+      height: layout.height
+    }
+  }, [height]);
+
+  const handleOnContainerLayout = useCallback((event: LayoutChangeEvent) => {
+    const layout = event.nativeEvent.layout;
+    containerLayout.current = {
+      width: layout.width,
+      height: layout.height
+    }
+  }, [height]);
+
   return open && (
-    <TouchableWithoutFeedback>
+    <TouchableWithoutFeedback
+      onPressIn={handleOnPress}
+      onLayout={handleOnWrapperLayout}>
       <FullWindowOverflow>
         <Animated.View
           entering={FadeIn}
           exiting={FadeOut}
           style={styles.wrapper}
           {...otherProps}>
-          <TouchableWithoutFeedback>
             <PanGestureHandler onGestureEvent={handleOnGestureEvent}>
               <Animated.View
                 style={[styles.container, animatedStyles]}
+                onLayout={handleOnContainerLayout}
                 entering={SlideInDown}
                 exiting={SlideOutDown}>
                 <View style={styles.bar}>
@@ -163,7 +205,6 @@ function Sheet(props: SheetProps) {
                 {children}
               </Animated.View>
             </PanGestureHandler>
-          </TouchableWithoutFeedback>
         </Animated.View>
       </FullWindowOverflow>
     </TouchableWithoutFeedback>
