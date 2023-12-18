@@ -9,6 +9,7 @@ import Text from "@/mobile/components/Text";
 import View from "@/mobile/components/View";
 
 import colors from "@/mobile/design/colors";
+import composeStyles from "../utils/composeStyles";
 
 interface TextProps extends RNTextInputProps {
   label: string;
@@ -17,17 +18,29 @@ interface TextProps extends RNTextInputProps {
 }
 
 const TextInput = React.forwardRef<RNTextInput, TextProps>((props, forwardedRef) => {
-  const { label, message = "", style, ...otherProps } = props;
-
-  const composedStyles = StyleSheet.compose(styles.base, style);
+  const { label, multiline, message = "", style, ...otherProps } = props;
 
   // todo: make message's element to be visually hidden when message isn't defined.
+  const composedStyles = composeStyles(
+    styles.base,
+    multiline && styles.multiline,
+    style
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{label}</Text>
-      <RNTextInput ref={forwardedRef} style={composedStyles} {...otherProps}/>
-      <Text style={styles.message}>{message}</Text>
+      <Text style={styles.text}>
+        {label}
+      </Text>
+      <RNTextInput
+        multiline={multiline}
+        ref={forwardedRef}
+        style={composedStyles}
+        {...otherProps}
+      />
+      <Text style={styles.message}>
+        {message}
+      </Text>
     </View>
   );
 });
@@ -39,6 +52,11 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     gap: 3
+  },
+  multiline: {
+    padding: 10,
+    paddingTop: 12,
+    height: 100
   },
   base: {
     borderRadius: 5,

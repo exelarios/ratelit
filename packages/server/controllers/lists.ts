@@ -4,6 +4,7 @@ import { z } from "zod";
 import prisma from "@/server/utils/prisma";
 import { getUser, parseToken } from "@/server/utils/auth";
 import { Prisma } from "@prisma/client";
+import { createList } from "@/shared/validate";
 
 export async function create(request: Request, response: Response) {
   try {
@@ -14,12 +15,18 @@ export async function create(request: Request, response: Response) {
       throw new Error("No authorization header provided.");
     }
 
+    const body = createList.parse(request.body);
+
     const token = parseToken(authorization);
     const owner = await getUser(token);
 
     const list = await prisma.list.create({
       data: {
-        published: false,
+        category: body.category,
+        thumbnail: body.thumbnail,
+        visibility: body.visibility,
+        description: body.description || "",
+        title: body.title,
         editors: {
           create: {
             role: "OWNER",

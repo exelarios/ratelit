@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useMemo } from "react";
+import { Fragment, useCallback, useMemo, useState } from "react";
 import { StyleSheet } from "react-native";
 import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
@@ -13,6 +13,9 @@ import { ListResponse, ListsResponse } from "@ratelit/shared/types";
 import { router } from "expo-router";
 
 import { ENDPOINT } from "@/mobile/utils/constants";
+import Button from "@/mobile/components/Button";
+
+import Animated, { FadeIn, FadeInDown, FadeOutDown } from "react-native-reanimated";
 
 function Following() {
   const auth = useAuth();
@@ -111,6 +114,7 @@ function Topbar() {
 }
 
 function Feed() {
+
 
   return (
     <Fragment>

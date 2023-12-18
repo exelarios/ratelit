@@ -1,9 +1,9 @@
+import { useCallback, useState } from "react";
+
 import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
-  ScrollView,
   StyleSheet,
   TouchableWithoutFeedback
 } from "react-native";
@@ -16,14 +16,15 @@ import View from "@/mobile/components/View";
 import Button from "@/mobile/components/Button";
 import Text from "@/mobile/components/Text";
 import Select from "@/mobile/components/Select";
-import colors from "@/mobile/design/colors";
 
-import { categories } from "@/mobile/utils/constants";
 import useForm from "@/mobile/hooks/useForm";
 import * as validate from "@ratelit/shared/validate";
 import { CreateListRequestParams } from "@ratelit/shared/types";
+import Animated, { FadeInDown, FadeOutDown} from "react-native-reanimated";
 
 function Create() {
+  const [open, setOpen] = useState(false);
+
   const form = useForm<CreateListRequestParams>({
     state: {
       title: "",
@@ -35,6 +36,11 @@ function Create() {
       console.log(state);
     }
   });
+
+  const handleOnSelectOnChange = useCallback((value: string) => {
+    const output = value.toUpperCase();
+    form.handleOnChange("visibility", output);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -58,9 +64,9 @@ function Create() {
                 label="Visibility"
                 defaultValue="Private"
                 message={form.message?.visibility}
-                onChange={(value) => form.handleOnChange("Visibility", value)}/>
+                onChange={handleOnSelectOnChange}
+              />
               <TextInput
-                style={{ height: 100 }}
                 multiline
                 message={form.message?.description}
                 label="Description"

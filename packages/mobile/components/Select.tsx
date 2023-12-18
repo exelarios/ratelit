@@ -13,12 +13,42 @@ interface SelectProps extends ViewProps {
   label: string;
   defaultValue?: string;
   value?: string;
+  placeholder?: string;
   message?: string;
   onChange: (value: string) => void;
 }
 
+interface ItemProps {
+  label: string;
+  value: string;
+  icon: any;
+  description: string;
+}
+
+const items: ItemProps[] = [
+  {
+    label: "Public",
+    value: "Public",
+    icon: "public",
+    description: "Anyone can view to this list."
+  },
+  {
+    label: "Restricted",
+    value: "Restricted",
+    icon: "check-circle-outline",
+    description: "Only approved can view this list."
+  },
+  {
+    label: "Private",
+    value: "Private",
+    icon: "lock-outline",
+    description: "Only you have access to this list."
+  }
+]
+
 function Select(props: SelectProps) {
-  const { label, value, defaultValue, onChange, message } = props;
+  const { label, value, defaultValue, placeholder, onChange, message } = props;
+  // todo: think of how to handle defaultValue and placeholder; should they co-exist?
 
   const isControlled = value !== null && value !== undefined;
   const [select, setSelect] = useState(isControlled ? value : defaultValue || "");
@@ -48,25 +78,20 @@ function Select(props: SelectProps) {
         open={open}
         snapPoints={snapPoints}
         onClose={() => setOpen(false)}>
-        <View safe style={styles.select}>
-          <SelectItem
-            icon="public"
-            label="Public"
-            description="Anyone can view to this list."
-            onPress={() => handleOnSelectItem("public")}
-          />
-          <SelectItem
-            icon="check-circle-outline"
-            label="Restricted"
-            description="Only approved can view this list."
-            onPress={() => handleOnSelectItem("restricted")}
-          />
-          <SelectItem
-            icon="lock-outline"
-            label="Private"
-            description="Only you have access to this list."
-            onPress={() => handleOnSelectItem("private")}
-          />
+        <View style={styles.select}>
+          {items?.map((props: ItemProps) => {
+            const { label, value, description, icon } = props;
+            return (
+              <SelectItem
+                active={value === select}
+                key={label}
+                icon={icon}
+                label={label}
+                description={description}
+                onPress={() => handleOnSelectItem(value)}
+              />
+            );
+          })}
         </View>
       </Sheet>
     </Fragment>
@@ -98,8 +123,8 @@ const styles = StyleSheet.create({
   },
   select: {
     display: "flex",
+    paddingHorizontal: 10,
     flexDirection: "column",
-    gap: 25
   }
 })
 

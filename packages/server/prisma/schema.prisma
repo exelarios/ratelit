@@ -50,6 +50,7 @@ model List {
   thumbnail String
   category  String
   visibility Visibility
+  description String       @default("")
   editors   EditorsOfList[]
   items     Item[]
 }

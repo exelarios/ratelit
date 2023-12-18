@@ -10,13 +10,15 @@ import colors from "@/mobile/design/colors";
 interface ItemProps extends PressableProps {
   icon: keyof (typeof MaterialIcons.glyphMap);
   label: string;
+  active?: boolean;
   description: string;
 }
 
 function Item(props: ItemProps) {
-  const { icon, label, description, ...otherProps } = props;
+  const { icon, label, description, active, ...otherProps } = props;
+
   return (
-    <Pressable style={styles.container} {...otherProps}>
+    <Pressable style={[styles.container, active && styles.active]} {...otherProps}>
       <MaterialIcons name={icon} size={30} color={colors.neutral[700]} />
       <View>
         <Text style={styles.label}>{label}</Text>
@@ -31,7 +33,12 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    borderRadius: 10,
+    padding: 10,
     gap: 10
+  },
+  active: {
+    backgroundColor: colors.neutral[200]
   },
   label: {
     fontWeight: "bold",

@@ -9,12 +9,14 @@ export const login = z.object({
 
 export const createList = z.object({
   title: z.string().min(3, "Name must be greater than 3 characters.").max(20),
-  visibility: z.enum(["public", "private", "restricted"], {
+  visibility: z.enum(["PUBLIC", "PRIVATE", "RESTRICTED"], {
     errorMap: () => {
       return {
         message: "Doesn't seem to a valid value for visibility."
       }
     }
   }),
+  category: z.string(),
+  thumbnail: z.string(),
   description: z.string().max(300).nullable(),
 });

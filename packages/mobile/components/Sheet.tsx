@@ -1,10 +1,13 @@
-import { useCallback, useMemo, useRef } from "react";
-import { useWindowDimensions, StyleSheet, TouchableWithoutFeedback, ViewProps, GestureResponderEvent, LayoutChangeEvent } from "react-native";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { Dimensions, useWindowDimensions, StyleSheet, TouchableWithoutFeedback, ViewProps, GestureResponderEvent, LayoutChangeEvent } from "react-native";
 import View from "@/mobile/components/View";
 import colors from "@/mobile/design/colors";
-import FullWindowOverflow from "@/mobile/components/FullWindowOverlay";
-import Animated, { Easing, FadeIn, FadeOut, SlideInDown, SlideOutDown, runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+// import FullWindowOverlay from "@/mobile/components/FullWindowOverlay";
+import Animated, { Keyframe, Easing, FadeIn, FadeOut, SlideInDown, SlideOutDown, runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withTiming, useAnimatedRef, measure, useAnimatedProps } from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
+
+const WindowHeight = Dimensions.get("window").height;
+const WindowWidth = Dimensions.get("window").width;
 
 interface SheetProps extends ViewProps {
   snapPoints: string[],
@@ -17,6 +20,7 @@ function Sheet(props: SheetProps) {
 
   const height = useSharedValue(250);
   const currentSnapPointIndex = useSharedValue(0);
+  const wrapper = useRef<Animated.View>();
 
   const containerLayout = useRef({
     width: 0,
@@ -67,8 +71,12 @@ function Sheet(props: SheetProps) {
     onActive: (event, context) => {
       "worklet";
       height.value = context.startY - event.translationY;
+
+      if (height.value < 100) {
+        runOnJS(onClose)();
+      }
     },
-    onFinish: (event) => {
+    onEnd: (event) => {
       "worklet";
       const maxHeight = dimensions.height - 100;
 
@@ -84,10 +92,10 @@ function Sheet(props: SheetProps) {
 
       // Max threshold: [-3000, 3000]
       // Takes the max height of the sheet via swipe up
-      // Closes the sheet via swipw down
+      // Closes the sheet via swipe down
       if (event.velocityY > 3000) { // swipe down
         runOnJS(onClose)();
-        height.value = snaps[1].start
+        height.value = snaps[0].start
         currentSnapPointIndex.value = 0;
         return;
       }
@@ -131,9 +139,11 @@ function Sheet(props: SheetProps) {
 
       for (let i = 0; i < snaps.length; i++) {
         const snap = snaps[i];
-        const { start, end } = snap;
-        if (start >= height.value && height.value < end) {
-          height.value = withTiming(start, {
+        const { start, end, point } = snap;
+        if (height.value > start && height.value < end) {
+          // If `start` is zero, we will use the `end` value
+          // so the height doesn't become zero.
+          height.value = withTiming(start === 0 ? end : start, {
             duration: 100,
             easing: Easing.ease
           });
@@ -173,9 +183,15 @@ function Sheet(props: SheetProps) {
       width: layout.width,
       height: layout.height
     }
+
+    wrapper.current?.measure((x, y, width, height, pageX, pageY) => {
+      wrapper.current.setNativeProps({
+        transform: [{ translateX: -pageX }, { translateY: -pageY }],
+      });
+    });
   }, [height]);
 
-  const handleOnContainerLayout = useCallback((event: LayoutChangeEvent) => {
+  const handleOnSheetLayout = useCallback((event: LayoutChangeEvent) => {
     const layout = event.nativeEvent.layout;
     containerLayout.current = {
       width: layout.width,
@@ -183,44 +199,53 @@ function Sheet(props: SheetProps) {
     }
   }, [height]);
 
+  const handleSideOutDownCallback = () => {
+    "worklet"
+    height.value = snaps[0].end
+    currentSnapPointIndex.value = 0;
+  }
+
   return open && (
     <TouchableWithoutFeedback
       onPressIn={handleOnPress}
       onLayout={handleOnWrapperLayout}>
-      <FullWindowOverflow>
-        <Animated.View
-          entering={FadeIn}
-          exiting={FadeOut}
-          style={styles.wrapper}
-          {...otherProps}>
-            <PanGestureHandler onGestureEvent={handleOnGestureEvent}>
-              <Animated.View
-                style={[styles.container, animatedStyles]}
-                onLayout={handleOnContainerLayout}
-                entering={SlideInDown}
-                exiting={SlideOutDown}>
-                <View style={styles.bar}>
-                  <View style={styles.barInner}></View>
-                </View>
-                {children}
-              </Animated.View>
-            </PanGestureHandler>
-        </Animated.View>
-      </FullWindowOverflow>
+      <Animated.View
+        ref={wrapper}
+        style={styles.wrapper}
+        entering={FadeIn}
+        exiting={FadeOut}
+        {...otherProps}>
+        <PanGestureHandler
+          onGestureEvent={handleOnGestureEvent}>
+          <Animated.View
+            style={[styles.sheet, animatedStyles]}
+            onLayout={handleOnSheetLayout}
+            entering={SlideInDown.delay(100)}
+            exiting={SlideOutDown.withCallback(handleSideOutDownCallback)}>
+            <View style={styles.bar}>
+              <View style={styles.barInner}></View>
+            </View>
+            {children}
+          </Animated.View>
+        </PanGestureHandler>
+      </Animated.View>
     </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
   wrapper: {
-    flex: 1,
+    position: "absolute",
     backgroundColor: "rgba(0, 0, 0, 0.2)",
+    width: WindowWidth,
+    height: WindowHeight,
+    zIndex: 9999999
   },
   bar: {
     width: "100%",
     display: "flex",
     justifyContent: "center",
-    flexDirection: "row"
+    flexDirection: "row",
   },
   barInner: {
     width: 100,
@@ -230,11 +255,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: colors.neutral[500]
   },
-  container: {
+  sheet: {
     position: "absolute",
     backgroundColor: colors.neutral[100],
     paddingTop: 15,
-    paddingHorizontal: 20,
     paddingBottom: 40,
     borderTopStartRadius: 20,
     borderTopEndRadius: 20,
