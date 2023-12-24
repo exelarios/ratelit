@@ -24,6 +24,7 @@ import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
 
 import { ENDPOINT } from "@/mobile/utils/constants";
+import Loading from "../components/Loading";
 
 type Login = z.infer<typeof validate.login>
 
@@ -38,44 +39,35 @@ type Login = z.infer<typeof validate.login>
 */
 
 export default function Login() {
-  const { dispatch } = useAuth();
+  const { dispatch, state } = useAuth();
+  const { isLoading } = state;
   const toast = useToast();
 
-  const sendCredentials = useCallback(async (payload: Login) => {
-      const response = await fetch(`${ENDPOINT}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: payload.email,
-          password: payload.password
-        })
-      });
+  const sendCredentials = useCallback(async (data: Login) => {
+    const response = await fetch(`${ENDPOINT}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password
+      })
+    });
 
-      return await response.json() as TokensResponse;
+    const payload = await response.json() as TokensResponse;
+
+    if (payload.status !== "success") {
+      throw new Error(payload.message);
+    }
+
+    return payload.data;
   }, []);
 
   const handleOnLogin = async (credentials: Login) => {
     try {
-      const data = await sendCredentials(credentials);
-
-      // Seems to be a lint issue where I can't express falsify through exclamation mark.
-      // https://www.reddit.com/r/typescript/comments/t0jpbc/why_doesnt_typescript_treat_respsuccess_as_an/
-      if (data.success === false) {
-        switch(data.code) {
-          case "INVALID_PAYLOAD":
-            // send the issues with the validation back to the form to be displayed.
-            return data.message;
-          case "INCORRECT_PASSWORD":
-            throw new Error(data.message);
-          default:
-            throw new Error(data.message);
-        }
-      }
-      
-      const tokens = data.payload;
+      const tokens = await sendCredentials(credentials);
 
       dispatch({
         type: "SET_TOKENS",
@@ -89,7 +81,7 @@ export default function Login() {
       // todo: put tokens into secure store
     } catch(error) {
       if (error instanceof Error) {
-        console.log(error.message);
+        console.log("handleOnLogin", error.message);
         toast.add({
           type: "warning",
           message: error.message
@@ -115,6 +107,10 @@ export default function Login() {
 
   const handleOnRegister = () => {
     router.push("/register");
+  }
+
+  if (isLoading) {
+    return <Loading/>;
   }
 
   return (

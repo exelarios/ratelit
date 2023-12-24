@@ -1,4 +1,4 @@
-import { login, createList } from "@/shared/validate";
+import * as validate from "@/shared/validate";
 import { ClientErrorCode } from "./ClientError";
 import Prisma from "prisma/prisma-client";
 import { JwtPayload } from "jsonwebtoken";
@@ -19,16 +19,16 @@ export interface RefreshToken extends JwtPayload {
 }
 
 interface SuccessResponse<T> {
-  success: true;
+  status: "success"
   message?: string;
-  payload?: T
+  data?: T
 }
 
 interface FailedResponse<T> {
-  success: false;
+  status: "fail" | "error"
   message?: string;
   code?: ClientErrorCode;
-  payload?: T
+  data?: T
 }
 
 interface Tokens {
@@ -48,9 +48,9 @@ export interface List extends Prisma.List {
   }[]
 }
 
-export type LoginRequestParams = z.infer<typeof login>;
+export type LoginRequestParams = z.infer<typeof validate.login>;
 
-export type CreateListRequestParams = z.infer<typeof createList>;
+export type CreateListRequestParams = z.infer<typeof validate.createList>;
 
 export type TokensResponse = SuccessResponse<Tokens> | FailedResponse<any>;
 
@@ -59,3 +59,5 @@ export type VerifyResponse = SuccessResponse<Verify> | FailedResponse<any>;
 export type ListsResponse = SuccessResponse<List[]> | FailedResponse<any>;
 
 export type ListResponse = SuccessResponse<List> | FailedResponse<any>;
+
+export type CreateListResponse = SuccessResponse<typeof validate.createList> | FailedResponse<any>;

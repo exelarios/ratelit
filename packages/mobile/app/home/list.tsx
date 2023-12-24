@@ -26,13 +26,13 @@ function List() {
           "Authorization": `bearer ${tokens.access}`
         }
       });
-      const data = await response.json() as ListResponse;
+      const payload = await response.json() as ListResponse;
       console.log("LIST", data);
-      if (data.success === false) {
-        throw new Error(data.message);
+      if (payload.success === false) {
+        throw new Error(payload.message);
       }
 
-      return data.payload;
+      return payload.data;
     }
   });
 

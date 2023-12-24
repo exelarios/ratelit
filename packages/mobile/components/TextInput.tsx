@@ -36,6 +36,7 @@ const TextInput = React.forwardRef<RNTextInput, TextProps>((props, forwardedRef)
         multiline={multiline}
         ref={forwardedRef}
         style={composedStyles}
+        placeholderTextColor={colors.neutral[500]}
         {...otherProps}
       />
       <Text style={styles.message}>

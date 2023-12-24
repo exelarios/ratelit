@@ -1,6 +1,6 @@
 import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
 
-import prisma from "@/server/utils/prisma";
+import prisma from "@/server/prisma";
 import secrets from "@/server/utils/secrets";
 
 import { AccessToken, RefreshToken } from "@/shared/types";

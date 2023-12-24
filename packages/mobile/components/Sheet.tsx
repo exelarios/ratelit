@@ -1,9 +1,30 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { Dimensions, useWindowDimensions, StyleSheet, TouchableWithoutFeedback, ViewProps, GestureResponderEvent, LayoutChangeEvent } from "react-native";
+import { useCallback, useMemo, useRef } from "react";
+import {
+  Dimensions,
+  useWindowDimensions,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  ViewProps,
+  GestureResponderEvent,
+  LayoutChangeEvent 
+} from "react-native";
+
 import View from "@/mobile/components/View";
 import colors from "@/mobile/design/colors";
-// import FullWindowOverlay from "@/mobile/components/FullWindowOverlay";
-import Animated, { Keyframe, Easing, FadeIn, FadeOut, SlideInDown, SlideOutDown, runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withTiming, useAnimatedRef, measure, useAnimatedProps } from "react-native-reanimated";
+
+import Animated, {
+  Easing, 
+  FadeIn, 
+  FadeOut,
+  SlideInDown,
+  SlideOutDown,
+  runOnJS,
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming 
+} from "react-native-reanimated";
+
 import { PanGestureHandler } from "react-native-gesture-handler";
 
 const WindowHeight = Dimensions.get("window").height;
@@ -12,13 +33,13 @@ const WindowWidth = Dimensions.get("window").width;
 interface SheetProps extends ViewProps {
   snapPoints: string[],
   open?: boolean;
+  maxHeightOnSnap?: boolean;
   onClose?: () => void;
 }
 
 function Sheet(props: SheetProps) {
   const { open = false, snapPoints, onClose, style, children, ...otherProps } = props;
 
-  const height = useSharedValue(250);
   const currentSnapPointIndex = useSharedValue(0);
   const wrapper = useRef<Animated.View>();
 
@@ -37,6 +58,7 @@ function Sheet(props: SheetProps) {
   const snaps = useMemo(() => {
     const windowHeight = dimensions.height - 100;
     const partition = Math.floor(windowHeight / snapPoints.length);
+
     return snapPoints.map((point, index) => {
       const regex = new RegExp(/\d+/);
       let value = parseInt(regex.exec(point)[0]);
@@ -61,8 +83,7 @@ function Sheet(props: SheetProps) {
     });
   }, [snapPoints]);
 
-  // fix: element from unmounting before exit animations stop playing.
-  // fix: sheet doesn't seem to snap to points
+  const height = useSharedValue(snaps[0].end);
 
   const handleOnGestureEvent = useAnimatedGestureHandler({
     onStart: (event, context: { startY: number }) => {
@@ -111,7 +132,7 @@ function Sheet(props: SheetProps) {
 
       // Theshold: [-300, 300]
       // Snaps to the next snap point
-      if (event.velocityY > 300) { // down
+      if (event.velocityY > 100) { // down
         const index = currentSnapPointIndex.value - 1;
         if (index < 0) return;
 
@@ -124,7 +145,7 @@ function Sheet(props: SheetProps) {
         return;
       }
 
-      if (event.velocityY <= -300) { // up
+      if (event.velocityY <= -100) { // up
         const index = currentSnapPointIndex.value + 1;
         if (index >= snaps.length) return;
 
@@ -218,10 +239,10 @@ function Sheet(props: SheetProps) {
         <PanGestureHandler
           onGestureEvent={handleOnGestureEvent}>
           <Animated.View
-            style={[styles.sheet, animatedStyles]}
+            style={[styles.sheet, style, animatedStyles]}
             onLayout={handleOnSheetLayout}
             entering={SlideInDown.delay(100)}
-            exiting={SlideOutDown.withCallback(handleSideOutDownCallback)}>
+            exiting={SlideOutDown.delay(100).withCallback(handleSideOutDownCallback)}>
             <View style={styles.bar}>
               <View style={styles.barInner}></View>
             </View>

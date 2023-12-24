@@ -132,17 +132,17 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
         }
       });
 
-      const data = await response.json() as TokensResponse;
-      if (data.success === false) {
-        switch(data.code) {
+      const payload = await response.json() as TokensResponse;
+      if (payload.success === false) {
+        switch(payload.code) {
           case "EXPIRED_REFRESH_TOKEN":
-            throw new ClientError(data.message);
+            throw new ClientError(payload.message);
           default:
             throw new Error("Something went wrong.");
         }
       }
 
-      const tokens = data.payload;
+      const tokens = payload.data;
 
       dispatch({
         type: "SET_TOKENS",
@@ -187,7 +187,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
 
       dispatch({
         type: "SET_USER",
-        payload: result.payload.user
+        payload: result.data.user
       });
 
       router.replace("/home");

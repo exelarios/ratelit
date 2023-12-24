@@ -5,6 +5,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator pothos {
+  provider = "prisma-pothos-types"
+}
+
 datasource db {
   provider     = "mysql"
   url          = env("DATABASE_URL")
@@ -47,10 +51,10 @@ model List {
   title     String          @default("Untitled List")
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
-  thumbnail String
-  category  String
+  thumbnail String?
+  category  String?
   visibility Visibility
-  description String       @default("")
+  description String?
   editors   EditorsOfList[]
   items     Item[]
 }
@@ -70,7 +74,9 @@ model EditorsOfList {
 model Item {
   id        String    @id @unique @default(uuid())
   rating    Float
-  thumbnail String
+  name      String
+  description String?
+  thumbnail String?
   ownerId   String
   createdBy User      @relation(fields: [ownerId], references: [id])
   createdAt DateTime  @default(now())

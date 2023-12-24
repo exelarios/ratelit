@@ -1,15 +1,15 @@
 import { Redirect, Stack, Tabs } from "expo-router";
 import { useAuth } from "@/mobile/context/AuthContext";
-import { TransitionPresets } from "@react-navigation/stack";
 
 import Text from "@/mobile/components/Text";
+import Loading from "@/mobile/components/Loading";
 
 export default function AppLayout() {
   const auth = useAuth();
   const { user, isLoading } = auth.state;
 
   if (isLoading) {
-    return <Text>Loading . . . </Text>
+    return <Loading/>
   }
 
   if (!user) {
@@ -39,7 +39,7 @@ export default function AppLayout() {
       <Stack.Screen
         name="create" 
         options={{
-          presentation: "modal",
+          // presentation: "modal",
         }}
       />
     </Stack>

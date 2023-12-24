@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { z } from "zod";
+import { useToast } from "../context/ToastContext";
 
 interface ValidationSuccess<T> {
   success: true
@@ -20,9 +21,50 @@ interface UseFormParams<T> {
 
 type FormMessage = Record<string, any>;
 
-function formatZodError<T>(state: T, zodErrors: z.SafeParseError<T>) {
+function formatZodError<T>(zodErrors: z.SafeParseError<T>) {
+  const issues = {}
+  const errors = zodErrors.error.format();
+  const stack = [];
+
+  for (const key of Object.keys(errors)) {
+    if (key === "_errors") continue;
+    stack.push({
+      path: issues,
+      key: key,
+      value: errors[key]
+    });
+  }
+
+  while(stack.length > 0) {
+    const { path, key, value } = stack.pop();
+
+    if (Object.keys(value).length === 1) {
+      path[key] = value?._errors.join("\n");
+    } else {
+      const innerPath = Object.keys(value);
+      path[key] = {};
+
+      for (const innerKey of innerPath) {
+        if (innerKey === "_errors") continue;
+        stack.push({
+          path: path[key],
+          key: innerKey,
+          value: value[innerKey]
+        })
+      }
+    }
+  }
+
+  return issues;
+}
+
+// This is the old method of formating zod errors
+// which uses the user's input state rather than zod's schema.
+function formatZodError2<T>(state: T, zodErrors: z.SafeParseError<T>) {
   const issues = {};
   const errors = zodErrors.error.format();
+
+  console.log("errors", JSON.stringify(errors, null, 2));
   // Gets the raw format errors.
 
   // Begins a DFS on the object.
@@ -39,7 +81,6 @@ function formatZodError<T>(state: T, zodErrors: z.SafeParseError<T>) {
 
   while(stack.length > 0) {
     const { path, key, currentState, errors } = stack.pop();
-
     // If there is only one key within the `errors` object,
     // this means we reached to a non-nested object.
     if (typeof currentState === "string") {
@@ -60,15 +101,22 @@ function formatZodError<T>(state: T, zodErrors: z.SafeParseError<T>) {
         });
       }
     }
+
+    // At the end, if that key doesn't contain any data.
+    // we will just remove that key from the object completely.
+    // This will make it easier later, if we want to check if any fields contains issues.
+    if (path[key] === null) {
+      delete path[key];
+    }
   }
 
-  console.log("@result", JSON.stringify(issues, null, 2));
-
+  console.log("formatZodError", issues);
   return issues;
 }
 
-function useForm<T extends object>(props: UseFormParams<T>) {
+function useForm<T extends {}>(props: UseFormParams<T>) {
   // If zodValidation passes, it will also check for onValidate.
+  const toast = useToast();
   const { state, onValidate, zodValidation, onSubmit } = props;
 
   const [value, setValue] = useState(state);
@@ -99,18 +147,18 @@ function useForm<T extends object>(props: UseFormParams<T>) {
 
     const parse = zodValidation.safeParse(value);
     if (parse.success === false) {
-      return formatZodError(state, parse);
+      return formatZodError(parse);
     }
 
     return null;
-  }, []);
+  }, [value]);
 
   const handleOnSubmit = useCallback(async () => {
     // todo: if value passes validation using zod
     try {
       const issues = handleOnZodValidate(value);
-      console.log("@issues", issues);
-      if (issues) {
+      if (issues != null) {
+        console.log(issues);
         setMessage(issues);
         return;
       }
@@ -118,13 +166,13 @@ function useForm<T extends object>(props: UseFormParams<T>) {
       const response = await onSubmit(value);
       if (zodValidation) {
         // todo: revalidate the response and display back to the user.
-        console.log(response);
+        console.log("response", response);
       } else {
         // normal validation
       }
     } catch(error) {
       if (error instanceof Error) {
-        console.log(error);
+        console.log("handleOnSubmit", error);
       }
     }
   }, [value]);

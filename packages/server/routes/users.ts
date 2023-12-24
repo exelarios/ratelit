@@ -9,7 +9,7 @@ Router.get("/", isAuthenticated, (request, response) => {
   } catch(_error) {
     const error = _error as Error;
     response.status(403).send({
-      "success": false,
+      "status": "fail",
       "message": error.message
     });
   }

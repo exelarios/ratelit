@@ -41,19 +41,18 @@ export async function create(request: Request, response: Response) {
     });
 
     response.send({
-      "payload": list,
-      "success": true,
+      "data": list,
+      "status": "success",
       "message": "A new list has been created."
     });
   } catch(error) {
     if (error instanceof Error) {
       response.status(403).send({
-        "success": false,
+        "status": "error",
         "message": error.message
       });
     }
   }
-
 }
 
 export async function get(request: Request, response: Response) {
@@ -69,8 +68,8 @@ export async function get(request: Request, response: Response) {
       });
 
       response.send({
-        "success": true,
-        "payload": list,
+        "status": "success",
+        "data": list,
       });
     } else {
 
@@ -138,17 +137,17 @@ export async function get(request: Request, response: Response) {
       });
 
       response.send({
-        "payload": list,
+        "data": list,
         "next_cursor": nextList.length > 0 ? lastList.id : null,
         "last_page": nextList.length <= 0,
-        "success": true,
+        "status": "success",
       });
     }
 
   } catch(error) {
     if (error instanceof Error) {
       response.status(403).send({
-        "success": false,
+        "status": "error",
         "message": error.message
       });
     }

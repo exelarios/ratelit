@@ -1,12 +1,11 @@
 import { RequestHandler } from "express";
 import { ZodError, z } from "zod";
 
-import prisma from "@/server/utils/prisma";
+import prisma from "@/server/prisma";
 import { generateTokens, parseToken, verifyAccessToken, verifyRefreshToken } from "@/server/utils/auth";
 import { NotBeforeError, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
 import * as validate from "@ratelit/shared/validate";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import ClientError from "@/shared/ClientError";
 
 export const login: RequestHandler = async (request, response) => {
   try {
@@ -25,9 +24,7 @@ export const login: RequestHandler = async (request, response) => {
     const isCorrectPassword = await Bun.password.verify(credentials.password, user.password);
 
     if (!isCorrectPassword) {
-      throw new ClientError("Incorrect password", {
-        code: "INCORRECT_PASSWORD",
-      });
+      throw new Error("Incorrect password");
     }
 
     const payload = {
@@ -50,9 +47,9 @@ export const login: RequestHandler = async (request, response) => {
     // todo: store the refresh token inside a NoSQL to track refresh tokens, thus we can invalidate them if necessary.
 
     response.send({
-      "success": true,
+      "status": "success",
       "message": "logged in",
-      "payload": {
+      "data": {
         "accessToken": tokens.access,
         "refreshToken": tokens.refresh
       },
@@ -61,26 +58,26 @@ export const login: RequestHandler = async (request, response) => {
   } catch(error) {
     if (error instanceof ZodError) {
       response.status(400).send({
-        "success": false,
+        "status": "fail",
         "code": "INVALID_PAYLOAD",
         "message": error.issues
       });
     } else if (error instanceof PrismaClientKnownRequestError) {
       if (error.code === "P2025")
       response.status(404).send({
-        "success": false,
+        "status": "fail",
         "message": "The credentials provided doesn't exist. Try creating an account."
       });
     } else if (error instanceof ClientError) {
       response.status(404).send({
-        "success": false,
+        "status": "error",
         "message": error.message,
         "code": error.code
       });
     } else {
       console.error(error);
       response.status(400).send({
-        "success": false,
+        "status": "error",
         "message": "Something went wrong."
       });
     }
@@ -108,7 +105,7 @@ export const signup: RequestHandler = async (request, response) => {
 
     if (doesEmailExist) {
       response.status(400).send({
-        "success": true,
+        "status": "success",
         "message": "This email has already been registered. Please try to login or forget password."
       });
     }
@@ -146,20 +143,25 @@ export const signup: RequestHandler = async (request, response) => {
     });
 
     response.send({
-      "success": true,
+      "status": "success",
       "message": "User has been sucessfully created.",
-      "payload": {
+      "data": {
         "accessToken": tokens.access,
         "refreshToken": tokens.refresh
       },
     });
 
   } catch(error) {
-    if (error instanceof Error) {
-      console.log(error);
+    if (error instanceof z.ZodError) {
       response.status(400).send({
-        "success": false,
-        "message": error instanceof z.ZodError ? error.issues : error.message
+        "status": "failed",
+        "message": error.issues
+      });
+    } else if (error instanceof Error) {
+      console.log("api/signup", error);
+      response.status(400).send({
+        "status": "error",
+        "message": error.message
       });
     }
   }
@@ -193,7 +195,7 @@ export const verify: RequestHandler = async (request, response) => {
 
     response.send({
       success: true,
-      payload: {
+      data: {
         user,
         token: session
       }
@@ -203,7 +205,7 @@ export const verify: RequestHandler = async (request, response) => {
     console.error("@verify", error);
     if (error instanceof TokenExpiredError) {
       response.status(401).send({
-        "success": false,
+        "status": "fail",
         "code": "EXPIRED_ACCESS_TOKEN",
         "message": "Use refresh token to generate new token.",
       });
@@ -211,14 +213,14 @@ export const verify: RequestHandler = async (request, response) => {
 
     if (error instanceof JsonWebTokenError) {
       response.status(403).send({
-        "success": false,
+        "status": "error",
         "message": error.message
       });
     }
 
     if (error instanceof Error) {
       response.status(403).send({
-        "success": false,
+        "status": "error",
         "message": error.message
       });
     }
@@ -247,7 +249,7 @@ export const refresh: RequestHandler = async (request, response) => {
 
     response.send({
       success: true,
-      payload: {
+      data: {
         "accessToken": tokens.access,
         "refreshToken": tokens.refresh
       },
@@ -257,14 +259,14 @@ export const refresh: RequestHandler = async (request, response) => {
   } catch(error) {
     if (error instanceof NotBeforeError) {
       response.status(403).send({
-        "success": false,
+        "status": "fail",
         "message": "Access token associated with the access token hasn't expired."
       });
     }
 
     if (error instanceof TokenExpiredError) {
       response.status(403).send({
-        "success": false,
+        "status": "fail",
         "code": "EXPIRED_REFRESH_TOKEN",
         "message": "The session has expired. Please relog in."
       });
@@ -273,14 +275,14 @@ export const refresh: RequestHandler = async (request, response) => {
     if (error instanceof JsonWebTokenError) {
       console.log(error);
       response.status(403).send({
-        "success": false,
+        "status": "error",
         "message": "The token is either invalid or malformed."
       });
     }
 
     if (error instanceof Error) {
       response.status(403).send({
-        "success": false,
+        "status": "error",
         "message": error.message
       });
     }

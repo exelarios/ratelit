@@ -31,12 +31,12 @@ function Following() {
         }
       });
 
-      const data = await response.json() as ListResponse;
-      if (data.success === false) {
-        throw new Error(data.message);
+      const payload = await response.json() as ListsResponse;
+      if (payload.success === false) {
+        throw new Error(payload.message);
       }
 
-      return data.payload;
+      return payload.data;
     }
   });
 
@@ -70,12 +70,12 @@ function UserList() {
         }
       });
 
-      const data = await response.json() as ListsResponse;
-      if (data.success === false) {
-        throw new Error(data.message);
+      const payload = await response.json() as ListsResponse;
+      if (payload.success === false) {
+        throw new Error(payload.message);
       }
 
-      return data.payload;
+      return payload.data;
     }
   });
 

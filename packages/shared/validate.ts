@@ -8,7 +8,7 @@ export const login = z.object({
 });
 
 export const createList = z.object({
-  title: z.string().min(3, "Name must be greater than 3 characters.").max(20),
+  title: z.string().min(3, "Name must be greater than 3 characters.").max(40),
   visibility: z.enum(["PUBLIC", "PRIVATE", "RESTRICTED"], {
     errorMap: () => {
       return {
@@ -16,7 +16,7 @@ export const createList = z.object({
       }
     }
   }),
-  category: z.string(),
-  thumbnail: z.string(),
-  description: z.string().max(300).nullable(),
+  category: z.string().optional(),
+  thumbnail: z.string().optional(),
+  description: z.string().max(300).optional(),
 });
