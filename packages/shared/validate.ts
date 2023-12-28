@@ -20,3 +20,12 @@ export const createList = z.object({
   thumbnail: z.string().optional(),
   description: z.string().max(300).optional(),
 });
+
+export const register = z.object({
+  firstName: z.string().min(1, "First name must not be empty.").max(20, "First name should not exceed 20 characters."),
+  lastName: z.string().min(1, "Last name must not be empty.").max(20, "Last name should not exceed 20 characters."),
+  email: z.string().email({
+    message: "Please provide a valid email address."
+  }),
+  password: z.string().min(4, "Password field must have a minimum of 4 characters.")
+});

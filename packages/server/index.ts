@@ -1,51 +1,88 @@
-// import express from "express";
-// import cookieParser from "cookie-parser";
-// import cors from "cors";
-import { createYoga } from "graphql-yoga";
+import { createGraphQLError, createYoga } from "graphql-yoga";
+import { initContextCache } from "@pothos/core";
+
 import schema from "@/server/graphql/schema";
+import prisma from "./prisma";
+import jwt from "jsonwebtoken";
+import secrets from "@/server/utils/secrets";
 
-// import users from "@/server/routes/users";
-// import auth from "@/server/routes/auth";
-// import lists from "@/server/routes/lists";
-// import schema from "@/server/generated/schema";
+export interface AccessToken extends jwt.JwtPayload {
+  id: string;
+  email: string;
+}
 
-const PORT = process.env.PORT || 3000;
+const ACCESS_TOKEN_SECRET = secrets.accessToken();
 
-// const app = express();
-
-// app.use(cors());
-// app.use(express.json());
-// app.use(cookieParser());
-
-// app.get("/", (request, response) => {
-//   response.send("hello express");
-// });
-
-// app.use("/api/users", users);
-// app.use("/api/auth", auth);
-// app.use("/api/lists", lists);
+const PORT = Bun.env.PORT || 3000;
+const IS_PRODUCTION = process.env.PRODUCTION === "PRODUCTION";
 
 const yoga = createYoga({
-  schema
+  schema,
+  multipart: true,
+  landingPage: false,
+  maskedErrors: IS_PRODUCTION,
+  logging: true,
+  context: async (props) => {
+    try {
+      const { request, params } = props;
+      const authorization = request.headers.get("authorization");
+    
+      if (!authorization) return;
+    
+      const [bearer, token] = authorization.split(" ");
+      if (bearer.toLowerCase() !== "bearer") {
+        throw createGraphQLError("Failed to parse authorization.");
+      }
+  
+      const payload = jwt.verify(token, ACCESS_TOKEN_SECRET) as AccessToken | null;
+  
+      const user = await prisma.user.findUniqueOrThrow({
+        select: {
+          email: true,
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+          createdAt: true
+        },
+        where: {
+          id: payload?.id
+        }
+      });
+
+      return {
+        ...initContextCache(),
+        isAuthenticated: true,
+        user: user,
+      }
+    } catch(error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw createGraphQLError("The session has expired.", {
+          originalError: error,
+          extensions: {
+            code: "EXPIRED_ACCESS_TOKEN"
+          }
+        });
+      } else if (error instanceof Error) {
+        console.error(error);
+        throw createGraphQLError(error.message);
+      }
+    }
+
+    return {
+      ...initContextCache(),
+      isAuthenticated: false,
+      user: null,
+    }
+  }
 });
 
 const server = Bun.serve({
-  fetch: yoga
+  fetch: yoga,
+  port: PORT,
 });
 
-console.info(`Server is running on ${new URL(yoga.graphqlEndpoint,`http://${server.hostname}:${server.port}`)}`);
-
-// A fallback route, if the route requested doesn't exist.
-// app.all("*", (request, response) => {
-//   response.status(404);
-//   response.send({
-//     "success": false,
-//     "message": "Route request not found. Please try a different route."
-//   });
-// });
-
-// function onListening() {
-//   console.log(`Listening on port ${PORT}.`);
-// }
-
-// app.listen(PORT, onListening);
+console.info(`Server is running on ${
+  new URL(yoga.graphqlEndpoint,
+  `http://${server.hostname}:${server.port}`)}
+`);

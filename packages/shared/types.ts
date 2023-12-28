@@ -8,14 +8,9 @@ export type User = Omit<Prisma.User, "password">;
 // export type List = ;
 export type Editors = Prisma.EditorsOfList;
 
-export interface AccessToken extends JwtPayload {
+export interface Token extends JwtPayload {
   id: string;
   email: string;
-}
-
-export interface RefreshToken extends JwtPayload {
-  id: string;
-  accessExpiration: number;
 }
 
 interface SuccessResponse<T> {

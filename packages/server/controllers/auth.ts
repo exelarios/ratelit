@@ -211,13 +211,6 @@ export const verify: RequestHandler = async (request, response) => {
       });
     }
 
-    if (error instanceof JsonWebTokenError) {
-      response.status(403).send({
-        "status": "error",
-        "message": error.message
-      });
-    }
-
     if (error instanceof Error) {
       response.status(403).send({
         "status": "error",
@@ -242,6 +235,7 @@ export const refresh: RequestHandler = async (request, response) => {
     const result = await verifyRefreshToken(refreshToken);
 
     const tokenPayload = {
+      email: result.email,
       id: result.id
     }
 

@@ -1,30 +1,32 @@
 import builder from "@/server/graphql/builder";
 import prisma from "@/server/prisma";
-import { GraphQLError } from "graphql";
+import { createGraphQLError } from "graphql-yoga";
 
-builder.queryField("User", (t) =>
-  t.prismaField({
-    type: "User",
-    description: "Query a user based on the user's email.",
-    args: {
-      email: t.arg({
-        type: "String",
-        required: true,
-      })
-    },
-    resolve: async (query, root, args, ctx, info) => {
-      try {
-        return prisma.user.findFirstOrThrow({
-          ...query,
-          where: {
-            email: args.email
-          }
-        }).catch(error => {
-          return Promise.reject(new GraphQLError(error.message))
-        });
-      } catch(error) {
-        return Promise.reject(new Error("Oops! Something went wrong."));
+builder.queryField("User", (t) => t.prismaField({
+  type: "User",
+  description: "Query a user based on the user's email.",
+  args: {
+    email: t.arg({
+      type: "String",
+      required: true,
+    }),
+  },
+  resolve: async (query, root, args, context, info) => {
+    const user = await prisma.user.findFirst({
+      ...query,
+      where: {
+        email: args.email
       }
-    },
-  })
-);
+    });
+
+    if (!user) {
+      throw createGraphQLError(`User associated with email '${args.email}' isn't found`, {
+        extensions: {
+          code: "USER_NOT_FOUND"
+        }
+      });
+    }
+
+    return user;
+  },
+}));

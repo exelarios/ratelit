@@ -10,7 +10,7 @@ builder.enumType(Visibility, {
   name: "Visibility"
 });
 
-builder.prismaNode("User", {
+export const User = builder.prismaNode("User", {
   id: {
     field: "id",
   },
@@ -35,7 +35,17 @@ builder.prismaNode("User", {
   })
 });
 
-builder.prismaNode("List", {
+export const Tokens = builder.objectRef<{
+  access: string,
+  refresh: string 
+}>("Tokens").implement({
+  fields: (t) => ({
+    access: t.exposeString("access"),
+    refresh: t.exposeString("refresh")
+  })
+});
+
+export const List = builder.prismaNode("List", {
   id: {
     field: "id"
   },
@@ -81,7 +91,7 @@ builder.prismaNode("List", {
   })
 });
 
-builder.prismaNode("Item", {
+export const Item = builder.prismaNode("Item", {
   id: {
     field: "id"
   },
@@ -106,16 +116,31 @@ builder.prismaNode("Item", {
         updatedAt: true
       },
       resolve: (parent) => parent.updatedAt.toUTCString()
-    }) 
+    }),
+    comments: t.relation("comments")
   })
 });
 
-builder.prismaNode("Comment", {
+export const Comment = builder.prismaNode("Comment", {
   id: {
     field: "id"
   },
   fields: (t) => ({
     content: t.exposeString("content"),
     ownerId: t.exposeID("ownerId"),
+    createdAt: t.string({
+      select: {
+        createdAt: true
+      },
+      resolve: (parent) => parent.createdAt.toUTCString()
+    }),
+    createdBy: t.relation("createdBy"),
+    updatedAt: t.string({
+      select: {
+        updatedAt: true
+      },
+      resolve: (parent) => parent.updatedAt.toUTCString()
+    }),
+    itemId: t.exposeID("itemId")
   })
 })

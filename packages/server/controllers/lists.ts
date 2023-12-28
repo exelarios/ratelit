@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 
-import prisma from "@/server/utils/prisma";
+import prisma from "@/server/prisma";
 import { getUser, parseToken } from "@/server/utils/auth";
 import { Prisma } from "@prisma/client";
 import { createList } from "@/shared/validate";

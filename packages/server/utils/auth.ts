@@ -3,7 +3,7 @@ import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
 import prisma from "@/server/prisma";
 import secrets from "@/server/utils/secrets";
 
-import { AccessToken, RefreshToken } from "@/shared/types";
+import { Token } from "@/shared/types";
 
 const ACCESS_TOKEN_SECRET = secrets.accessToken();
 const REFRESH_TOKEN_SECRET = secrets.refreshToken();
@@ -30,11 +30,7 @@ const verify = <T extends JwtPayload>(token: string, secretOrPublicKey: string) 
   });
 }
 
-interface TokenPayload {
-  id: string;
-}
-
-export function generateTokens(payload: TokenPayload) {
+export function generateTokens(payload: Token) {
   const access = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
     "expiresIn": ACCESS_TOKEN_DURATION,
   });
@@ -74,11 +70,11 @@ export function parseToken(authorization: string) {
 }
 
 export async function verifyAccessToken(token: string) {
-  return await verify<AccessToken>(token, ACCESS_TOKEN_SECRET);
+  return await verify<Token>(token, ACCESS_TOKEN_SECRET);
 }
 
 export async function verifyRefreshToken(token: string) {
-  return await verify<RefreshToken>(token, REFRESH_TOKEN_SECRET);
+  return await verify<Token>(token, REFRESH_TOKEN_SECRET);
 }
 
 export async function getUser(token: string) {
