@@ -11,7 +11,7 @@
     "db:push": "bun --cwd packages/server prisma:push",
     "db:format": "bun --cwd packages/server prisma:format",
     "db:validate": "bun --cwd packages/server prisma:validate",
-    "db:generate": "bun --cwd packages/server prisma:generate",
+    "db:gen": "bun --cwd packages/server prisma:generate",
     "relay": "bun --cwd packages/mobile relay",
     "gql:gen": "bun --cwd packages/mobile gqlgen"
   },
