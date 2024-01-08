@@ -43,7 +43,7 @@ model User {
   comments Comment[]
 
   // lists where users have some sort of admin powers.
-  lists EditorsOfList[]
+  membership EditorsOfList[]
 }
 
 model List {
@@ -55,7 +55,7 @@ model List {
   category  String?
   visibility Visibility
   description String?
-  editors   EditorsOfList[]
+  members   EditorsOfList[]
   items     Item[]
 }
 

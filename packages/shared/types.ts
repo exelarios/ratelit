@@ -1,12 +1,21 @@
 import * as validate from "@/shared/validate";
-import { ClientErrorCode } from "./ClientError";
-import Prisma from "prisma/prisma-client";
 import { JwtPayload } from "jsonwebtoken";
 import { z } from "zod";
 
-export type User = Omit<Prisma.User, "password">;
-// export type List = ;
-export type Editors = Prisma.EditorsOfList;
+export type ErrorCode = 
+  | "EXPIRED_ACCESS_TOKEN"
+  | "USER_NOT_FOUND"
+  | "REGISTER_EMAIL_TAKEN"
+  | "EXPIRED_REFRESH_TOKEN"
+  | "REFRESH_TOKEN_BEFORE_EXPIRED"
+  | "INVALID_AUTH_TOKEN"
+
+export type GraphQLError = {
+  extensions: {
+    code: ErrorCode
+  },
+  message: string;
+}
 
 export interface Token extends JwtPayload {
   id: string;
@@ -22,7 +31,7 @@ interface SuccessResponse<T> {
 interface FailedResponse<T> {
   status: "fail" | "error"
   message?: string;
-  code?: ClientErrorCode;
+  code?: string
   data?: T
 }
 
@@ -42,8 +51,6 @@ export interface List extends Prisma.List {
     role: Editors["role"]
   }[]
 }
-
-export type LoginRequestParams = z.infer<typeof validate.login>;
 
 export type CreateListRequestParams = z.infer<typeof validate.createList>;
 

@@ -3,6 +3,22 @@ import { createGraphQLError } from "graphql-yoga";
 import { Tokens } from "@/server/graphql/types";
 import { generateTokens, verifyRefreshToken } from "@/server/utils/auth";
 import jwt from "jsonwebtoken";
+import prisma from "@/server/prisma";
+
+builder.mutationField("verifyToken", t => t.prismaField({
+  type: "User",
+  authScopes: {
+    isLoggedIn: true
+  },
+  resolve: async (query, parent, args, context) => {
+    return prisma.user.findFirstOrThrow({
+      ...query,
+      where: {
+        id: context.user?.id
+      }
+    });
+  }
+}));
 
 builder.mutationField("refreshToken", t => t.field({
   type: Tokens,
@@ -14,6 +30,11 @@ builder.mutationField("refreshToken", t => t.field({
     })
   },
   resolve: async (parent, args, context, info) => {
+    let output = {
+      access: "",
+      refresh: ""
+    };
+
     try {
       const { id, email } = await verifyRefreshToken(args.token);
 
@@ -22,10 +43,10 @@ builder.mutationField("refreshToken", t => t.field({
         email
       });
 
-      return tokens;
+      output = tokens;
     } catch(error) {
       if (error instanceof jwt.NotBeforeError) {
-        throw createGraphQLError("Access token associated with the access token hasn't expired.", {
+        throw createGraphQLError("Refresh token associated with the access token hasn't expired.", {
           originalError: error,
           extensions: {
             code: "REFRESH_TOKEN_BEFORE_EXPIRED"
@@ -43,9 +64,6 @@ builder.mutationField("refreshToken", t => t.field({
       }
     }
 
-    return {
-      access: "urmom",
-      refresh: "urdad"
-    }
+    return output;
   }
 }));

@@ -11,6 +11,9 @@ builder.queryField("User", (t) => t.prismaField({
       required: true,
     }),
   },
+  authScopes: {
+    isLoggedIn: true
+  },
   resolve: async (query, root, args, context, info) => {
     const user = await prisma.user.findFirst({
       ...query,

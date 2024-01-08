@@ -1,25 +1,27 @@
 import { createContext, useContext, useMemo, useEffect, useReducer, useCallback } from "react";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
-import { TokensResponse, VerifyResponse } from "@ratelit/shared/types";
-import ClientError from "@ratelit/shared/ClientError";
+import { graphql, useMutation } from "react-relay";
+
 import { useToast } from "@/mobile/context/ToastContext";
-import { User } from "@ratelit/shared/types";
-import { ENDPOINT } from "../utils/constants";
+import tokens from "@/mobile/utils/token";
+
+import type { AuthContextValidateSessionMutation, AuthContextValidateSessionMutation$data } from "./__generated__/AuthContextValidateSessionMutation.graphql"; 
+
+type User = Partial<AuthContextValidateSessionMutation$data["verifyToken"]>;
 
 interface State {
   user?: User;
-  tokens: {
-    access: string,
-    refresh: string
-  };
   isLoading: boolean;
   isLoggedIn: boolean;
 }
 
+type SessionPayload = {
+  user: User
+}
+
 type Action = 
-  | { type: "SET_TOKENS", payload: State["tokens"] }
-  | { type: "SET_USER", payload: any }
+  | { type: "LOGIN", payload: SessionPayload }
+  | { type: "RESUME_SESSION", payload: SessionPayload }
   | { type: "LOADED" }
   | { type: "CLEAR_SESSION" }
 
@@ -40,57 +42,47 @@ export const useAuth = () => {
   return context;
 }
 
-const ACCESS_TOKEN_KEY = "ACCESS_TOKEN";
-const REFRESH_TOKEN_KEY = "REFRESH_TOKEN";
 
-function reducer(state: State, action: Action) {
+// Don't put any side-effects functions that causes re-render while
+// the reducer action is taking effect. For instance, changing router
+// inside of the reducer. e.g router.replace("/home");
+function reducer(state: State, action: Action): State {
   console.log(`INVOKED ${action.type}`);
+  const type = action.type;
   try {
-    switch(action.type) {
-      case "SET_TOKENS":
-        const { access, refresh } = action.payload;
-        if (access) {
-          SecureStore.setItemAsync(ACCESS_TOKEN_KEY, access);
-        }
-
-        if (refresh) {
-          SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refresh);
-        }
-
-        return {
-          ...state,
-          tokens: {
-            access: access,
-            refresh: refresh
-          },
-          isLoading: true
-        }
-      case "SET_USER":
-        return {
-          ...state,
-          user: action.payload,
-          isLoading: false,
-          isLoggedIn: true
-        }
-      case "CLEAR_SESSION": {
-
-        SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-        SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-
-        return {
-          ...state,
-          user: null,
-          isLoading: false,
-          isLoggedIn: false
-        }
+    if (type === "LOGIN") {
+      const { user } = action.payload;
+      return {
+        ...state,
+        user,
+        isLoading: false,
+        isLoggedIn: true
       }
-      case "LOADED":
-        return {
-          ...state,
-          isLoading: false
-        }
-      default:
-        throw new Error("Invalid action via AuthContext");
+    } else if (type === "RESUME_SESSION") {
+      const { user } = action.payload;
+
+      return {
+        ...state,
+        user,
+        isLoading: false,
+        isLoggedIn: true
+      } 
+    } else if (type === "LOADED") {
+      return {
+        ...state,
+        isLoading: false
+      }
+    } else if (type === "CLEAR_SESSION") {
+      tokens.clear();
+
+      return {
+        ...state,
+        user: null,
+        isLoading: false,
+        isLoggedIn: false
+      }
+    } else {
+      throw new Error("Invalid action via AuthContext"); 
     }
   } catch(error) {
     if (error instanceof Error) {
@@ -101,17 +93,30 @@ function reducer(state: State, action: Action) {
 
 const initialState = {
   user: null,
-  tokens: {
-    access: null,
-    refresh: null
-  },
   isLoading: true,
   isLoggedIn: false
 }
 
+const AuthContextValidateSessionMutation = graphql`
+  mutation AuthContextValidateSessionMutation {
+    verifyToken {
+      firstName
+      avatar
+      email
+      id
+      name
+      firstName
+      createdAt
+      lastName
+    }
+  }
+`;
+
 export const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toast = useToast();
+
+  const [validateTokenMutation] = useMutation<AuthContextValidateSessionMutation>(AuthContextValidateSessionMutation);
 
   const value = useMemo(() => {
     return {
@@ -120,114 +125,47 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
     }
   }, [state]);
 
-  const valdiateRefreshToken = useCallback(async () => {
-    try {
-      const refresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-      const response = await fetch(`${ENDPOINT}/api/auth/refresh`, {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${refresh}`
-        }
-      });
-
-      const payload = await response.json() as TokensResponse;
-      if (payload.success === false) {
-        switch(payload.code) {
-          case "EXPIRED_REFRESH_TOKEN":
-            throw new ClientError(payload.message);
-          default:
-            throw new Error("Something went wrong.");
-        }
-      }
-
-      const tokens = payload.data;
-
-      dispatch({
-        type: "SET_TOKENS",
-        payload: {
-          access: tokens.accessToken,
-          refresh: tokens.refreshToken
-        }
-      });
-    } catch(error) {
-      console.log("valdiateRefreshToken", error);
-      if (error instanceof ClientError) {
-        toast.add({
-          type: "warning",
-          message: error.message,
-        });
-      }
-    }
-  }, []);
-
-  const validateAccessToken = useCallback(async () => {
-    try {
-      const authorization = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-      const response = await fetch(`${ENDPOINT}/api/auth/verify`, {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authorization}`
-        }
-      });
-
-      const result = await response.json() as VerifyResponse;
-      if (result.success == false) {
-        switch(result.code) {
-          case "EXPIRED_ACCESS_TOKEN":
-            await valdiateRefreshToken();
-            return;
-          default:
-            throw new Error(result.message);
-        }
-      }
-
-      dispatch({
-        type: "SET_USER",
-        payload: result.data.user
-      });
-
-      router.replace("/home");
-    } catch(error) {
-      if (error instanceof ClientError) {
-        toast.add({
-          type: "warning",
-          message: error.message,
-        });
-      }
-
-      dispatch({
-        type: "LOADED"
-      });
-    }
-  }, []);
-
   const checkForTokens = useCallback(async () => {
-    if (!state.tokens.access && !state.tokens.refresh) {
-      const access = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-      const refresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+    // If our current session context ins't be initialized.
+    if (!state.isLoggedIn) {
+      console.log("USER ISN'T LOGGEDIN");
+      const access = await tokens.getAccess();
+      // If the tokens aren't found in device's store.
+      // we will redirect user to login in.
+      if (!access) {
+        console.log("no session active");
+        return dispatch({
+          type: "LOADED",
+        });
+      }
 
-      dispatch({
-        type: "SET_TOKENS",
-        payload: {
-          access,
-          refresh
+      validateTokenMutation({
+        variables: {},
+        onCompleted: async (data) => {
+          const user = data.verifyToken;
+
+          dispatch({
+            type: "RESUME_SESSION",
+            payload: {
+              user
+            }
+          });
+
+          router.replace("/home");
+        },
+        onError(error) {
+          console.error(error);
         }
-      });
+      })
     }
-  }, []);
+  }, [state]);
 
   useEffect(() => {
+    // The function gets invoke as AuthContext gets initialized.
+    // Checks whether the client is authenticated via tokens.
+    // The token is check through the server to ensure it's legitmate.
     checkForTokens();
   }, []);
-
-  useEffect(() => {
-    // todo: check secure store if tokens exist.
-    validateAccessToken();
-  }, [state?.tokens]);
 
   return (
     <AuthContext.Provider value={value}>

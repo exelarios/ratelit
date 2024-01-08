@@ -1,4 +1,5 @@
 import builder from "@/server/graphql/builder";
+import prisma from "@/server/prisma";
 
 export enum Visibility {
   PUBLIC = "PUBLIC",
@@ -9,6 +10,24 @@ export enum Visibility {
 builder.enumType(Visibility, {
   name: "Visibility"
 });
+
+/*
+
+query GetUserByEmail {
+  User(email: "derickwok25@gmail.com") {
+    id
+    name
+    avatar
+    membership {
+      role
+      list {
+
+      }
+    }
+  }
+}
+
+*/
 
 export const User = builder.prismaNode("User", {
   id: {
@@ -31,6 +50,28 @@ export const User = builder.prismaNode("User", {
         createdAt: true
       },
       resolve: (parent) => parent.createdAt.toUTCString()
+    }),
+    membership: t.prismaConnection({
+      cursor: "userId_listId",
+      type: "EditorsOfList",
+      resolve(query, parent, args, context, info) {
+        return prisma.editorsOfList.findMany({
+          ...query,
+          where: {
+            AND: [
+              {
+                OR: [
+                  { role: "EDITOR" },
+                  { role: "OWNER"}
+                ]
+              },
+              {
+                userId: parent.id
+              }
+            ]
+          }
+        })
+      },
     })
   })
 });
@@ -78,12 +119,12 @@ export const List = builder.prismaNode("List", {
         "listId": t.arg.string(),
       },
       select: (args) => ({
-        editors: {
+        members: {
           where: { listId: args.listId }
         }
       }),
       resolve: (parent, args) => {
-        const user = parent.editors.filter(editor => editor.role === "OWNER")[0];
+        const user = parent.members.filter(member => member.role === "OWNER")[0];
         return user.userId;
       }
     }),
@@ -117,7 +158,18 @@ export const Item = builder.prismaNode("Item", {
       },
       resolve: (parent) => parent.updatedAt.toUTCString()
     }),
-    comments: t.relation("comments")
+    comments: t.prismaConnection({
+      cursor: "id",
+      type: "Comment",
+      resolve: async (query, parent, args, context, info) => {
+        return prisma.comment.findMany({
+          ...query,
+          where: {
+            itemId: parent.id
+          }
+        });
+      },
+    })
   })
 });
 
@@ -143,4 +195,15 @@ export const Comment = builder.prismaNode("Comment", {
     }),
     itemId: t.exposeID("itemId")
   })
-})
+});
+
+export const Membership = builder.prismaNode("EditorsOfList", {
+  id: {
+    field: "userId_listId"
+  },
+  fields: (t) => ({
+    list: t.relation("list"),
+    user: t.relation("user"),
+    role: t.exposeString("role")
+  })
+});

@@ -1,0 +1,155 @@
+"""Exposes a URL that specifies the behavior of this scalar."""
+directive @specifiedBy(
+  """The URL that specifies the behavior of this scalar."""
+  url: String!
+) on SCALAR
+
+type Comment implements Node {
+  content: String!
+  createdAt: String!
+  createdBy: User!
+  id: ID!
+  itemId: ID!
+  ownerId: ID!
+  updatedAt: String!
+}
+
+type EditorsOfList implements Node {
+  id: ID!
+  list: List!
+  role: String!
+  user: User!
+}
+
+type Item implements Node {
+  comments(after: ID, before: ID, first: Int, last: Int): ItemCommentsConnection!
+  createdAt: String!
+  description: String
+  id: ID!
+  name: String!
+  ownerId: ID!
+  rating: Float!
+  thumbnail: String
+  updatedAt: String!
+}
+
+type ItemCommentsConnection {
+  edges: [ItemCommentsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type ItemCommentsConnectionEdge {
+  cursor: ID!
+  node: Comment!
+}
+
+type List implements Node {
+  category: String
+  createdAt: String!
+  description: String
+  id: ID!
+  items: [Item!]!
+  owner(listId: String): String!
+  title: String!
+  updatedAt: String!
+  visibility: Visibility!
+}
+
+input ListCreateInput {
+  category: String
+  description: String
+  thumbnail: String
+  title: String!
+  visibility: Visibility!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type LoginPayload {
+  access: String!
+  refresh: String!
+  user: User!
+}
+
+type Mutation {
+  createList(data: ListCreateInput!): List!
+  login(input: LoginInput!): LoginPayload!
+  refreshToken(
+    """refresh token"""
+    token: String!
+  ): Tokens!
+  register(input: RegisterInput!): RegisterPayload!
+  verifyToken: User!
+}
+
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  endCursor: ID
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: ID
+}
+
+type Query {
+  List(
+    """The list assoicated to this id."""
+    id: String!
+  ): List!
+
+  """Query a user based on the user's email."""
+  User(email: String!): User!
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
+}
+
+input RegisterInput {
+  email: String
+  firstName: String
+  lastName: String
+  password: String
+}
+
+type RegisterPayload {
+  access: String!
+  refresh: String!
+  user: User!
+}
+
+type Tokens {
+  access: String!
+  refresh: String!
+}
+
+type User implements Node {
+  avatar: String!
+  createdAt: String!
+  email: String!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  membership(after: ID, before: ID, first: Int, last: Int): UserMembershipConnection!
+  name: String!
+}
+
+type UserMembershipConnection {
+  edges: [UserMembershipConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserMembershipConnectionEdge {
+  cursor: ID!
+  node: EditorsOfList!
+}
+
+enum Visibility {
+  PRIVATE
+  PUBLIC
+  RESTRICTED
+}
+

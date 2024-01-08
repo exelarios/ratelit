@@ -2,23 +2,28 @@ import SchemaBuilder from "@pothos/core";
 
 import PrismaPlugin from "@pothos/plugin-prisma";
 import RelayPlugin from "@pothos/plugin-relay";
-import PrismaUtils from "@pothos/plugin-prisma-utils";
+import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import prisma from "@/server/prisma";
-
-import { User as UserType } from "@/server/graphql/types";
 
 import type PrismaTypes from "@pothos/plugin-prisma/generated";
 
+export type User = {
+  email: string;
+  id: string;
+}
+
 type Builder = {
-  PrismaTypes: PrismaTypes,
+  PrismaTypes: PrismaTypes;
   Context: {
-    user: typeof UserType.$inferType,
-    isAuthenticated: boolean;
+    user: User | null;
+  };
+  AuthScopes: {
+    isLoggedIn: boolean;
   }
 }
 
 const builder = new SchemaBuilder<Builder>({
-  plugins: [PrismaPlugin, RelayPlugin, PrismaUtils],
+  plugins: [RelayPlugin, PrismaPlugin, ScopeAuthPlugin],
   prisma: {
     client: prisma,
     filterConnectionTotalCount: true,
@@ -28,7 +33,12 @@ const builder = new SchemaBuilder<Builder>({
   relayOptions: {
     clientMutationId: "omit",
     cursorType: "ID"
-  }
+  },
+  authScopes: async (context) => ({
+    isLoggedIn(param) {
+      return context.user !== null;
+    },
+  })
 });
 
 builder.queryType({});

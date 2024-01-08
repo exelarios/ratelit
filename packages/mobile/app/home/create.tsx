@@ -20,7 +20,6 @@ import Dropdown from "@/mobile/components/Dropdown";
 import useForm from "@/mobile/hooks/useForm";
 import * as validate from "@ratelit/shared/validate";
 import { ENDPOINT, categories } from "@/mobile/utils/constants";
-import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
 import request from "@/mobile/utils/request";
@@ -55,24 +54,25 @@ function Create() {
   const tokens = auth.state.tokens;
   const toast = useToast();
 
-  const query = useMutation({
-    mutationFn: async (payload) => {
+  const query = {};
+  // const query = useMutation({
+  //   mutationFn: async (payload) => {
 
-      console.log("newlist", payload);
+  //     console.log("newlist", payload);
 
-      // const data = await response.json() as CreateListResponse;
-      // if (data.success === false) {
-      //   throw new Error(data.message);
-      // }
-      // console.log(data);
+  //     // const data = await response.json() as CreateListResponse;
+  //     // if (data.success === false) {
+  //     //   throw new Error(data.message);
+  //     // }
+  //     // console.log(data);
 
-    },
-    onError(error)  {
-      toast.add({
-        message: error.message
-      });
-    },
-  });
+  //   },
+  //   onError(error)  {
+  //     toast.add({
+  //       message: error.message
+  //     });
+  //   },
+  // });
 
   const form = useForm<CreateListRequestParams>({
     state: {

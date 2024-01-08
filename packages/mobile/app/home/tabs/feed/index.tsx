@@ -1,98 +1,17 @@
-import { Fragment, useCallback, useMemo, useState } from "react";
+import { Fragment, useCallback, useMemo } from "react";
 import { StyleSheet } from "react-native";
+import { graphql, useLazyLoadQuery } from "react-relay";
+
 import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
-import Category from "@/mobile/components/Categories";
-import ListCard from "@/mobile/components/ListCard";
+import List from "@/mobile/components/List";
 
 import { useAuth } from "@/mobile/context/AuthContext";
 
 import { Feather } from '@expo/vector-icons';
-import { useQuery } from "@tanstack/react-query";
-import { ListResponse, ListsResponse } from "@ratelit/shared/types";
 import { router } from "expo-router";
 
-import { ENDPOINT } from "@/mobile/utils/constants";
-import Button from "@/mobile/components/Button";
-
-import Animated, { FadeIn, FadeInDown, FadeOutDown } from "react-native-reanimated";
-
-function Following() {
-  const auth = useAuth();
-  const tokens = auth.state.tokens;
-
-  const query = useQuery({
-    queryKey: ["lists"],
-    queryFn: async () => {
-      const response = await fetch(`${ENDPOINT}/api/lists`, {
-        method: "GET",
-        headers: {
-          "Authorization": `bearer ${tokens.access}`
-        }
-      });
-
-      const payload = await response.json() as ListsResponse;
-      if (payload.success === false) {
-        throw new Error(payload.message);
-      }
-
-      return payload.data;
-    }
-  });
-
-  const lists = useMemo(() => {
-    return query.data?.map((list) => {
-      return (
-        <ListCard key={list.id} {...list}/>
-      );
-    });
-  }, [query.data]);
-
-  return (
-    <View style={styles.wrapper}>
-      <Text style={styles.heading}>Following</Text>
-      {lists}
-    </View>
-  );
-}
-
-function UserList() {
-  const auth = useAuth();
-  const tokens = auth.state.tokens;
-
-  const query = useQuery({
-    queryKey: ["lists"],
-    queryFn: async () => {
-      const response = await fetch(`${ENDPOINT}/api/lists`, {
-        method: "GET",
-        headers: {
-          "Authorization": `bearer ${tokens.access}`
-        }
-      });
-
-      const payload = await response.json() as ListsResponse;
-      if (payload.success === false) {
-        throw new Error(payload.message);
-      }
-
-      return payload.data;
-    }
-  });
-
-  const lists = useMemo(() => {
-    return query.data?.map((list) => {
-      return (
-        <ListCard key={list.id} {...list}/>
-      );
-    });
-  }, [query.data]);
-  return (
-    <View style={styles.wrapper}>
-      <Text style={styles.heading}>My list</Text>
-      {lists}
-    </View>
-  );
-}
+import { feedUserEditableListQuery } from "./__generated__/feedUserEditableListQuery.graphql";
 
 function Topbar() {
   // const auth = useAuth();
@@ -113,15 +32,55 @@ function Topbar() {
   );
 }
 
-function Feed() {
+const UserEditableListQuery = graphql`
+  query feedUserEditableListQuery($email: String!) {
+    User(email: $email) {
+      membership {
+        edges {
+          node {
+            list {
+              id
+              title
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
+function UserEditableList() {
+  const variables = {
+    email: "derickwok25@gmail.com"
+  }
+
+  const data = useLazyLoadQuery<feedUserEditableListQuery>(UserEditableListQuery, variables);
+
+  const list = useMemo(() => {
+    const membership = data.User.membership.edges;
+    return membership?.map(({ node }) => {
+      const { list } = node;
+      return (
+        <List key={node.list.id} {...list} />
+      );
+    });
+  }, [data.User.membership]);
+
+  return (
+    <View>
+      <Text>Your List</Text>
+      {list}
+    </View>
+  );
+}
+
+function Feed() {
 
   return (
     <Fragment>
       <View safe style={styles.container}>
         <Topbar/>
-        <UserList/>
-        <Following/>
+        <UserEditableList/>
       </View>
     </Fragment>
   );

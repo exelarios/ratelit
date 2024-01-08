@@ -1,10 +1,5 @@
-import { useCallback, useMemo } from "react";
-import { Image, StyleSheet } from "react-native";
-import { useMutation } from "@tanstack/react-query";
-
-import { z } from "zod";
-
-import { TokensResponse } from "@ratelit/shared/types";
+import { useMemo } from "react";
+import { StyleSheet } from "react-native";
 
 import { AntDesign } from '@expo/vector-icons';
 import * as validate from "@ratelit/shared/validate";
@@ -23,10 +18,13 @@ import useForm from "@/mobile/hooks/useForm";
 import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
 
-import { ENDPOINT } from "@/mobile/utils/constants";
 import Loading from "../components/Loading";
 
-type Login = z.infer<typeof validate.login>
+import { useMutation, graphql } from "react-relay";
+
+import type { appLoginMutation, LoginInput } from "./__generated__/appLoginMutation.graphql"
+
+import store from "../utils/token";
 
 /*
 
@@ -38,59 +36,81 @@ type Login = z.infer<typeof validate.login>
       3. Inside of setAuth(), we push the tokens into SecureStore
 */
 
+const UserQuery = graphql`
+  query appUserQuery($email: String!) {
+    User(email: $email) {
+      name
+      avatar
+      createdAt
+    }
+  }
+`;
+
+const LoginMutation = graphql`
+  mutation appLoginMutation($input: LoginInput!) {
+    login(input: $input) {
+      access
+      refresh
+      user {
+        firstName
+        lastName
+        email
+        id
+        avatar
+      }
+    }
+  }
+`;
+
 export default function Login() {
   const { dispatch, state } = useAuth();
   const { isLoading } = state;
   const toast = useToast();
 
-  const sendCredentials = useCallback(async (data: Login) => {
-    const response = await fetch(`${ENDPOINT}/api/auth/login`, {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: data.email,
-        password: data.password
-      })
-    });
+  const [commitMutation, isInFlight] = useMutation<appLoginMutation>(LoginMutation);
 
-    const payload = await response.json() as TokensResponse;
-
-    if (payload.status !== "success") {
-      throw new Error(payload.message);
-    }
-
-    return payload.data;
-  }, []);
-
-  const handleOnLogin = async (credentials: Login) => {
-    try {
-      const tokens = await sendCredentials(credentials);
-
-      dispatch({
-        type: "SET_TOKENS",
-        payload: {
-          access: tokens.accessToken,
-          refresh: tokens.refreshToken
+  const handleOnLogin = async (credentials: LoginInput) => {
+    commitMutation({
+      variables: {
+        input: {
+          email: credentials.email,
+          password: credentials.password
         }
-      });
+      },
+      cacheConfig: {
+        metadata: {
+          token: false
+        }
+      },
+      onCompleted: async (data) => {
+        console.log("onCompleted:Login", data.login);
 
-      // todo: implement return for input validation from the server.
-      // todo: put tokens into secure store
-    } catch(error) {
-      if (error instanceof Error) {
-        console.log("handleOnLogin", error.message);
-        toast.add({
-          type: "warning",
-          message: error.message
-        })
-      }
-    }
+        await store.setAccess(data.login.access);
+        await store.setRefresh(data.login.refresh);
+
+        dispatch({
+          type: "LOGIN",
+          payload: {
+            user: data.login.user
+          }
+        });
+
+        router.replace("/home");
+      },
+      onError(error) {
+        const errors = error.source.errors;
+        for (const error of errors) {
+          console.log(error);
+          toast.add({
+            type: "warning",
+            message: error.message
+          });
+        }
+      },
+    });
   };
 
-  const form = useForm<Login>({
+  const form = useForm<LoginInput>({
     state: {
       email: "",
       password: ""
@@ -115,7 +135,6 @@ export default function Login() {
 
   return (
     <View safe style={styles.container}>
-      {/* <Text size={50} style={styles.title}>Ratelit 🔥</Text> */}
       <View style={{ paddingVertical: 20, justifyContent: "center", display: "flex", flexDirection: "row" }}>
         <Logo/>
       </View>
@@ -146,7 +165,7 @@ export default function Login() {
         <Separator>OR</Separator>
         <View style={styles.containerSpacing}>
           <Button variant="outline" icon={GoogleLogo}>Login with Google</Button>
-          <Button variant="outline" onPress={handleOnRegister}>Sign up</Button>
+          <Button variant="outline" disabled={isInFlight} onPress={handleOnRegister}>Sign up</Button>
         </View>
         <Text color={colors.neutral[500]} size={13} style={{ paddingTop: 5 }}>
           By continuing, you are agree to our User Agreement

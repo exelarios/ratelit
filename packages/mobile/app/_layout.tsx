@@ -1,16 +1,13 @@
 import { Stack } from "expo-router";
 
 import { AuthContextProvider } from "@/mobile/context/AuthContext";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastContextProvider } from "@/mobile/context/ToastContext";
-import { StatusBar } from "expo-status-bar";
-
-const queryClient = new QueryClient();
+import RelayProvider from "@/mobile/context/RelayContext";
 
 export default function Root() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastContextProvider>
+    <ToastContextProvider>
+      <RelayProvider>
         <AuthContextProvider>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="home" options={{
@@ -18,7 +15,7 @@ export default function Root() {
             }}/>
           </Stack>
         </AuthContextProvider>
-      </ToastContextProvider>
-    </QueryClientProvider>
+      </RelayProvider>
+    </ToastContextProvider>
   );
 }

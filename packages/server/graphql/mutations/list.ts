@@ -28,10 +28,6 @@ builder.mutationField("createList", (t) => t.prismaField({
     })
   },
   resolve: async (query, parent, args, context) => {
-    if (!context.isAuthenticated) {
-      throw createGraphQLError("No access token has been provided. Please log in.");
-    }
-
     return prisma.list.create({
       ...query,
       data: {
@@ -43,7 +39,7 @@ builder.mutationField("createList", (t) => t.prismaField({
         editors: {
           create: {
             role: "OWNER",
-            userId: context.user.id
+            userId: context.user!.id
           }
         },
       }

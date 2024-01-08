@@ -12,11 +12,10 @@ builder.queryField("List", (t) => t.prismaField({
       required: true
     })
   },
+  authScopes: {
+    isLoggedIn: true
+  },
   resolve: async (query, root, args, context, info) => {
-    if (!context.isAuthenticated) {
-      throw createGraphQLError("No access token has been provided. Please log in.");
-    }
-
     return prisma.list.findFirstOrThrow({
       ...query,
       where: { 

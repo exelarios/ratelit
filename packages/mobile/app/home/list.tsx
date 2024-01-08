@@ -3,7 +3,6 @@ import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
 import Back from "@/mobile/components/Back";
 import { useLocalSearchParams } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
 import { ListResponse } from "@ratelit/shared/types";
 import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
@@ -18,25 +17,25 @@ function List() {
   const parmas = useLocalSearchParams();
   const { listId } = parmas;
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["lists", listId],
-    queryFn: async () => {
-      const response = await fetch(`${ENDPOINT}/api/lists?id=${listId}`, {
-        headers: {
-          "Authorization": `bearer ${tokens.access}`
-        }
-      });
-      const payload = await response.json() as ListResponse;
-      console.log("LIST", data);
-      if (payload.success === false) {
-        throw new Error(payload.message);
-      }
+  // const { data, isLoading, isError, error } = useQuery({
+  //   queryKey: ["lists", listId],
+  //   queryFn: async () => {
+  //     const response = await fetch(`${ENDPOINT}/api/lists?id=${listId}`, {
+  //       headers: {
+  //         "Authorization": `bearer ${tokens.access}`
+  //       }
+  //     });
+  //     const payload = await response.json() as ListResponse;
+  //     console.log("LIST", data);
+  //     if (payload.success === false) {
+  //       throw new Error(payload.message);
+  //     }
 
-      return payload.data;
-    }
-  });
+  //     return payload.data;
+  //   }
+  // });
 
-  if (isLoading) {
+  if ("dgd") {
     return (
       <View safe>
         <Text> . . . </Text>
@@ -50,8 +49,7 @@ function List() {
         <Back/>
       </View>
       <View style={styles.container}>
-        <Text style={styles.title}>{data.title}</Text>
-        <Text>{JSON.stringify(data, null, 2)}</Text>
+        <Text style={styles.title}>yes</Text>
       </View>
     </View>
   );
