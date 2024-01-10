@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6eda17fbdca0c08b4f53c84cb67c9809>>
+ * @generated SignedSource<<bfe21b6bf2b97331dd36b1b24b050238>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,10 +9,10 @@
 // @ts-nocheck
 
 import { ConcreteRequest, Query } from 'relay-runtime';
-export type feedUserEditableListQuery$variables = {
+export type ProfileUserEditableListQuery$variables = {
   email: string;
 };
-export type feedUserEditableListQuery$data = {
+export type ProfileUserEditableListQuery$data = {
   readonly User: {
     readonly membership: {
       readonly edges: ReadonlyArray<{
@@ -26,9 +26,9 @@ export type feedUserEditableListQuery$data = {
     };
   };
 };
-export type feedUserEditableListQuery = {
-  response: feedUserEditableListQuery$data;
-  variables: feedUserEditableListQuery$variables;
+export type ProfileUserEditableListQuery = {
+  response: ProfileUserEditableListQuery$data;
+  variables: ProfileUserEditableListQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -77,7 +77,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "feedUserEditableListQuery",
+    "name": "ProfileUserEditableListQuery",
     "selections": [
       {
         "alias": null,
@@ -132,7 +132,7 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "feedUserEditableListQuery",
+    "name": "ProfileUserEditableListQuery",
     "selections": [
       {
         "alias": null,
@@ -184,16 +184,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "7ba699db6bd79835b3aaf63aa6437130",
+    "cacheID": "485f63985e796b307fb28ef65c52ee07",
     "id": null,
     "metadata": {},
-    "name": "feedUserEditableListQuery",
+    "name": "ProfileUserEditableListQuery",
     "operationKind": "query",
-    "text": "query feedUserEditableListQuery(\n  $email: String!\n) {\n  User(email: $email) {\n    membership {\n      edges {\n        node {\n          list {\n            id\n            title\n          }\n          id\n        }\n      }\n    }\n    id\n  }\n}\n"
+    "text": "query ProfileUserEditableListQuery(\n  $email: String!\n) {\n  User(email: $email) {\n    membership {\n      edges {\n        node {\n          list {\n            id\n            title\n          }\n          id\n        }\n      }\n    }\n    id\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "a699632130a9911083b37e3d0152129e";
+(node as any).hash = "d6aa4be2bb2dec8ca1c6bbe91efd258a";
 
 export default node;

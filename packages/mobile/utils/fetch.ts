@@ -16,7 +16,7 @@ type Tokens = {
 }
 
 async function refreshTokens() {
-  console.log("initialzing refresh token");
+  console.log("refreshing tokens");
   try {
     const refresh = await store.getRefresh();
 
@@ -82,8 +82,6 @@ const fetchFn: FetchFunction = async (request, variables, cacheConfig) => {
 
   if (useAuthorization) {
     const token = await store.getAccess();
-    console.log(token);
-    console.log("using authourzation");
     headers = {
       ...headers,
       "Authorization": `bearer ${token}`

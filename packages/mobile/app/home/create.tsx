@@ -22,7 +22,6 @@ import * as validate from "@ratelit/shared/validate";
 import { ENDPOINT, categories } from "@/mobile/utils/constants";
 import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
-import request from "@/mobile/utils/request";
 import Back from "@/mobile/components/Back";
 import { z } from "zod";
 

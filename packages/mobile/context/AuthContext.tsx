@@ -5,7 +5,10 @@ import { graphql, useMutation } from "react-relay";
 import { useToast } from "@/mobile/context/ToastContext";
 import tokens from "@/mobile/utils/token";
 
-import type { AuthContextValidateSessionMutation, AuthContextValidateSessionMutation$data } from "./__generated__/AuthContextValidateSessionMutation.graphql"; 
+import type {
+  AuthContextValidateSessionMutation,
+  AuthContextValidateSessionMutation$data
+} from "./__generated__/AuthContextValidateSessionMutation.graphql"; 
 
 type User = Partial<AuthContextValidateSessionMutation$data["verifyToken"]>;
 
@@ -128,7 +131,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
   const checkForTokens = useCallback(async () => {
     // If our current session context ins't be initialized.
     if (!state.isLoggedIn) {
-      console.log("USER ISN'T LOGGEDIN");
       const access = await tokens.getAccess();
       // If the tokens aren't found in device's store.
       // we will redirect user to login in.

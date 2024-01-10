@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { StyleSheet } from "react-native";
+import { useMutation, graphql } from "react-relay";
 
 import { AntDesign } from '@expo/vector-icons';
 import * as validate from "@ratelit/shared/validate";
@@ -11,30 +12,19 @@ import Button from "@/mobile/components/Button";
 import Text from "@/mobile/components/Text";
 import TextInput from "@/mobile/components/TextInput";
 import Logo from "@/mobile/components/Logo";
+import Loading from "@/mobile/components/Loading";
 
 import colors from "@/mobile/design/colors";
 import Separator from "@/mobile/components/Separator";
 import useForm from "@/mobile/hooks/useForm";
 import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
+import store from "@/mobile/utils/token";
 
-import Loading from "../components/Loading";
-
-import { useMutation, graphql } from "react-relay";
-
-import type { appLoginMutation, LoginInput } from "./__generated__/appLoginMutation.graphql"
-
-import store from "../utils/token";
-
-/*
-
-1. Login views renders, checks if SecureStore exists tokens
-  a. tokens exist and valid, redirects protected views.
-  b. tokens doesn't exist and not valid
-      1. promots the user to log in via credentials 
-      2. In AuthContext call setAuth({ access, refresh })
-      3. Inside of setAuth(), we push the tokens into SecureStore
-*/
+import type {
+  appLoginMutation,
+  LoginInput
+} from "./__generated__/appLoginMutation.graphql"
 
 const UserQuery = graphql`
   query appUserQuery($email: String!) {

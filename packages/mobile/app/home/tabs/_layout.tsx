@@ -20,18 +20,18 @@ type TabButtons = {
 
 const icons: TabButtons = [
   {
-    label: "feed",
+    label: "Feed",
     type: "screen",
     icon: <AntDesign name="home" size={30} color="black" />
   },
   {
-    label: "create",
+    label: "Create",
     type: "sheet",
-    path: "/home/create",
+    path: "/home/Create",
     icon: <Ionicons name="add-circle-outline" size={35} color="black" />
   },
   {
-    label: "profile",
+    label: "Profile",
     type: "screen",
     icon: <Ionicons name="md-person-outline" size={30} color="black" />
   },
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: colors.neutral[200],
+    backgroundColor: colors.neutral[100],
     height: 80
   }
 });

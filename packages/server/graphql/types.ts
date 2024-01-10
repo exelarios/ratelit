@@ -11,24 +11,6 @@ builder.enumType(Visibility, {
   name: "Visibility"
 });
 
-/*
-
-query GetUserByEmail {
-  User(email: "derickwok25@gmail.com") {
-    id
-    name
-    avatar
-    membership {
-      role
-      list {
-
-      }
-    }
-  }
-}
-
-*/
-
 export const User = builder.prismaNode("User", {
   id: {
     field: "id",
@@ -45,11 +27,8 @@ export const User = builder.prismaNode("User", {
       },
       resolve: (parent) => `${parent.firstName} ${parent.lastName}`
     }),
-    createdAt: t.string({
-      select: {
-        createdAt: true
-      },
-      resolve: (parent) => parent.createdAt.toUTCString()
+    createdAt: t.expose("createdAt", {
+      type: "Date"
     }),
     membership: t.prismaConnection({
       cursor: "userId_listId",
@@ -92,11 +71,8 @@ export const List = builder.prismaNode("List", {
   },
   fields: (t) => ({
     title: t.exposeString("title"),
-    createdAt: t.string({
-      select: {
-        createdAt: true
-      },
-      resolve: (parent) => parent.createdAt.toUTCString()
+    createdAt: t.expose("createdAt", {
+      type: "Date"
     }),
     updatedAt: t.string({
       select: {
@@ -146,17 +122,11 @@ export const Item = builder.prismaNode("Item", {
       nullable: true
     }),
     ownerId: t.exposeID("ownerId"),
-    createdAt: t.string({
-      select: {
-        createdAt: true
-      },
-      resolve: (parent) => parent.createdAt.toUTCString()
+    createdAt: t.expose("createdAt", {
+      type: "Date"
     }),
-    updatedAt: t.string({
-      select: {
-        updatedAt: true
-      },
-      resolve: (parent) => parent.updatedAt.toUTCString()
+    updatedAt: t.expose("createdAt", {
+      type: "Date"
     }),
     comments: t.prismaConnection({
       cursor: "id",
@@ -180,19 +150,13 @@ export const Comment = builder.prismaNode("Comment", {
   fields: (t) => ({
     content: t.exposeString("content"),
     ownerId: t.exposeID("ownerId"),
-    createdAt: t.string({
-      select: {
-        createdAt: true
-      },
-      resolve: (parent) => parent.createdAt.toUTCString()
+    createdAt: t.expose("createdAt", {
+      type: "Date"
+    }),
+    updatedAt: t.expose("createdAt", {
+      type: "Date"
     }),
     createdBy: t.relation("createdBy"),
-    updatedAt: t.string({
-      select: {
-        updatedAt: true
-      },
-      resolve: (parent) => parent.updatedAt.toUTCString()
-    }),
     itemId: t.exposeID("itemId")
   })
 });

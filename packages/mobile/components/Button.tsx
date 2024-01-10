@@ -68,6 +68,8 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
 
   const child = useMemo(() => {
     if (isText) {
+      const color = textSyles[variant].color;
+
       return (
         <Text
           color={color}
@@ -131,7 +133,9 @@ const textSyles = StyleSheet.create({
     textAlign: "center",
     color: colors.neutral[800]
   },
-  none: {}
+  none: {
+    color: colors.neutral[800]
+  }
 });
 
 const none = styles.none;

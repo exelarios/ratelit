@@ -20,7 +20,7 @@ function List(props: ListProps) {
   if (variant === "large") {
     return (
       <Link
-        style={styles.wrapper}
+        style={large.wrapper}
         href={{
           pathname: "/home/list",
           params: {
@@ -28,7 +28,11 @@ function List(props: ListProps) {
           }
         }}>
         <LinearGradient
-          colors={["rgba(0,0,0,0.8)", "transparent"]}>
+          colors={["transparent", "rgba(0,0,0,0.8)"]}
+          style={large.gradient}>
+          <View style={large.container}>
+            <Text style={styles.title}>{title}</Text>
+          </View>
         </LinearGradient>
       </Link>
     );
@@ -53,6 +57,27 @@ function List(props: ListProps) {
     </Link>
   );
 }
+
+const large = StyleSheet.create({
+  wrapper: {
+    width: "100%",
+    height: 150,
+    backgroundColor: "red",
+  },
+  gradient: {
+    borderRadius: 10,
+    width: "100%",
+    height: 150,
+  },
+  container: {
+    width: "100%",
+    height: "100%",
+    padding: 10,
+    display: "flex",
+    justifyContent: "flex-end",
+    flexDirection: "column"
+  }
+});
 
 const styles = StyleSheet.create({
   wrapper: {

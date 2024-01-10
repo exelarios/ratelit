@@ -97,6 +97,7 @@ type PageInfo {
 }
 
 type Query {
+  Feed(after: ID, before: ID, first: Int, last: Int): QueryFeedConnection!
   List(
     """The list assoicated to this id."""
     id: String!
@@ -106,6 +107,16 @@ type Query {
   User(email: String!): User!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
+}
+
+type QueryFeedConnection {
+  edges: [QueryFeedConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type QueryFeedConnectionEdge {
+  cursor: ID!
+  node: List!
 }
 
 input RegisterInput {
