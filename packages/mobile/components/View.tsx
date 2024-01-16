@@ -12,7 +12,11 @@ const View = React.forwardRef<RNView, ViewProps>((props, forwardedRef) => {
   const Component = safe ? SafeAreaView : RNView;
 
   return (
-    <Component ref={forwardedRef} {...otherProps}>{children}</Component>
+    <Component
+      ref={forwardedRef}
+      {...otherProps}>
+      {children}
+    </Component>
   );
 
 });

@@ -21,23 +21,10 @@ import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
 import store from "@/mobile/utils/token";
 
-import type {
-  appLoginMutation,
-  LoginInput
-} from "./__generated__/appLoginMutation.graphql"
+import type { LoginInput, appMutation } from "./__generated__/appMutation.graphql";
 
-const UserQuery = graphql`
-  query appUserQuery($email: String!) {
-    User(email: $email) {
-      name
-      avatar
-      createdAt
-    }
-  }
-`;
-
-const LoginMutation = graphql`
-  mutation appLoginMutation($input: LoginInput!) {
+const UserLoginMutation = graphql`
+  mutation appMutation($input: LoginInput!) {
     login(input: $input) {
       access
       refresh
@@ -57,7 +44,7 @@ export default function Login() {
   const { isLoading } = state;
   const toast = useToast();
 
-  const [commitMutation, isInFlight] = useMutation<appLoginMutation>(LoginMutation);
+  const [commitMutation, isInFlight] = useMutation<appMutation>(UserLoginMutation);
 
   const handleOnLogin = async (credentials: LoginInput) => {
     commitMutation({
@@ -85,7 +72,7 @@ export default function Login() {
           }
         });
 
-        router.replace("/home");
+        router.replace("/Home");
       },
       onError(error) {
         const errors = error.source.errors;

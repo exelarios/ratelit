@@ -12,7 +12,7 @@ import colors from "@/mobile/design/colors";
 import composeStyles from "../utils/composeStyles";
 
 interface TextProps extends RNTextInputProps {
-  label: string;
+  label?: string;
   message?: string;
   size?: number | string;
 }

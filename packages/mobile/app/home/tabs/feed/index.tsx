@@ -1,110 +1,74 @@
-import { Fragment, useCallback, useMemo } from "react";
-import { StyleSheet } from "react-native";
+import { useMemo } from "react";
+import { FlatList, StyleSheet } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 import { graphql, useLazyLoadQuery } from "react-relay";
 
 import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
-import List from "@/mobile/components/List";
-
+import Button from "@/mobile/components/Button";
 import { useAuth } from "@/mobile/context/AuthContext";
-
-import { Feather } from '@expo/vector-icons';
+import List from "@/mobile/components/List";
 import { router } from "expo-router";
 
-import { FeedListQuery } from "./__generated__/FeedListQuery.graphql";
+import { FeedUserEditableListQuery } from "./__generated__/FeedUserEditableListQuery.graphql";
 
-function Topbar() {
-  // const auth = useAuth();
-  // const { user } = auth.state;
-
-  const handleOnSearch = useCallback(() => {
-    router.push("/home/tabs/feed/search");
-  }, []);
-
-  return (
-    <View style={styles.topbar}>
-      {/* <Text style={styles.topbarLabel}>Hello, {user.firstName}</Text> */}
-      {/* <View style={styles.topbarActions}> */}
-        <Feather onPress={handleOnSearch} name="search" size={20} color="black" />
-        <Feather name="bell" size={20} color="black" />
-      {/* </View> */}
-    </View>
-  );
-}
-
-const FeedQuery = graphql`
-  query FeedListQuery {
-    Feed {
-      edges {
-        node {
-          id
-          title
-          description
+const UserEditableListQuery = graphql`
+  query FeedUserEditableListQuery($email: String!) {
+    User(email: $email) {
+      membership {
+        edges {
+          node {
+            list {
+              id
+              title
+              owner
+              description
+            }
+          }
         }
       }
     }
   }
-`;
+`; 
 
-// function UserEditableList() {
-//   const variables = {
-//     email: "derickwok25@gmail.com"
-//   }
+function Explore() {
+  const auth = useAuth();
+  const user = auth.state.user;
 
-//   // const data = useLazyLoadQuery<FeedUserEditableListQuery>(UserEditableListQuery, variables);
+  const data = useLazyLoadQuery<FeedUserEditableListQuery>(UserEditableListQuery, {
+    email: user.email
+  });
 
-//   const list = useMemo(() => {
-//     const membership = data.User.membership.edges;
-//     return membership?.map(({ node }) => {
-//       const { list } = node;
-//       return (
-//         <List variant="large" key={node.list.id} {...list} />
-//       );
-//     });
-//   }, [data.User.membership]);
-
-//   return (
-//     <View>
-//       <Text>Your List</Text>
-//       {list}
-//     </View>
-//   );
-// }
-
-function Feed() {
-
-  const data = useLazyLoadQuery<FeedListQuery>(FeedQuery, {});
-  console.log(data);
-
-  const feedList = useMemo(() => {
-    return data.Feed.edges?.map(({ node }) => {
-      return (
-        <List variant="large" key={node.id} {...node}/>
-      );
-    })
-  }, [data.Feed]);
+  const plus = useMemo(() => {
+    return (
+      <Ionicons name="add-sharp" size={24} color="black" />
+    );
+  }, []);
 
   return (
-    <Fragment>
-      <View safe style={styles.container}>
-        <Topbar/>
-        <View style={styles.feed}>
-          {feedList}
-        </View>
+    <View style={styles.container}>
+      <View style={styles.topbar}>
+        <Button
+          icon={plus}
+          fontWeight="500"
+          onPress={() => router.push("/Home/Create")}>
+          Create a list
+        </Button>
       </View>
-    </Fragment>
+      <View style={styles.list}>
+        <Text style={styles.title}>Your List</Text>
+        <FlatList
+          data={data.User.membership.edges}
+          contentContainerStyle={styles.feed}
+          renderItem={({ item }) => <List variant="large" {...item.node.list} />}
+          keyExtractor={node => node.node.list.id}
+        /> 
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    paddingBottom: 20,
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10
-  },
   feed: {
     display: "flex",
     flexDirection: "column",
@@ -113,25 +77,25 @@ const styles = StyleSheet.create({
   },
   topbar: {
     display: "flex",
+    flexDirection: "row",
     justifyContent: "flex-end",
-    columnGap: 20,
-    flexDirection: "row",
+    alignItems: "center"
   },
-  topbarActions: {
+  list: {
     display: "flex",
-    flexDirection: "row",
-    columnGap: 30,
-  },
-  topbarLabel: {
-    fontSize: 25,
-    fontWeight: "bold"
+    flex: 1,
+    justifyContent: "flex-start",
+    flexDirection: "column",
+    gap: 10
   },
   container: {
-    display: "flex",
-    flexDirection: "column",
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    flex: 1,
+    paddingHorizontal: 20
   },
+  title: {
+    fontSize: 30,
+    fontWeight: "bold"
+  }
 });
 
-export default Feed;
+export default Explore;

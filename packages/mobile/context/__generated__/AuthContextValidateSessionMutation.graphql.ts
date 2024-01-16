@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<eb15e1487cbcabdfb765844fafbb0ee2>>
+ * @generated SignedSource<<c73899172fbf097ac2c2e410449cf19e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,7 +13,7 @@ export type AuthContextValidateSessionMutation$variables = Record<PropertyKey, n
 export type AuthContextValidateSessionMutation$data = {
   readonly verifyToken: {
     readonly avatar: string;
-    readonly createdAt: string;
+    readonly createdAt: any;
     readonly email: string;
     readonly firstName: string;
     readonly id: string;

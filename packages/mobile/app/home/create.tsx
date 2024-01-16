@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import {
   Keyboard,
@@ -8,8 +8,7 @@ import {
   TouchableWithoutFeedback
 } from "react-native";
 
-import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
+import { graphql, useMutation } from "react-relay";
 
 import TextInput from "@/mobile/components/TextInput";
 import View from "@/mobile/components/View";
@@ -19,69 +18,58 @@ import Dropdown from "@/mobile/components/Dropdown";
 
 import useForm from "@/mobile/hooks/useForm";
 import * as validate from "@ratelit/shared/validate";
-import { ENDPOINT, categories } from "@/mobile/utils/constants";
-import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
 import Back from "@/mobile/components/Back";
-import { z } from "zod";
 
-// const items = [
-//   {
-//     label: "Public",
-//     value: "public",
-//     icon: "public",
-//     description: "Anyone can view this list."
-//   },
-//   {
-//     label: "Private",
-//     value: "private",
-//     icon: "lock-outline",
-//     description: "Only you have access to this list."
-//   },
-//   {
-//     label: "Restricted",
-//     value: "restricted",
-//     icon: "check-circle-outline",
-//     description: "Only approved can view this list."
-//   }
-// ] as const;
+import { CreateListMutation, ListCreateInput } from "./__generated__/CreateListMutation.graphql";
 
-type CreateListParams = z.infer<typeof validate.createList>;
+const CreateList = graphql`
+  mutation CreateListMutation($input: ListCreateInput!) {
+    createList(data: $input) {
+      id
+      title
+      description
+      visibility
+      category
+      createdAt
+    }
+  }
+`;
 
 function Create() {
-  const auth = useAuth();
-  const tokens = auth.state.tokens;
   const toast = useToast();
 
-  const query = {};
-  // const query = useMutation({
-  //   mutationFn: async (payload) => {
+  const [commit, isInFlight] = useMutation<CreateListMutation>(CreateList);
 
-  //     console.log("newlist", payload);
-
-  //     // const data = await response.json() as CreateListResponse;
-  //     // if (data.success === false) {
-  //     //   throw new Error(data.message);
-  //     // }
-  //     // console.log(data);
-
-  //   },
-  //   onError(error)  {
-  //     toast.add({
-  //       message: error.message
-  //     });
-  //   },
-  // });
-
-  const form = useForm<CreateListRequestParams>({
+  const form = useForm<ListCreateInput>({
     state: {
       title: "",
-      visibility: "",
+      visibility: "PUBLIC",
       description: "",
     },
     zodValidation: validate.createList,
     onSubmit: async (state) => {
-      query.mutate(state);
+      commit({
+        variables: {
+          input: {
+            title: state.title,
+            description: state.description,
+            visibility: state.visibility
+          }
+        },
+        onCompleted(response) {
+          const { title } = response.createList;
+          toast.add({
+            message: `${title} has been created.`
+          });
+        },
+        onError(error) {
+          console.error(error);
+          toast.add({
+            message: error.message
+          });
+        }
+      });
     }
   });
 
@@ -142,7 +130,6 @@ function Create() {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-      {/* <StatusBar style="inverted"/> */}
     </View>
   );
 }

@@ -35,13 +35,8 @@ export default function AppLayout() {
         headerShown: false,
       }}>
       <Stack.Screen name="tabs"/>
-      <Stack.Screen name="list"/>
-      <Stack.Screen
-        name="Create" 
-        options={{
-          // presentation: "modal",
-        }}
-      />
+      <Stack.Screen name="ListDetails/index"/>
+      <Stack.Screen name="Create"/>
     </Stack>
   );
 }

@@ -104,7 +104,52 @@ export const List = builder.prismaNode("List", {
         return user.userId;
       }
     }),
-    items: t.relation("items")
+    items: t.relation("items"),
+    following: t.prismaConnection({
+      cursor: "userId_listId",
+      type: "EditorsOfList",
+      resolve(query, parent, args, context, info) {
+        return prisma.editorsOfList.findMany({
+          ...query,
+          where: {
+            AND: [
+              {
+                listId: parent.id
+              },
+              {
+                role: "VIEWER"
+              }
+            ]
+          }
+        })
+      },
+    }),
+    editors: t.prismaConnection({
+      cursor: "userId_listId",
+      type: "EditorsOfList",
+      resolve(query, parent, args, context, info) {
+        return prisma.editorsOfList.findMany({
+          ...query,
+          where: {
+            AND: [
+              {
+                listId: parent.id
+              },
+              {
+                OR: [
+                  {
+                    role: "EDITOR"
+                  },
+                  {
+                    role: "OWNER"
+                  }
+                ]
+              }
+            ]
+          }
+        })
+      },
+    })
   })
 });
 

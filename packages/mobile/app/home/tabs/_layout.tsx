@@ -1,13 +1,12 @@
-import { useCallback, useMemo } from "react";
 import { Tabs, router } from "expo-router";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 import View from "@/mobile/components/View";
 
-import { AntDesign } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet } from "react-native";
 import colors from "@/mobile/design/colors";
-import Button from "@/mobile/components/Button";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type TabType = "screen" | "sheet" | "modal"
 
@@ -15,48 +14,59 @@ type TabButtons = {
   label: string,
   type: TabType,
   path?: string;
-  icon: React.ReactNode
+  icon: keyof (typeof Ionicons)["glyphMap"];
+  active: keyof (typeof Ionicons)["glyphMap"];
 }[];
 
-const icons: TabButtons = [
+const screens: TabButtons = [
   {
     label: "Feed",
     type: "screen",
-    icon: <AntDesign name="home" size={30} color="black" />
+    icon: "layers-outline",
+    active: "layers"
   },
   {
-    label: "Create",
-    type: "sheet",
-    path: "/home/Create",
-    icon: <Ionicons name="add-circle-outline" size={35} color="black" />
+    label: "Explore",
+    type: "screen",
+    icon: "search-outline",
+    active: "search",
+  },
+  {
+    label: "Notifications",
+    type: "screen",
+    icon: "notifications-outline",
+    active: "notifications-sharp",
   },
   {
     label: "Profile",
     type: "screen",
-    icon: <Ionicons name="md-person-outline" size={30} color="black" />
+    icon: "happy-outline",
+    active: "happy-sharp"
   },
 ];
 
-function Tabbar({ state, navigation }) {
+function Tabbar({ state, navigation }: BottomTabBarProps) {
+  const currentTab = state.history.at(-1);
+
   return (
     <View style={styles.bar}>
-      {icons.map(({ label, icon, type, path }, index) => {
+      {screens.map(({ label, icon, type, path, active }, index) => {
+        // todo: fix this to be less ambiguous.
+        const currentTabName = currentTab.key.split("-")[0];
+        const isActive = currentTabName.includes(label);
         const handleOnPress = () => {
-          switch(type) {
-            case "sheet":
-              router.push(path || `/home/tabs/${label}`);
-            default:
-              router.push(path || `/home/tabs/${label}`);
-              break;
-          }
+          if (isActive) return;
+          router.replace(path || `/Home/tabs/${label}`);
         }
 
         return (
-          <Button 
+          <Ionicons
             key={label}
-            onPress={handleOnPress}>
-            {icon}
-          </Button>
+            onPress={handleOnPress}
+            name={isActive ? active : icon}
+            size={24}
+            color="black"
+          />
         );
       })}
     </View>
@@ -64,16 +74,26 @@ function Tabbar({ state, navigation }) {
 }
 
 function Layout() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <Tabs
-      initialRouteName="feed"
+    <View style={[styles.wrapper, {
+      paddingTop: insets.top
+    }]}>
+      <Tabs
       tabBar={Tabbar}
-      screenOptions={{ headerShown: false }}
-    />
+      initialRouteName="Feed/index"
+      screenOptions={{
+        headerShown: false,
+      }}/>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1
+  },
   bar: {
     padding: 10,
     display: "flex",

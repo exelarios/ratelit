@@ -3,6 +3,7 @@ import prisma from "@/server/prisma";
 
 import { Visibility } from "@/server/graphql/types";
 import { createGraphQLError } from "graphql-yoga";
+import { decodeGlobalID } from "@pothos/plugin-relay";
 
 const ListCreateInput = builder.inputType("ListCreateInput", {
   fields: (t) => ({
@@ -36,13 +37,18 @@ builder.mutationField("createList", (t) => t.prismaField({
         visibility: args.data.visibility,
         category: args.data.category,
         description: args.data.description,
-        editors: {
+        members: {
           create: {
             role: "OWNER",
             userId: context.user!.id
           }
         },
       }
-    })
+    });
+
+    // return {
+    //   ...list,
+    //   id: decodeGlobalID(list.id).id
+    // }
   }
 }));

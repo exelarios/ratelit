@@ -153,7 +153,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
             }
           });
 
-          router.replace("/home");
+          router.replace("/Home");
         },
         onError(error) {
           console.error(error);

@@ -8,7 +8,7 @@ import { Token } from "@/shared/types";
 const ACCESS_TOKEN_SECRET = secrets.accessToken();
 const REFRESH_TOKEN_SECRET = secrets.refreshToken();
 
-const ACCESS_TOKEN_DURATION = "30s";
+const ACCESS_TOKEN_DURATION = "10m";
 const REFRESH_TOKEN_DURATION = "1y"
 
 /**

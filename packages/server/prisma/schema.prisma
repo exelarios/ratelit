@@ -63,8 +63,8 @@ model EditorsOfList {
   role   Role
   userId String
   listId String
-  user   User   @relation(fields: [userId], references: [id])
-  list   List   @relation(fields: [listId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  list   List   @relation(fields: [listId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([userId, listId])
   @@index([userId])
@@ -78,11 +78,11 @@ model Item {
   description String?
   thumbnail String?
   ownerId   String
-  createdBy User      @relation(fields: [ownerId], references: [id])
+  createdBy User      @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   listId    String
-  list      List      @relation(fields: [listId], references: [id])
+  list      List      @relation(fields: [listId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   comments  Comment[]
 
   @@index([ownerId])
@@ -93,11 +93,11 @@ model Comment {
   id        String   @id @unique @default(uuid())
   content   String
   ownerId   String
-  createdBy User     @relation(fields: [ownerId], references: [id])
+  createdBy User     @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   itemId    String
-  item      Item     @relation(fields: [itemId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([ownerId])
   @@index([itemId])

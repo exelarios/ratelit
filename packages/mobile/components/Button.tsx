@@ -4,7 +4,7 @@ import {
   Pressable,
   StyleSheet,
   StyleProp,
-  ViewStyle
+  ViewStyle,
 } from "react-native";
 
 import Text from "@/mobile/components/Text";
@@ -17,6 +17,7 @@ interface ButtonProps extends PressableProps {
   iconAligin?: "start" | "end";
   color?: string;
   variant?: "fill" | "outline" | "none";
+  fontWeight?: string;
 }
 
 const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) => {
@@ -26,7 +27,8 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
     icon, 
     iconAligin = "start", 
     color, 
-    style, 
+    style,
+    fontWeight = "normal",
     children, 
     ...otherProps 
   } = props;
@@ -39,6 +41,10 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
 
   const outline = useMemo(() => {
     return composeStyles(styles.base, styles.outline, style);
+  }, [hovering]);
+
+  const none = useMemo(() => {
+    return composeStyles(styles.base, style);
   }, [hovering]);
 
   const selection = useMemo(() => {
@@ -59,12 +65,11 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
     currentVarient, 
     iconAligin === "end" && { flexDirection: "row-reverse" }, 
     style as StyleProp<ViewStyle>
-    );
+  );
 
-  const composedTextStyles = composeStyles(textSyles[variant], { fontSize: textSize });
+  const composedTextStyles = composeStyles(textSyles[variant], { fontSize: textSize, fontWeight: fontWeight });
 
   const isText = !React.isValidElement(children) && typeof children === "string";
-
 
   const child = useMemo(() => {
     if (isText) {
@@ -137,7 +142,5 @@ const textSyles = StyleSheet.create({
     color: colors.neutral[800]
   }
 });
-
-const none = styles.none;
 
 export default Button;

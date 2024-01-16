@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Link } from "expo-router";
@@ -8,33 +7,55 @@ import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
 import colors from "@/mobile/design/colors";
 
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from "../context/AuthContext";
+
 type ListProps = {
   id: string;
   title: string;
+  owner: string;
   variant?: "small" | "large"
 }
 
+const SAMPLE_IMAGE = "https://images.unsplash.com/photo-1579282940892-6152e6e80c52?q=80&w=2487&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+
 function List(props: ListProps) {
-  const { id, title, variant = "small" } = props;
+  const { id, title, owner, variant = "small" } = props;
+  console.log(owner);
+
+  const auth = useAuth();
+  const user = auth.state.user;
+
+  console.log(user.id);
 
   if (variant === "large") {
     return (
-      <Link
-        style={large.wrapper}
-        href={{
-          pathname: "/home/list",
-          params: {
-            listId: id
-          }
-        }}>
+      <ImageBackground
+        source={{ uri: SAMPLE_IMAGE }}
+        resizeMode="center"
+        imageStyle={{ borderRadius: 10}}
+        style={large.wrapper}>
         <LinearGradient
           colors={["transparent", "rgba(0,0,0,0.8)"]}
           style={large.gradient}>
-          <View style={large.container}>
-            <Text style={styles.title}>{title}</Text>
-          </View>
+          <Link
+            href={{
+              pathname: "/Home/ListDetails",
+              params: {
+                listId: id
+              }
+            }}>
+              <View style={large.container}>
+                <View style={[large.col, { justifyContent: "flex-end" }]}>
+                  <Ionicons name="bookmark" size={24} color="white" />
+                </View>
+                <View style={large.col}>
+                  <Text style={styles.title}>{title}</Text>
+                </View>
+              </View>
+          </Link>
         </LinearGradient>
-      </Link>
+      </ImageBackground>
     );
   }
 
@@ -42,7 +63,7 @@ function List(props: ListProps) {
     <Link 
       style={styles.wrapper}
       href={{
-      pathname: "/home/list",
+      pathname: "/Home/list",
       params: {
         listId: id
       }
@@ -59,24 +80,29 @@ function List(props: ListProps) {
 }
 
 const large = StyleSheet.create({
+  gradient: {
+    width: "100%",
+    height: 150,
+    borderRadius: 10,
+  },
+  col: {
+    display: "flex",
+    width: "100%",
+    justifyContent: "space-between",
+    flexDirection: "row"
+  },
   wrapper: {
     width: "100%",
     height: 150,
-    backgroundColor: "red",
-  },
-  gradient: {
     borderRadius: 10,
-    width: "100%",
-    height: 150,
   },
   container: {
     width: "100%",
     height: "100%",
     padding: 10,
     display: "flex",
-    justifyContent: "flex-end",
-    flexDirection: "column"
-  }
+    justifyContent: "space-between",
+  },
 });
 
 const styles = StyleSheet.create({
