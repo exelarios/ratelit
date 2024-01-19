@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<936a8ff28715f50e2f5b363214865da5>>
+ * @generated SignedSource<<957c415ee823f1628bd1465b6393cce1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,7 +20,9 @@ export type ListDetailsQuery$data = {
     readonly createdAt: any;
     readonly description: string | null | undefined;
     readonly id: string;
-    readonly owner: string;
+    readonly owner: {
+      readonly name: string;
+    };
     readonly title: string;
     readonly updatedAt: string;
     readonly visibility: Visibility;
@@ -93,7 +95,7 @@ v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "owner",
+  "name": "name",
   "storageKey": null
 },
 v9 = {
@@ -124,7 +126,18 @@ return {
           (v5/*: any*/),
           (v6/*: any*/),
           (v7/*: any*/),
-          (v8/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "User",
+            "kind": "LinkedField",
+            "name": "owner",
+            "plural": false,
+            "selections": [
+              (v8/*: any*/)
+            ],
+            "storageKey": null
+          },
           (v9/*: any*/),
           {
             "args": null,
@@ -158,7 +171,19 @@ return {
           (v5/*: any*/),
           (v6/*: any*/),
           (v7/*: any*/),
-          (v8/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "User",
+            "kind": "LinkedField",
+            "name": "owner",
+            "plural": false,
+            "selections": [
+              (v8/*: any*/),
+              (v2/*: any*/)
+            ],
+            "storageKey": null
+          },
           (v9/*: any*/),
           {
             "alias": null,
@@ -193,13 +218,7 @@ return {
                         "plural": false,
                         "selections": [
                           (v2/*: any*/),
-                          {
-                            "alias": null,
-                            "args": null,
-                            "kind": "ScalarField",
-                            "name": "name",
-                            "storageKey": null
-                          },
+                          (v8/*: any*/),
                           {
                             "alias": null,
                             "args": null,
@@ -226,16 +245,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "4c9390dac386ad38fbb6e6d013eba34e",
+    "cacheID": "2dc8f799d7a15549db786f736db0dd77",
     "id": null,
     "metadata": {},
     "name": "ListDetailsQuery",
     "operationKind": "query",
-    "text": "query ListDetailsQuery(\n  $listId: String!\n) {\n  List(id: $listId) {\n    id\n    title\n    description\n    category\n    createdAt\n    visibility\n    owner\n    updatedAt\n    ...ListDetailsEditorsFragment\n  }\n}\n\nfragment ListDetailsEditorsFragment on List {\n  editors {\n    edges {\n      node {\n        user {\n          id\n          name\n          avatar\n        }\n        id\n      }\n    }\n  }\n}\n"
+    "text": "query ListDetailsQuery(\n  $listId: String!\n) {\n  List(id: $listId) {\n    id\n    title\n    description\n    category\n    createdAt\n    visibility\n    owner {\n      name\n      id\n    }\n    updatedAt\n    ...ListDetailsEditorsFragment\n  }\n}\n\nfragment ListDetailsEditorsFragment on List {\n  editors {\n    edges {\n      node {\n        user {\n          id\n          name\n          avatar\n        }\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "aa3e96cb53dcbeca6c74459ac04365bc";
+(node as any).hash = "f6dc93454dcf1c0c629f8b98eb060759";
 
 export default node;

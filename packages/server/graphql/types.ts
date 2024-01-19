@@ -75,9 +75,7 @@ export const List = builder.prismaNode("List", {
       },
       resolve: (parent) => parent.updatedAt.toUTCString()
     }),
-    category: t.exposeString("category", {
-      nullable: true
-    }),
+    categories: t.exposeStringList("categories"),
     visibility: t.field({
       type: Visibility,
       resolve: (parent) => Visibility[parent.visibility]
@@ -88,9 +86,10 @@ export const List = builder.prismaNode("List", {
     isFollowing: t.field({
       type: "Boolean",
       resolve: async (parent, args, context) => {
-        const query = await prisma.editorsOfList.findFirst({
+        const query = await prisma.membership.findFirst({
           where: {
-            userId: context.user?.id
+            userId: context.user?.id,
+            listId: parent.id
           }
         });
 
@@ -103,9 +102,13 @@ export const List = builder.prismaNode("List", {
     }),
     role: t.string({
       resolve: async (parent, args, context) => {
-        const query = await prisma.editorsOfList.findFirst({
+        const query = await prisma.membership.findFirst({
+          select: {
+            role: true
+          },
           where: {
-            userId: context.user?.id
+            userId: context.user?.id,
+            listId: parent.id
           }
         });
 
@@ -134,9 +137,9 @@ export const List = builder.prismaNode("List", {
     items: t.relation("items"),
     following: t.prismaConnection({
       cursor: "userId_listId",
-      type: "EditorsOfList",
+      type: "Membership",
       resolve(query, parent, args, context, info) {
-        return prisma.editorsOfList.findMany({
+        return prisma.membership.findMany({
           ...query,
           where: {
             AND: [
@@ -153,9 +156,9 @@ export const List = builder.prismaNode("List", {
     }),
     editors: t.prismaConnection({
       cursor: "userId_listId",
-      type: "EditorsOfList",
+      type: "Membership",
       resolve: async (query, parent, args, context, info) => {
-        const data = await prisma.editorsOfList.findMany({
+        return prisma.membership.findMany({
           ...query,
           where: {
             AND: [
@@ -175,9 +178,6 @@ export const List = builder.prismaNode("List", {
             ]
           }
         });
-
-        console.log(JSON.stringify(data, null, 2))
-        return data;
       },
     })
   })
@@ -236,7 +236,7 @@ export const Comment = builder.prismaNode("Comment", {
   })
 });
 
-export const Membership = builder.prismaNode("EditorsOfList", {
+export const Membership = builder.prismaNode("Membership", {
   id: {
     field: "userId_listId"
   },

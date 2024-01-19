@@ -48,10 +48,10 @@ function List(props: ListProps) {
             }}>
               <View style={large.container}>
                 <View style={[large.col, { justifyContent: "flex-end" }]}>
+
                 </View>
                 <View style={large.col}>
                   <Text style={styles.title}>{title}</Text>
-                  <Text></Text>
                 </View>
               </View>
           </Link>

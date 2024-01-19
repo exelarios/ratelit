@@ -2,8 +2,6 @@ import builder from "@/server/graphql/builder";
 import prisma from "@/server/prisma";
 
 import { Visibility } from "@/server/graphql/types";
-import { createGraphQLError } from "graphql-yoga";
-import { decodeGlobalID } from "@pothos/plugin-relay";
 
 const ListCreateInput = builder.inputType("ListCreateInput", {
   fields: (t) => ({
@@ -11,7 +9,7 @@ const ListCreateInput = builder.inputType("ListCreateInput", {
       required: true
     }),
     thumbnail: t.string(),
-    category: t.string(),
+    categories: t.stringList(),
     visibility: t.field({
       type: Visibility,
       required: true
@@ -35,7 +33,9 @@ builder.mutationField("createList", (t) => t.prismaField({
         title: args.data.title,
         thumbnail: args.data.thumbnail,
         visibility: args.data.visibility,
-        category: args.data.category,
+        categories: {
+          set: args.data.categories!
+        },
         description: args.data.description,
         members: {
           create: {
@@ -45,10 +45,5 @@ builder.mutationField("createList", (t) => t.prismaField({
         },
       }
     });
-
-    // return {
-    //   ...list,
-    //   id: decodeGlobalID(list.id).id
-    // }
   }
 }));

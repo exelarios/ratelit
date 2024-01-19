@@ -64,7 +64,9 @@ const DetailsQuery = graphql`
       createdAt
       visibility
       createdAt
-      owner
+      owner {
+        name
+      }
       updatedAt
       ...ListDetailsEditorsFragment
     }

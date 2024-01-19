@@ -10,9 +10,8 @@ generator pothos {
 }
 
 datasource db {
-  provider     = "mysql"
+  provider     = "postgresql"
   url          = env("DATABASE_URL")
-  relationMode = "prisma"
 }
 
 enum Role {
@@ -43,7 +42,7 @@ model User {
   comments Comment[]
 
   // lists where users have some sort of admin powers.
-  membership EditorsOfList[]
+  membership Membership[]
 }
 
 model List {
@@ -52,14 +51,14 @@ model List {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   thumbnail String?
-  category  String?
+  categories String[]
   visibility Visibility
   description String?
-  members   EditorsOfList[]
+  members   Membership[]
   items     Item[]
 }
 
-model EditorsOfList {
+model Membership {
   role   Role
   userId String
   listId String

@@ -61,7 +61,7 @@ type List implements Node {
   id: ID!
   isFollowing: Boolean!
   items: [Item!]!
-  owner(listId: String): String!
+  owner: User!
   role: String!
   title: String!
   updatedAt: String!
