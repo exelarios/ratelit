@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { ErrorBoundary, Stack } from "expo-router";
 
 import { AuthContextProvider } from "@/mobile/context/AuthContext";
 import { ToastContextProvider } from "@/mobile/context/ToastContext";
@@ -10,6 +10,7 @@ export {
 } from 'expo-router';
 
 export default function Root() {
+
   return (
     <ToastContextProvider>
       <RelayProvider>

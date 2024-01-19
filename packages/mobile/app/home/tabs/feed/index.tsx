@@ -1,14 +1,14 @@
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { FlatList, StyleSheet } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
 import { graphql, useLazyLoadQuery } from "react-relay";
+import { router } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
 
 import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
 import Button from "@/mobile/components/Button";
 import { useAuth } from "@/mobile/context/AuthContext";
 import List from "@/mobile/components/List";
-import { router } from "expo-router";
 
 import { FeedUserEditableListQuery } from "./__generated__/FeedUserEditableListQuery.graphql";
 
@@ -18,18 +18,14 @@ const UserEditableListQuery = graphql`
       membership {
         edges {
           node {
-            list {
-              id
-              title
-              owner
-              description
-            }
+            id
+            ...ListFragment
           }
         }
       }
     }
   }
-`; 
+`;
 
 function Explore() {
   const auth = useAuth();
@@ -46,25 +42,27 @@ function Explore() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.topbar}>
-        <Button
-          icon={plus}
-          fontWeight="500"
-          onPress={() => router.push("/Home/Create")}>
-          Create a list
-        </Button>
+    <Suspense fallback={<Text>loading . . . </Text>}>
+      <View style={styles.container}>
+        <View style={styles.topbar}>
+          <Button
+            icon={plus}
+            fontWeight="500"
+            onPress={() => router.push("/Home/Create")}>
+            Create a list
+          </Button>
+        </View>
+        <View style={styles.list}>
+          <Text style={styles.title}>Your List</Text>
+          <FlatList
+            data={data.User.membership.edges}
+            contentContainerStyle={styles.feed}
+            renderItem={({ item }) => <List variant="large" list={item.node}/>}
+            keyExtractor={node => node.node.id}
+          />
+        </View>
       </View>
-      <View style={styles.list}>
-        <Text style={styles.title}>Your List</Text>
-        <FlatList
-          data={data.User.membership.edges}
-          contentContainerStyle={styles.feed}
-          renderItem={({ item }) => <List variant="large" {...item.node.list} />}
-          keyExtractor={node => node.node.list.id}
-        /> 
-      </View>
-    </View>
+    </Suspense>
   );
 }
 

@@ -1,32 +1,33 @@
 import { StyleSheet, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-
+import { graphql, useFragment } from "react-relay";
 import { Link } from "expo-router";
 
 import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
 import colors from "@/mobile/design/colors";
-
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from "../context/AuthContext";
+import { ListFragment$key } from "./__generated__/ListFragment.graphql";
 
 type ListProps = {
-  id: string;
-  title: string;
-  owner: string;
-  variant?: "small" | "large"
+  list: ListFragment$key;
+  variant: "large" | "small";
 }
 
 const SAMPLE_IMAGE = "https://images.unsplash.com/photo-1579282940892-6152e6e80c52?q=80&w=2487&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
+const ListFragment = graphql`
+  fragment ListFragment on List {
+    id
+    title
+  }
+`;
+
 function List(props: ListProps) {
-  const { id, title, owner, variant = "small" } = props;
-  console.log(owner);
+  const { variant = "small" } = props;
 
-  const auth = useAuth();
-  const user = auth.state.user;
+  const data = useFragment(ListFragment, props.list);
 
-  console.log(user.id);
+  const { id, title } = data;
 
   if (variant === "large") {
     return (
@@ -47,10 +48,10 @@ function List(props: ListProps) {
             }}>
               <View style={large.container}>
                 <View style={[large.col, { justifyContent: "flex-end" }]}>
-                  <Ionicons name="bookmark" size={24} color="white" />
                 </View>
                 <View style={large.col}>
                   <Text style={styles.title}>{title}</Text>
+                  <Text></Text>
                 </View>
               </View>
           </Link>

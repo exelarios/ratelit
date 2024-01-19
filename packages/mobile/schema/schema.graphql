@@ -59,8 +59,10 @@ type List implements Node {
   editors(after: ID, before: ID, first: Int, last: Int): ListEditorsConnection!
   following(after: ID, before: ID, first: Int, last: Int): ListFollowingConnection!
   id: ID!
+  isFollowing: Boolean!
   items: [Item!]!
   owner(listId: String): String!
+  role: String!
   title: String!
   updatedAt: String!
   visibility: Visibility!
@@ -177,6 +179,7 @@ type User implements Node {
   lastName: String!
   membership(after: ID, before: ID, first: Int, last: Int): UserMembershipConnection!
   name: String!
+  userId: ID!
 }
 
 type UserMembershipConnection {
@@ -186,7 +189,7 @@ type UserMembershipConnection {
 
 type UserMembershipConnectionEdge {
   cursor: ID!
-  node: EditorsOfList!
+  node: List!
 }
 
 enum Visibility {

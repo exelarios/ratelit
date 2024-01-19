@@ -16,6 +16,7 @@ export const User = builder.prismaNode("User", {
     field: "id",
   },
   fields: (t) => ({
+    userId: t.exposeID("id"),
     firstName: t.exposeString("firstName"),
     lastName: t.exposeString("lastName"),
     email: t.exposeString("email"),
@@ -31,23 +32,17 @@ export const User = builder.prismaNode("User", {
       type: "Date"
     }),
     membership: t.prismaConnection({
-      cursor: "userId_listId",
-      type: "EditorsOfList",
+      cursor: "id",
+      type: "List",
       resolve(query, parent, args, context, info) {
-        return prisma.editorsOfList.findMany({
+        return prisma.list.findMany({
           ...query,
           where: {
-            AND: [
-              {
-                OR: [
-                  { role: "EDITOR" },
-                  { role: "OWNER"}
-                ]
-              },
-              {
+            members: {
+              every: {
                 userId: parent.id
               }
-            ]
+            }
           }
         })
       },
@@ -90,18 +85,50 @@ export const List = builder.prismaNode("List", {
     description: t.exposeString("description", {
       nullable: true
     }),
-    owner: t.string({
-      args: {
-        "listId": t.arg.string(),
-      },
-      select: (args) => ({
-        members: {
-          where: { listId: args.listId }
+    isFollowing: t.field({
+      type: "Boolean",
+      resolve: async (parent, args, context) => {
+        const query = await prisma.editorsOfList.findFirst({
+          where: {
+            userId: context.user?.id
+          }
+        });
+
+        if (!query) {
+          return false;
         }
-      }),
-      resolve: (parent, args) => {
-        const user = parent.members.filter(member => member.role === "OWNER")[0];
-        return user.userId;
+
+        return true;
+      }
+    }),
+    role: t.string({
+      resolve: async (parent, args, context) => {
+        const query = await prisma.editorsOfList.findFirst({
+          where: {
+            userId: context.user?.id
+          }
+        });
+
+        if (!query) {
+          return "GUEST"
+        }
+
+        return query.role;
+      }
+    }),
+    owner: t.prismaField({
+      type: "User",
+      resolve: (query, parent, args, context) => {
+        return prisma.user.findFirstOrThrow({
+          ...query,
+          where: {
+            membership: {
+              some: {
+                listId: parent.id
+              }
+            }
+          }
+        });
       }
     }),
     items: t.relation("items"),
@@ -127,8 +154,8 @@ export const List = builder.prismaNode("List", {
     editors: t.prismaConnection({
       cursor: "userId_listId",
       type: "EditorsOfList",
-      resolve(query, parent, args, context, info) {
-        return prisma.editorsOfList.findMany({
+      resolve: async (query, parent, args, context, info) => {
+        const data = await prisma.editorsOfList.findMany({
           ...query,
           where: {
             AND: [
@@ -147,7 +174,10 @@ export const List = builder.prismaNode("List", {
               }
             ]
           }
-        })
+        });
+
+        console.log(JSON.stringify(data, null, 2))
+        return data;
       },
     })
   })
