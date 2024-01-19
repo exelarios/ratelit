@@ -31,6 +31,17 @@ export const User = builder.prismaNode("User", {
     createdAt: t.expose("createdAt", {
       type: "Date"
     }),
+    feed: t.prismaConnection({
+      type: "List",
+      cursor: "id",
+      resolve(query, parent, args, context, info) {
+        // note: for now, we'll just display everything.
+        // but eventually it will be tailored to the user.
+        return prisma.list.findMany({
+          ...query
+        });
+      },
+    }),
     membership: t.prismaConnection({
       cursor: "id",
       type: "List",

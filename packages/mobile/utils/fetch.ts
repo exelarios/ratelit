@@ -47,9 +47,17 @@ async function refreshTokens() {
     });
 
     const payload = await response.json();
-    console.log("[PAYLOAD]", payload);
+    const errors = payload?.errors as GraphQLError[];
     if (payload?.error) {
-      throw payload;
+      for (const error of errors) {
+        const extension = error?.extensions;
+        switch(extension.code) {
+          case "EXPIRED_REFRESH_TOKEN":
+            await store.clear();
+          default:
+            throw error;
+        }
+      }
     }
 
     const tokens = payload.data.refreshToken as Tokens;

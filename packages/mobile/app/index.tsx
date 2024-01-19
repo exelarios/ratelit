@@ -75,7 +75,6 @@ export default function Login() {
         router.replace("/Home");
       },
       onError(error) {
-        console.log(error);
         toast.add({
           type: "warning",
           message: error.message

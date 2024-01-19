@@ -2,10 +2,12 @@ import { StyleSheet, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { graphql, useFragment } from "react-relay";
 import { Link } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
 
 import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
 import colors from "@/mobile/design/colors";
+
 import { ListFragment$key } from "./__generated__/ListFragment.graphql";
 
 type ListProps = {
@@ -19,6 +21,7 @@ const ListFragment = graphql`
   fragment ListFragment on List {
     id
     title
+    isFollowing
   }
 `;
 
@@ -27,7 +30,7 @@ function List(props: ListProps) {
 
   const data = useFragment(ListFragment, props.list);
 
-  const { id, title } = data;
+  const { id, title, isFollowing } = data;
 
   if (variant === "large") {
     return (
@@ -48,7 +51,11 @@ function List(props: ListProps) {
             }}>
               <View style={large.container}>
                 <View style={[large.col, { justifyContent: "flex-end" }]}>
-
+                  <Ionicons
+                    name={isFollowing ? "bookmark-sharp" : "bookmark-outline"}
+                    size={24}
+                    color="white"
+                  />
                 </View>
                 <View style={large.col}>
                   <Text style={styles.title}>{title}</Text>

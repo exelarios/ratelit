@@ -1,6 +1,6 @@
-import { Suspense, useMemo } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
-import { graphql, useLazyLoadQuery } from "react-relay";
+import { graphql, useLazyLoadQuery, usePaginationFragment } from "react-relay";
 import { router } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 
@@ -11,28 +11,77 @@ import { useAuth } from "@/mobile/context/AuthContext";
 import List from "@/mobile/components/List";
 
 import { FeedUserEditableListQuery } from "./__generated__/FeedUserEditableListQuery.graphql";
+import { FeedUserEditableListFragment$key } from "./__generated__/FeedUserEditableListFragment.graphql";
+import { useToast } from "@/mobile/context/ToastContext";
 
 const UserEditableListQuery = graphql`
-  query FeedUserEditableListQuery($email: String!) {
+  query FeedUserEditableListQuery($email: String!, $count: Int!, $cusor: ID) {
     User(email: $email) {
-      membership {
-        edges {
-          node {
-            id
-            ...ListFragment
-          }
+      ...FeedUserEditableListFragment
+    }
+  }
+`;
+
+const UserEditableListFragment = graphql`
+  fragment FeedUserEditableListFragment on User
+  @refetchable(queryName: "UserEditablePaginationFragment") {
+    membership(first: $count, after: $cusor)
+    @connection(key: "UserEditableList_membership") {
+      edges {
+        node {
+          id
+          ...ListFragment
         }
       }
     }
   }
 `;
 
+interface ExploreListProps {
+  user: FeedUserEditableListFragment$key;
+}
+
+function ExploreList(props: ExploreListProps) {
+  const toast = useToast();
+  const [isLoading, setLoading] = useState(false);
+  const list = usePaginationFragment(UserEditableListFragment, props.user);
+
+  const handleOnRefresh = useCallback(() => {
+    list.refetch({
+      first: 10
+    }, {
+      onComplete(error) {
+        if (error) {
+          console.log(error);
+          toast.add({
+            message: error.message
+          });
+        }
+        setLoading(false);
+      },
+      fetchPolicy: "store-and-network"
+    });
+  }, [list]);
+
+  return (
+    <FlatList
+      data={list.data.membership.edges}
+      refreshing={isLoading}
+      onRefresh={handleOnRefresh}
+      contentContainerStyle={styles.feed}
+      renderItem={({ item }) => <List variant="large" list={item.node}/>}
+      keyExtractor={node => node.node.id}
+    />
+  );
+}
+
 function Explore() {
   const auth = useAuth();
   const user = auth.state.user;
 
   const data = useLazyLoadQuery<FeedUserEditableListQuery>(UserEditableListQuery, {
-    email: user.email
+    email: user.email,
+    count: 10
   });
 
   const plus = useMemo(() => {
@@ -54,12 +103,7 @@ function Explore() {
         </View>
         <View style={styles.list}>
           <Text style={styles.title}>Your List</Text>
-          <FlatList
-            data={data.User.membership.edges}
-            contentContainerStyle={styles.feed}
-            renderItem={({ item }) => <List variant="large" list={item.node}/>}
-            keyExtractor={node => node.node.id}
-          />
+          <ExploreList user={data.User}/>
         </View>
       </View>
     </Suspense>

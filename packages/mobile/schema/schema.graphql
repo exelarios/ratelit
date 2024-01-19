@@ -130,7 +130,6 @@ type PageInfo {
 }
 
 type Query {
-  Feed(after: ID, before: ID, first: Int, last: Int): QueryFeedConnection!
   List(
     """The list assoicated to this id."""
     id: String!
@@ -140,16 +139,6 @@ type Query {
   User(email: String!): User!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
-}
-
-type QueryFeedConnection {
-  edges: [QueryFeedConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type QueryFeedConnectionEdge {
-  cursor: ID!
-  node: List!
 }
 
 input RegisterInput {
@@ -174,12 +163,23 @@ type User implements Node {
   avatar: String!
   createdAt: Date!
   email: String!
+  feed(after: ID, before: ID, first: Int, last: Int): UserFeedConnection!
   firstName: String!
   id: ID!
   lastName: String!
   membership(after: ID, before: ID, first: Int, last: Int): UserMembershipConnection!
   name: String!
   userId: ID!
+}
+
+type UserFeedConnection {
+  edges: [UserFeedConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserFeedConnectionEdge {
+  cursor: ID!
+  node: List!
 }
 
 type UserMembershipConnection {

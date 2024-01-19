@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<342ec02ebe5c539514d97519e64f21c2>>
+ * @generated SignedSource<<5119082adf2dfda50d3b533e8dbc2c82>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,15 +10,14 @@
 
 import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type ExploreListQuery$variables = Record<PropertyKey, never>;
+export type ExploreListQuery$variables = {
+  count: number;
+  cursor?: string | null | undefined;
+  email: string;
+};
 export type ExploreListQuery$data = {
-  readonly Feed: {
-    readonly edges: ReadonlyArray<{
-      readonly node: {
-        readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"ListFragment">;
-      };
-    } | null | undefined>;
+  readonly User: {
+    readonly " $fragmentSpreads": FragmentRefs<"ExploreFeedFragment">;
   };
 };
 export type ExploreListQuery = {
@@ -28,6 +27,40 @@ export type ExploreListQuery = {
 
 const node: ConcreteRequest = (function(){
 var v0 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "count"
+},
+v1 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "cursor"
+},
+v2 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "email"
+},
+v3 = [
+  {
+    "kind": "Variable",
+    "name": "email",
+    "variableName": "email"
+  }
+],
+v4 = [
+  {
+    "kind": "Variable",
+    "name": "after",
+    "variableName": "cursor"
+  },
+  {
+    "kind": "Variable",
+    "name": "first",
+    "variableName": "count"
+  }
+],
+v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
@@ -36,46 +69,27 @@ var v0 = {
 };
 return {
   "fragment": {
-    "argumentDefinitions": [],
+    "argumentDefinitions": [
+      (v0/*: any*/),
+      (v1/*: any*/),
+      (v2/*: any*/)
+    ],
     "kind": "Fragment",
     "metadata": null,
     "name": "ExploreListQuery",
     "selections": [
       {
         "alias": null,
-        "args": null,
-        "concreteType": "QueryFeedConnection",
+        "args": (v3/*: any*/),
+        "concreteType": "User",
         "kind": "LinkedField",
-        "name": "Feed",
+        "name": "User",
         "plural": false,
         "selections": [
           {
-            "alias": null,
             "args": null,
-            "concreteType": "QueryFeedConnectionEdge",
-            "kind": "LinkedField",
-            "name": "edges",
-            "plural": true,
-            "selections": [
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "List",
-                "kind": "LinkedField",
-                "name": "node",
-                "plural": false,
-                "selections": [
-                  (v0/*: any*/),
-                  {
-                    "args": null,
-                    "kind": "FragmentSpread",
-                    "name": "ListFragment"
-                  }
-                ],
-                "storageKey": null
-              }
-            ],
-            "storageKey": null
+            "kind": "FragmentSpread",
+            "name": "ExploreFeedFragment"
           }
         ],
         "storageKey": null
@@ -86,40 +100,101 @@ return {
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": [],
+    "argumentDefinitions": [
+      (v2/*: any*/),
+      (v0/*: any*/),
+      (v1/*: any*/)
+    ],
     "kind": "Operation",
     "name": "ExploreListQuery",
     "selections": [
       {
         "alias": null,
-        "args": null,
-        "concreteType": "QueryFeedConnection",
+        "args": (v3/*: any*/),
+        "concreteType": "User",
         "kind": "LinkedField",
-        "name": "Feed",
+        "name": "User",
         "plural": false,
         "selections": [
           {
             "alias": null,
-            "args": null,
-            "concreteType": "QueryFeedConnectionEdge",
+            "args": (v4/*: any*/),
+            "concreteType": "UserFeedConnection",
             "kind": "LinkedField",
-            "name": "edges",
-            "plural": true,
+            "name": "feed",
+            "plural": false,
             "selections": [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "List",
+                "concreteType": "UserFeedConnectionEdge",
                 "kind": "LinkedField",
-                "name": "node",
-                "plural": false,
+                "name": "edges",
+                "plural": true,
                 "selections": [
-                  (v0/*: any*/),
+                  {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "List",
+                    "kind": "LinkedField",
+                    "name": "node",
+                    "plural": false,
+                    "selections": [
+                      (v5/*: any*/),
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "title",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "isFollowing",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "__typename",
+                        "storageKey": null
+                      }
+                    ],
+                    "storageKey": null
+                  },
                   {
                     "alias": null,
                     "args": null,
                     "kind": "ScalarField",
-                    "name": "title",
+                    "name": "cursor",
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "PageInfo",
+                "kind": "LinkedField",
+                "name": "pageInfo",
+                "plural": false,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "endCursor",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "hasNextPage",
                     "storageKey": null
                   }
                 ],
@@ -127,23 +202,33 @@ return {
               }
             ],
             "storageKey": null
-          }
+          },
+          {
+            "alias": null,
+            "args": (v4/*: any*/),
+            "filters": null,
+            "handle": "connection",
+            "key": "ExploreFeedLists_feed",
+            "kind": "LinkedHandle",
+            "name": "feed"
+          },
+          (v5/*: any*/)
         ],
         "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "80f7794a2fc23de7c88691738893065d",
+    "cacheID": "4b426a10b0c7f8565ded79e8b087eb45",
     "id": null,
     "metadata": {},
     "name": "ExploreListQuery",
     "operationKind": "query",
-    "text": "query ExploreListQuery {\n  Feed {\n    edges {\n      node {\n        id\n        ...ListFragment\n      }\n    }\n  }\n}\n\nfragment ListFragment on List {\n  id\n  title\n}\n"
+    "text": "query ExploreListQuery(\n  $email: String!\n  $count: Int!\n  $cursor: ID\n) {\n  User(email: $email) {\n    ...ExploreFeedFragment\n    id\n  }\n}\n\nfragment ExploreFeedFragment on User {\n  feed(first: $count, after: $cursor) {\n    edges {\n      node {\n        id\n        ...ListFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ListFragment on List {\n  id\n  title\n  isFollowing\n}\n"
   }
 };
 })();
 
-(node as any).hash = "128b7f705bc909a2997afb6d8935e5c3";
+(node as any).hash = "8c7a5a0e8491323c03fbddf99fe1c53a";
 
 export default node;
