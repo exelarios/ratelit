@@ -47,14 +47,9 @@ async function refreshTokens() {
     });
 
     const payload = await response.json();
-    const errors = payload?.errors as GraphQLError[];
+    console.log("[PAYLOAD]", payload);
     if (payload?.error) {
-      const output = [];
-      for (const error of errors) {
-        console.error(error.message);
-        output.push(error.message);
-      }
-      throw new Error(output.join("\n"));
+      throw payload;
     }
 
     const tokens = payload.data.refreshToken as Tokens;
@@ -113,9 +108,8 @@ const fetchFn: FetchFunction = async (request, variables, cacheConfig) => {
           throw new Error("The authorization tokens were malformed. Please restart app.");
         }
       } else {
-        throw new Error(error.message, {
-          cause: error
-        });
+        console.error(error);
+        throw Error(error.message);
       }
     }
   }

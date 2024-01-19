@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<957c415ee823f1628bd1465b6393cce1>>
+ * @generated SignedSource<<ea2c44e6f11d9fba08f22bae07294015>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -16,7 +16,7 @@ export type ListDetailsQuery$variables = {
 };
 export type ListDetailsQuery$data = {
   readonly List: {
-    readonly category: string | null | undefined;
+    readonly categories: ReadonlyArray<string>;
     readonly createdAt: any;
     readonly description: string | null | undefined;
     readonly id: string;
@@ -74,7 +74,7 @@ v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "category",
+  "name": "categories",
   "storageKey": null
 },
 v6 = {
@@ -204,7 +204,7 @@ return {
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "EditorsOfList",
+                    "concreteType": "Membership",
                     "kind": "LinkedField",
                     "name": "node",
                     "plural": false,
@@ -245,16 +245,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "2dc8f799d7a15549db786f736db0dd77",
+    "cacheID": "6932dd45411e6a1756ad0a939250dffd",
     "id": null,
     "metadata": {},
     "name": "ListDetailsQuery",
     "operationKind": "query",
-    "text": "query ListDetailsQuery(\n  $listId: String!\n) {\n  List(id: $listId) {\n    id\n    title\n    description\n    category\n    createdAt\n    visibility\n    owner {\n      name\n      id\n    }\n    updatedAt\n    ...ListDetailsEditorsFragment\n  }\n}\n\nfragment ListDetailsEditorsFragment on List {\n  editors {\n    edges {\n      node {\n        user {\n          id\n          name\n          avatar\n        }\n        id\n      }\n    }\n  }\n}\n"
+    "text": "query ListDetailsQuery(\n  $listId: String!\n) {\n  List(id: $listId) {\n    id\n    title\n    description\n    categories\n    createdAt\n    visibility\n    owner {\n      name\n      id\n    }\n    updatedAt\n    ...ListDetailsEditorsFragment\n  }\n}\n\nfragment ListDetailsEditorsFragment on List {\n  editors {\n    edges {\n      node {\n        user {\n          id\n          name\n          avatar\n        }\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "f6dc93454dcf1c0c629f8b98eb060759";
+(node as any).hash = "6e6e6bf4df7ef6bf143e2db9111d2b9f";
 
 export default node;

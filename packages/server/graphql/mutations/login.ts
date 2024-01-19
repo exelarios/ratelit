@@ -29,7 +29,7 @@ builder.relayMutationField("login", {
         password: true
       },
       where: {
-        email: args.input.email,
+        email: args.input.email.toLowerCase(),
       }
     });
 
@@ -44,7 +44,11 @@ builder.relayMutationField("login", {
     const isCorrectPassword = await Bun.password.verify(args.input.password, user.password);
 
     if (!isCorrectPassword) {
-      throw new GraphQLError("Incorrect password");
+      throw createGraphQLError("Incorrect password.", {
+        extensions: {
+          code: "USER_INCORRECT_PASSWORD"
+        }
+      });
     }
 
     const payload = {

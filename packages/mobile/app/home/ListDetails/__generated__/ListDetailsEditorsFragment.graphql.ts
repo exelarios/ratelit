@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<44f0f0d02ad13933a1edeac6251d4e7f>>
+ * @generated SignedSource<<de581160e88fb338bd8f2b4c31f12417>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -54,7 +54,7 @@ const node: ReaderFragment = {
             {
               "alias": null,
               "args": null,
-              "concreteType": "EditorsOfList",
+              "concreteType": "Membership",
               "kind": "LinkedField",
               "name": "node",
               "plural": false,

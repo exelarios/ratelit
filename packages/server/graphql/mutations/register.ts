@@ -49,7 +49,7 @@ builder.relayMutationField("register", {
       data: {
         firstName: credentials.firstName,
         lastName: credentials.lastName,
-        email: credentials.email,
+        email: credentials.email.toLowerCase(),
         password: password,
         avatar: "",
       }

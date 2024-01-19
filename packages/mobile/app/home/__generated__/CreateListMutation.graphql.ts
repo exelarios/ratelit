@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6fb385e50fd2fe8702529378b11c4fa7>>
+ * @generated SignedSource<<69ced52ce5d8cbc0b4d674f5419415eb>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,7 +11,7 @@
 import { ConcreteRequest, Mutation } from 'relay-runtime';
 export type Visibility = "PRIVATE" | "PUBLIC" | "RESTRICTED" | "%future added value";
 export type ListCreateInput = {
-  category?: string | null | undefined;
+  categories?: ReadonlyArray<string> | null | undefined;
   description?: string | null | undefined;
   thumbnail?: string | null | undefined;
   title: string;
@@ -22,7 +22,7 @@ export type CreateListMutation$variables = {
 };
 export type CreateListMutation$data = {
   readonly createList: {
-    readonly category: string | null | undefined;
+    readonly categories: ReadonlyArray<string>;
     readonly createdAt: any;
     readonly description: string | null | undefined;
     readonly id: string;
@@ -90,7 +90,7 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "category",
+        "name": "categories",
         "storageKey": null
       },
       {
@@ -122,16 +122,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "f0154d2770f6743aed315d1646629997",
+    "cacheID": "cbcc0726041b07fbffa499bb6d5b99e6",
     "id": null,
     "metadata": {},
     "name": "CreateListMutation",
     "operationKind": "mutation",
-    "text": "mutation CreateListMutation(\n  $input: ListCreateInput!\n) {\n  createList(data: $input) {\n    id\n    title\n    description\n    visibility\n    category\n    createdAt\n  }\n}\n"
+    "text": "mutation CreateListMutation(\n  $input: ListCreateInput!\n) {\n  createList(data: $input) {\n    id\n    title\n    description\n    visibility\n    categories\n    createdAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "016073b02e41a04662e4854a547c63bb";
+(node as any).hash = "be8f8cdf7556c0323d3000097e916cab";
 
 export default node;

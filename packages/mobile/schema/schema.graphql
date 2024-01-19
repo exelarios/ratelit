@@ -23,13 +23,6 @@ from a string in ISO 8601 format.
 """
 scalar Date
 
-type EditorsOfList implements Node {
-  id: ID!
-  list: List!
-  role: String!
-  user: User!
-}
-
 type Item implements Node {
   comments(after: ID, before: ID, first: Int, last: Int): ItemCommentsConnection!
   createdAt: Date!
@@ -53,7 +46,7 @@ type ItemCommentsConnectionEdge {
 }
 
 type List implements Node {
-  category: String
+  categories: [String!]!
   createdAt: Date!
   description: String
   editors(after: ID, before: ID, first: Int, last: Int): ListEditorsConnection!
@@ -69,7 +62,7 @@ type List implements Node {
 }
 
 input ListCreateInput {
-  category: String
+  categories: [String!]
   description: String
   thumbnail: String
   title: String!
@@ -83,7 +76,7 @@ type ListEditorsConnection {
 
 type ListEditorsConnectionEdge {
   cursor: ID!
-  node: EditorsOfList!
+  node: Membership!
 }
 
 type ListFollowingConnection {
@@ -93,7 +86,7 @@ type ListFollowingConnection {
 
 type ListFollowingConnectionEdge {
   cursor: ID!
-  node: EditorsOfList!
+  node: Membership!
 }
 
 input LoginInput {
@@ -104,6 +97,13 @@ input LoginInput {
 type LoginPayload {
   access: String!
   refresh: String!
+  user: User!
+}
+
+type Membership implements Node {
+  id: ID!
+  list: List!
+  role: String!
   user: User!
 }
 

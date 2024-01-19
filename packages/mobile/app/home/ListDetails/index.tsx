@@ -60,7 +60,7 @@ const DetailsQuery = graphql`
       id
       title
       description
-      category
+      categories
       createdAt
       visibility
       createdAt

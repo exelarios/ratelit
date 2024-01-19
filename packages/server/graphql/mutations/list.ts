@@ -26,6 +26,9 @@ builder.mutationField("createList", (t) => t.prismaField({
       required: true
     })
   },
+  authScopes: {
+    isLoggedIn: true
+  },
   resolve: async (query, parent, args, context) => {
     return prisma.list.create({
       ...query,
@@ -34,7 +37,7 @@ builder.mutationField("createList", (t) => t.prismaField({
         thumbnail: args.data.thumbnail,
         visibility: args.data.visibility,
         categories: {
-          set: args.data.categories!
+          set: args.data.categories || []
         },
         description: args.data.description,
         members: {

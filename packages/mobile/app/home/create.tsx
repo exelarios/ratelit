@@ -30,7 +30,7 @@ const CreateList = graphql`
       title
       description
       visibility
-      category
+      categories
       createdAt
     }
   }
@@ -45,6 +45,7 @@ function Create() {
     state: {
       title: "",
       visibility: "PUBLIC",
+      categories: [],
       description: "",
     },
     zodValidation: validate.createList,
@@ -54,6 +55,7 @@ function Create() {
           input: {
             title: state.title,
             description: state.description,
+            categories: state.categories,
             visibility: state.visibility
           }
         },

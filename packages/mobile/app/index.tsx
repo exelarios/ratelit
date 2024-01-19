@@ -75,14 +75,11 @@ export default function Login() {
         router.replace("/Home");
       },
       onError(error) {
-        const errors = error.source.errors;
-        for (const error of errors) {
-          console.log(error);
-          toast.add({
-            type: "warning",
-            message: error.message
-          });
-        }
+        console.log(error);
+        toast.add({
+          type: "warning",
+          message: error.message
+        });
       },
     });
   };
