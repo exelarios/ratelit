@@ -62,6 +62,7 @@ function Tabbar({ state, navigation }: BottomTabBarProps) {
         return (
           <Ionicons
             key={label}
+            suppressHighlighting
             onPress={handleOnPress}
             name={isActive ? active : icon}
             size={24}

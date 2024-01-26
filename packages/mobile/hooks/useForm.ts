@@ -122,7 +122,7 @@ function useForm<T extends {}>(props: UseFormParams<T>) {
   const [value, setValue] = useState(state);
   const [message, setMessage] = useState<FormMessage>();
   
-  const handleOnChange = useCallback((name: string, text: string) => {
+  const handleOnChange = useCallback((name: string, text: any) => {
     setValue((v) => {
       return {
         ...v,
@@ -156,12 +156,12 @@ function useForm<T extends {}>(props: UseFormParams<T>) {
   const handleOnSubmit = useCallback(async () => {
     // todo: if value passes validation using zod
     try {
-      const issues = handleOnZodValidate(value);
-      if (issues != null) {
-        console.log(issues);
-        setMessage(issues);
-        return;
-      }
+      // const issues = handleOnZodValidate(value);
+      // if (issues != null) {
+      //   console.log(issues);
+      //   setMessage(issues);
+      //   return;
+      // }
 
       const response = await onSubmit(value);
       if (zodValidation != undefined) {

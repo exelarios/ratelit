@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ea2c44e6f11d9fba08f22bae07294015>>
+ * @generated SignedSource<<ac4e4c656e9bdf22add8ba2fc59921a7>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -23,8 +23,9 @@ export type ListDetailsQuery$data = {
     readonly owner: {
       readonly name: string;
     };
+    readonly thumbnail: string;
     readonly title: string;
-    readonly updatedAt: string;
+    readonly updatedAt: any;
     readonly visibility: Visibility;
     readonly " $fragmentSpreads": FragmentRefs<"ListDetailsEditorsFragment">;
   };
@@ -81,24 +82,31 @@ v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "createdAt",
+  "name": "thumbnail",
   "storageKey": null
 },
 v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "visibility",
+  "name": "createdAt",
   "storageKey": null
 },
 v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "name",
+  "name": "visibility",
   "storageKey": null
 },
 v9 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v10 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
@@ -126,6 +134,7 @@ return {
           (v5/*: any*/),
           (v6/*: any*/),
           (v7/*: any*/),
+          (v8/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -134,11 +143,11 @@ return {
             "name": "owner",
             "plural": false,
             "selections": [
-              (v8/*: any*/)
+              (v9/*: any*/)
             ],
             "storageKey": null
           },
-          (v9/*: any*/),
+          (v10/*: any*/),
           {
             "args": null,
             "kind": "FragmentSpread",
@@ -171,6 +180,7 @@ return {
           (v5/*: any*/),
           (v6/*: any*/),
           (v7/*: any*/),
+          (v8/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -179,12 +189,12 @@ return {
             "name": "owner",
             "plural": false,
             "selections": [
-              (v8/*: any*/),
+              (v9/*: any*/),
               (v2/*: any*/)
             ],
             "storageKey": null
           },
-          (v9/*: any*/),
+          (v10/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -218,7 +228,7 @@ return {
                         "plural": false,
                         "selections": [
                           (v2/*: any*/),
-                          (v8/*: any*/),
+                          (v9/*: any*/),
                           {
                             "alias": null,
                             "args": null,
@@ -245,16 +255,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "6932dd45411e6a1756ad0a939250dffd",
+    "cacheID": "88fe10c90e9f41416df3476c27792e79",
     "id": null,
     "metadata": {},
     "name": "ListDetailsQuery",
     "operationKind": "query",
-    "text": "query ListDetailsQuery(\n  $listId: String!\n) {\n  List(id: $listId) {\n    id\n    title\n    description\n    categories\n    createdAt\n    visibility\n    owner {\n      name\n      id\n    }\n    updatedAt\n    ...ListDetailsEditorsFragment\n  }\n}\n\nfragment ListDetailsEditorsFragment on List {\n  editors {\n    edges {\n      node {\n        user {\n          id\n          name\n          avatar\n        }\n        id\n      }\n    }\n  }\n}\n"
+    "text": "query ListDetailsQuery(\n  $listId: String!\n) {\n  List(id: $listId) {\n    id\n    title\n    description\n    categories\n    thumbnail\n    createdAt\n    visibility\n    owner {\n      name\n      id\n    }\n    updatedAt\n    ...ListDetailsEditorsFragment\n  }\n}\n\nfragment ListDetailsEditorsFragment on List {\n  editors {\n    edges {\n      node {\n        user {\n          id\n          name\n          avatar\n        }\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6e6e6bf4df7ef6bf143e2db9111d2b9f";
+(node as any).hash = "7f1385c0be0fd0ce81af3dd7b4306c22";
 
 export default node;

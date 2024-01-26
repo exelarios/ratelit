@@ -1,13 +1,14 @@
-import { useCallback } from "react";
-
+import { useCallback, useState } from "react";
 import {
+  ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   TouchableWithoutFeedback
 } from "react-native";
-
+import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { graphql, useMutation } from "react-relay";
 
 import TextInput from "@/mobile/components/TextInput";
@@ -15,11 +16,12 @@ import View from "@/mobile/components/View";
 import Button from "@/mobile/components/Button";
 import Text from "@/mobile/components/Text";
 import Dropdown from "@/mobile/components/Dropdown";
+import Back from "@/mobile/components/Back";
 
 import useForm from "@/mobile/hooks/useForm";
 import * as validate from "@ratelit/shared/validate";
 import { useToast } from "@/mobile/context/ToastContext";
-import Back from "@/mobile/components/Back";
+import colors from "@/mobile/design/colors";
 
 import { CreateListMutation, ListCreateInput } from "./__generated__/CreateListMutation.graphql";
 
@@ -38,6 +40,7 @@ const CreateList = graphql`
 
 function Create() {
   const toast = useToast();
+  const [photo, setPhoto] = useState("");
 
   const [commit, isInFlight] = useMutation<CreateListMutation>(CreateList);
 
@@ -47,6 +50,7 @@ function Create() {
       visibility: "PUBLIC",
       categories: [],
       description: "",
+      thumbnail: null
     },
     zodValidation: validate.createList,
     onSubmit: async (state) => {
@@ -55,9 +59,10 @@ function Create() {
           input: {
             title: state.title,
             description: state.description,
+            thumbnail: state.thumbnail,
             categories: state.categories,
             visibility: state.visibility
-          }
+          },
         },
         onCompleted(response) {
           const { title } = response.createList;
@@ -75,6 +80,60 @@ function Create() {
     }
   });
 
+  const handleOnImagePicker = useCallback(async () => {
+    // If the fileSize is less than 300kb, we won't compress the image.
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      base64: true,
+      aspect: [5, 5],
+      quality: 1,
+      selectionLimit: 1
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    let image = result.assets[0];
+
+    if (!image.fileSize) {
+      toast.add({
+        message: "We couldn't read your image, please choose a different image"
+      });
+      return;
+    }
+
+    // If the image is over 300kb, we will compress the image.
+    const needCompression = (image.fileSize / 1000) > 300;
+    
+    if (needCompression) {
+      const thumbnail = await ImageManipulator.manipulateAsync(image.uri, [], {
+        base64: true,
+        compress: 0.2,
+        format: ImageManipulator.SaveFormat.JPEG
+      });
+
+      image = thumbnail;
+    }
+
+    setPhoto(image.uri);
+
+    // We make a fetch to grab the file type.
+    const response = await fetch(image.uri, {
+      method: "GET",
+    });
+
+    // Blobs aren't support with RN expo thus, we are required to
+    // send the image's data as base64 rather a blob.
+    const blob = await response.blob();
+
+    form.handleOnChange("thumbnail", {
+      encoding: image.base64,
+      type: blob.type
+    });
+  }, [form]);
+
   const handleOnSelectOnChange = useCallback((value: string) => {
     const output = value.toUpperCase();
     form.handleOnChange("visibility", output);
@@ -90,6 +149,15 @@ function Create() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.inner}>
             <View style={styles.form}>
+              <ImageBackground
+                source={photo ? { uri: photo } : null}
+                style={[styles.thumbnail, photo ? { borderWidth: 0 } : null]}
+                imageStyle={{ borderRadius: 10 }}>
+                <Button
+                  onPress={handleOnImagePicker}>
+                  {!photo ? "Pick an image from camera roll" : null}
+                </Button>
+              </ImageBackground>
               <TextInput
                 label="Name"
                 placeholder="Best 'Your Mom' Jokes of All Time"
@@ -163,6 +231,15 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     justifyContent: "flex-end"
+  },
+  thumbnail: {
+    borderWidth: 2,
+    display: "flex",
+    justifyContent: "center",
+    borderStyle: "dashed",
+    borderRadius: 10,
+    borderColor: colors.neutral[400],
+    height: 120
   }
 });
 

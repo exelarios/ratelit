@@ -1,5 +1,6 @@
 import builder from "@/server/graphql/builder";
 import prisma from "@/server/prisma";
+import storage from "@/server/lib/storage";
 
 export enum Visibility {
   PUBLIC = "PUBLIC",
@@ -80,11 +81,21 @@ export const List = builder.prismaNode("List", {
     createdAt: t.expose("createdAt", {
       type: "Date"
     }),
-    updatedAt: t.string({
+    updatedAt: t.expose("updatedAt", {
+      type: "Date"
+    }),
+    thumbnail: t.string({
       select: {
-        updatedAt: true
+        thumbnail: true
       },
-      resolve: (parent) => parent.updatedAt.toUTCString()
+      resolve: async (parent) => {
+        const key = parent.thumbnail;
+        if (!key) {
+          return "";
+        }
+        const image = await storage.fetch(key);
+        return image!;
+      }
     }),
     categories: t.exposeStringList("categories"),
     visibility: t.field({

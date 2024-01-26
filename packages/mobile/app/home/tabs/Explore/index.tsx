@@ -1,12 +1,11 @@
 import { Suspense, useCallback, useState } from "react";
 import { TextInput, FlatList, StyleSheet } from "react-native";
 import { graphql, useLazyLoadQuery, usePaginationFragment } from "react-relay";
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 
 import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
-import List from "@/mobile/components/List";
-import Category from "@/mobile/components/Categories";
+import Article from "@/mobile/components/Article";
 import { useAuth } from "@/mobile/context/AuthContext";
 import { useToast } from "@/mobile/context/ToastContext";
 
@@ -42,11 +41,12 @@ function Header() {
   return (
     <View style={styles.heading}>
       <Text style={styles.title}>Explore</Text>
-      <View style={styles.search}>
-        <Feather name="search" size={20} color={colors.neutral[600]} />
-        <TextInput placeholder="search"/>
-      </View>
-      <Category/>
+      <Ionicons 
+        suppressHighlighting
+        name="search"
+        size={24}
+        color="black"
+      />
     </View>
   );
 }
@@ -69,6 +69,7 @@ function ExploreList(props: ExploreListProps) {
   const list = usePaginationFragment(ExploreFeedFragment, props.feed);
 
   const handleOnRefresh = useCallback(() => {
+    setLoading(true);
     list.refetch({
       first: 10
     }, {
@@ -86,7 +87,8 @@ function ExploreList(props: ExploreListProps) {
   }, [list]);
 
   return (
-    <Suspense fallback={<Text>loading . . . </Text>}>
+    <Suspense
+      fallback={<Text>loading . . . </Text>}>
       <FlatList
         ListHeaderComponent={Header}
         ListFooterComponent={Footer}
@@ -96,7 +98,7 @@ function ExploreList(props: ExploreListProps) {
         contentContainerStyle={styles.feed}
         keyExtractor={node => node.node.id}
         renderItem={({ item }) =>
-          <List variant="large" list={item.node}/>
+          <Article list={item.node}/>
         }
       />
     </Suspense>
@@ -146,7 +148,9 @@ const styles = StyleSheet.create({
   },
   heading: {
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     gap: 15,
   }
 });

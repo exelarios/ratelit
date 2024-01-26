@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a2388b064679756aca31723ac0d1d4b7>>
+ * @generated SignedSource<<8ab0daf58c1d349eb79252ba1c33ab7e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -158,7 +158,54 @@ return {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
+                            "name": "thumbnail",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
                             "name": "isFollowing",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "categories",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "description",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "concreteType": "User",
+                            "kind": "LinkedField",
+                            "name": "owner",
+                            "plural": false,
+                            "selections": [
+                              {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "name",
+                                "storageKey": null
+                              },
+                              (v3/*: any*/)
+                            ],
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "updatedAt",
                             "storageKey": null
                           },
                           (v2/*: any*/)
@@ -222,12 +269,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "5ad0f65b491dcc5768750979816aaf99",
+    "cacheID": "40ebef77bb3d30b453b131949a48d01f",
     "id": null,
     "metadata": {},
     "name": "UserEditablePaginationFragment",
     "operationKind": "query",
-    "text": "query UserEditablePaginationFragment(\n  $count: Int\n  $cusor: ID\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...FeedUserEditableListFragment\n    id\n  }\n}\n\nfragment FeedUserEditableListFragment on User {\n  membership(first: $count, after: $cusor) {\n    edges {\n      node {\n        id\n        ...ListFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ListFragment on List {\n  id\n  title\n  isFollowing\n}\n"
+    "text": "query UserEditablePaginationFragment(\n  $count: Int\n  $cusor: ID\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...FeedUserEditableListFragment\n    id\n  }\n}\n\nfragment FeedUserEditableListFragment on User {\n  membership(first: $count, after: $cusor) {\n    edges {\n      node {\n        id\n        ...ListFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ListFragment on List {\n  id\n  title\n  thumbnail\n  isFollowing\n  categories\n  description\n  owner {\n    name\n    id\n  }\n  updatedAt\n}\n"
   }
 };
 })();

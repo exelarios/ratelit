@@ -56,15 +56,18 @@ type List implements Node {
   items: [Item!]!
   owner: User!
   role: String!
+  thumbnail: String!
   title: String!
-  updatedAt: String!
+  updatedAt: Date!
   visibility: Visibility!
 }
 
 input ListCreateInput {
   categories: [String!]
   description: String
-  thumbnail: String
+
+  """encode in base64"""
+  thumbnail: Upload!
   title: String!
   visibility: Visibility!
 }
@@ -158,6 +161,8 @@ type Tokens {
   access: String!
   refresh: String!
 }
+
+scalar Upload
 
 type User implements Node {
   avatar: String!

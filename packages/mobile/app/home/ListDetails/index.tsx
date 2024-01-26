@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { Image, StyleSheet } from "react-native";
+import { Image, ImageBackground, StyleSheet } from "react-native";
 import { useLocalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
 
 import View from "@/mobile/components/View";
@@ -35,7 +36,6 @@ const EditorsListFragment = graphql`
 `;
 
 function Editors(props: EditorsProps) {
-
   const data = useFragment(EditorsListFragment, props.list);
 
   return (
@@ -61,6 +61,7 @@ const DetailsQuery = graphql`
       title
       description
       categories
+      thumbnail
       createdAt
       visibility
       createdAt
@@ -85,18 +86,27 @@ function List() {
     listId: listId as string
   });
 
-  const { title, description } = data.List;
+  const { title, description, thumbnail } = data.List;
 
   return (
     <View>
-      <View safe style={styles.thumbnail}>
-        <Back/>
-      </View>
+      <ImageBackground
+        style={styles.thumbnail}
+        source={{ uri: thumbnail }}
+        imageStyle={{
+          height: "100%",
+          objectFit: "cover"
+        }}>
+        <View safe style={{ width: "100%", height: "100%" }}>
+          <Back/>
+        </View>
+      </ImageBackground>
       <View style={styles.container}>
         <Text style={styles.title}>{title}</Text>
         <Text>{description}</Text>
         <Editors list={data.List}/>
       </View>
+      <StatusBar animated translucent style="inverted"/>
     </View>
   );
 }
@@ -104,9 +114,7 @@ function List() {
 const styles = StyleSheet.create({
   thumbnail: {
     backgroundColor: colors.neutral[500],
-    paddingTop: 0,
     height: "40%",
-    padding: 20
   },
   container: {
     padding: 20

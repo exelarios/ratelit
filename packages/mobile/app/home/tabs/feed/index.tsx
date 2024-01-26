@@ -47,6 +47,7 @@ function ExploreList(props: ExploreListProps) {
   const list = usePaginationFragment(UserEditableListFragment, props.user);
 
   const handleOnRefresh = useCallback(() => {
+    setLoading(true);
     list.refetch({
       first: 10
     }, {
@@ -64,14 +65,16 @@ function ExploreList(props: ExploreListProps) {
   }, [list]);
 
   return (
-    <FlatList
-      data={list.data.membership.edges}
-      refreshing={isLoading}
-      onRefresh={handleOnRefresh}
-      contentContainerStyle={styles.feed}
-      renderItem={({ item }) => <List variant="large" list={item.node}/>}
-      keyExtractor={node => node.node.id}
-    />
+    <Suspense fallback={<Text>loading . . . </Text>}>
+      <FlatList
+        data={list.data.membership.edges}
+        refreshing={isLoading}
+        onRefresh={handleOnRefresh}
+        contentContainerStyle={styles.feed}
+        renderItem={({ item }) => <List variant="large" list={item.node}/>}
+        keyExtractor={node => node.node.id}
+      />
+    </Suspense>
   );
 }
 
@@ -91,22 +94,20 @@ function Explore() {
   }, []);
 
   return (
-    <Suspense fallback={<Text>loading . . . </Text>}>
-      <View style={styles.container}>
-        <View style={styles.topbar}>
-          <Button
-            icon={plus}
-            fontWeight="500"
-            onPress={() => router.push("/Home/Create")}>
-            Create a list
-          </Button>
-        </View>
-        <View style={styles.list}>
-          <Text style={styles.title}>Your List</Text>
-          <ExploreList user={data.User}/>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.topbar}>
+        <Button
+          icon={plus}
+          fontWeight="500"
+          onPress={() => router.push("/Home/Create")}>
+          Create a list
+        </Button>
       </View>
-    </Suspense>
+      <View style={styles.list}>
+        <Text style={styles.title}>Your List</Text>
+        <ExploreList user={data.User}/>
+      </View>
+    </View>
   );
 }
 

@@ -19,6 +19,7 @@ function Back() {
 
   return (
     <Ionicons
+      suppressHighlighting
       name="chevron-back"
       borderRadius={1000}
       style={styles.icon}

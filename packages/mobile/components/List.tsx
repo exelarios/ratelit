@@ -12,82 +12,71 @@ import { ListFragment$key } from "./__generated__/ListFragment.graphql";
 
 type ListProps = {
   list: ListFragment$key;
-  variant: "large" | "small";
 }
-
-const SAMPLE_IMAGE = "https://images.unsplash.com/photo-1579282940892-6152e6e80c52?q=80&w=2487&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
 const ListFragment = graphql`
   fragment ListFragment on List {
     id
     title
+    thumbnail
     isFollowing
+    categories
+    description
+    owner {
+      name
+    }
+    updatedAt
   }
 `;
 
 function List(props: ListProps) {
-  const { variant = "small" } = props;
-
   const data = useFragment(ListFragment, props.list);
 
-  const { id, title, isFollowing } = data;
-
-  if (variant === "large") {
-    return (
-      <ImageBackground
-        source={{ uri: SAMPLE_IMAGE }}
-        resizeMode="center"
-        imageStyle={{ borderRadius: 10}}
-        style={large.wrapper}>
-        <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.8)"]}
-          style={large.gradient}>
-          <Link
-            href={{
-              pathname: "/Home/ListDetails",
-              params: {
-                listId: id
-              }
-            }}>
-              <View style={large.container}>
-                <View style={[large.col, { justifyContent: "flex-end" }]}>
-                  <Ionicons
-                    name={isFollowing ? "bookmark-sharp" : "bookmark-outline"}
-                    size={24}
-                    color="white"
-                  />
-                </View>
-                <View style={large.col}>
-                  <Text style={styles.title}>{title}</Text>
-                </View>
-              </View>
-          </Link>
-        </LinearGradient>
-      </ImageBackground>
-    );
-  }
+  const { id, title, isFollowing, thumbnail, owner, description } = data;
 
   return (
-    <Link 
-      style={styles.wrapper}
-      href={{
-      pathname: "/Home/list",
-      params: {
-        listId: id
-      }
-    }}>
+    <ImageBackground
+      source={{ uri: thumbnail }}
+      resizeMode="center"
+      imageStyle={{ borderRadius: 10, objectFit: "cover" }}
+      style={styles.wrapper}>
       <LinearGradient
         colors={["transparent", "rgba(0,0,0,0.8)"]}
         style={styles.gradient}>
-        <View style={styles.container}>
-          <Text style={styles.title}>{title}</Text>
-        </View>
+        <Link
+          href={{
+            pathname: "/Home/ListDetails",
+            params: {
+              listId: id
+            }
+          }}>
+            <View style={styles.container}>
+              <View style={[styles.col, { justifyContent: "flex-end" }]}>
+                <Ionicons
+                  name={isFollowing ? "bookmark-sharp" : "bookmark-outline"}
+                  size={24}
+                  color="white"
+                />
+              </View>
+              <View style={{ display: "flex", flexDirection: "column" }}>
+                <Text style={[styles.text, styles.owner]}>{owner.name}</Text>
+                <Text style={styles.title}>{title}</Text>
+                <Text style={[styles.text, styles.description]}>{description}</Text>
+              </View>
+            </View>
+        </Link>
       </LinearGradient>
-    </Link>
+    </ImageBackground>
   );
 }
 
-const large = StyleSheet.create({
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.neutral[100],
+    marginVertical: 3,
+  },
   gradient: {
     width: "100%",
     height: 150,
@@ -111,32 +100,14 @@ const large = StyleSheet.create({
     display: "flex",
     justifyContent: "space-between",
   },
-});
-
-const styles = StyleSheet.create({
-  wrapper: {
-    width: 150,
-    height: 150,
+  text: {
+    color: colors.neutral["100"]
   },
-  gradient: {
-    borderRadius: 10,
-    width: 150,
-    height: 150,
-    backgroundColor: colors.neutral[200],
+  owner: {
+    fontWeight: "500"
   },
-  container: {
-    width: "100%",
-    height: "100%",
-    padding: 10,
-    display: "flex",
-    justifyContent: "flex-end",
-    flexDirection: "column"
-  },
-  title: {
-    fontSize: 17,
-    fontWeight: "bold",
-    color: colors.neutral[100],
-    marginVertical: 3,
+  description: {
+    fontSize: 12
   }
 });
 

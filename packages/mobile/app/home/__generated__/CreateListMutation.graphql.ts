@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<69ced52ce5d8cbc0b4d674f5419415eb>>
+ * @generated SignedSource<<c73c837d8b8e3cc4a21f752ab00ce3b5>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,7 +13,7 @@ export type Visibility = "PRIVATE" | "PUBLIC" | "RESTRICTED" | "%future added va
 export type ListCreateInput = {
   categories?: ReadonlyArray<string> | null | undefined;
   description?: string | null | undefined;
-  thumbnail?: string | null | undefined;
+  thumbnail: any;
   title: string;
   visibility: Visibility;
 };

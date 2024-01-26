@@ -4,12 +4,6 @@ import { GraphQLError } from "@ratelit/shared/types";
 
 import store from "@/mobile/utils/token";
 
-type Headers = {
-  "Accept": string;
-  "Content-Type": string;
-  "Authorization"?: string;
-}
-
 type Tokens = {
   access: string;
   refresh: string;
@@ -71,10 +65,11 @@ async function refreshTokens() {
   }
 }
 
-const fetchFn: FetchFunction = async (request, variables, cacheConfig) => {
-  let headers: Headers = {
-    "Accept": "application/graphql-response+json; charset=utf-8, application/json; charset=utf-8",
-    "Content-Type": "application/json"
+const fetchFn: FetchFunction = async (request, variables, cacheConfig, uploadables) => {
+
+  const options: RequestInit = {
+    method: "POST",
+    headers: {}
   }
 
   // By default, we will asssume the request requires authorization token.
@@ -85,20 +80,58 @@ const fetchFn: FetchFunction = async (request, variables, cacheConfig) => {
 
   if (useAuthorization) {
     const token = await store.getAccess();
-    headers = {
-      ...headers,
+    options.headers = {
+      ...options.headers,
       "Authorization": `bearer ${token}`
     }
   }
 
-  const response = await fetch(ENDPOINT, {
-    method: "POST",
-    headers: headers,
-    body: JSON.stringify({
+  if (uploadables) {
+    console.log("use multipart/form-data");
+    options.headers = {
+      ...options.headers,
+      "Content-Type": "multipart/form-data"
+    }
+
+    const form = new FormData();
+    form.append("operations", JSON.stringify({
       query: request.text,
-      variables,
-    }),
-  });
+      variables: variables
+    }));
+
+    const mapping: {
+      [key: string]: string[]
+    } = {};
+
+    Object.keys(uploadables).forEach(async (key) => {
+      if (Object.prototype.hasOwnProperty.call(uploadables, key)) {
+        mapping[key] = [`variables.${key}`]
+      }
+    });
+
+    form.append("map", JSON.stringify(mapping));
+
+    Object.keys(uploadables).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(uploadables, key)) {
+        form.append(key, uploadables[key])
+      }
+    });
+
+    options.body = form;
+  } else {
+    options.headers = {
+      ...options.headers,
+      "Accept": "application/graphql-response+json; charset=utf-8, application/json; charset=utf-8",
+      "Content-Type": "application/json"
+    }
+
+    options.body = JSON.stringify({
+      query: request.text,
+      variables: variables
+    });
+  }
+
+  const response = await fetch(ENDPOINT, options);
 
   const data = await response.json();
   if (data?.errors) {
