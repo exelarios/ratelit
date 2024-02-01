@@ -186,7 +186,6 @@ type User implements Node {
   id: ID!
   lastName: String!
   name: String!
-  userId: ID!
 }
 
 type UserEditableListConnection {

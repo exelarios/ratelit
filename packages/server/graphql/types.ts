@@ -1,17 +1,11 @@
 import builder from "@/server/graphql/builder";
 import prisma from "@/server/prisma";
 import storage from "@/server/lib/storage";
-import { decodeGlobalID, encodeGlobalID } from "@pothos/plugin-relay";
 
 export enum Visibility {
   PUBLIC = "PUBLIC",
   PRIVATE = "PRIVATE",
   RESTRICTED = "RESTRICTED"
-}
-
-export enum ROLE_ACCESS {
-  FOLLOWING = "FOLLOWING",
-  EDITOR = "EDITOR"
 }
 
 builder.enumType(Visibility, {
@@ -23,7 +17,6 @@ export const User = builder.prismaNode("User", {
     field: "id",
   },
   fields: (t) => ({
-    userId: t.exposeID("id"),
     firstName: t.exposeString("firstName"),
     lastName: t.exposeString("lastName"),
     email: t.exposeString("email"),
@@ -52,21 +45,35 @@ export const User = builder.prismaNode("User", {
         });
       },
     }),
+    list: t.prismaConnection({
+      type: "List",
+      cursor: "id",
+      resolve: async (query, parent, args, context, info) => {
+        return prisma.list.findMany({
+          include: {
+            members: {
+              where: {
+                userId: parent.id,
+              }
+            }
+          }
+        })
+      }
+    }),
     followingList: t.prismaConnection({
       cursor: "id",
       type: "List",
-      resolve(query, parent, args, context, info) {
+      resolve: async (query, parent, args, context, info) => {
         return prisma.list.findMany({
-          ...query,
-          where: {
+          include: {
             members: {
-              every: {
+              where: {
                 userId: parent.id,
                 role: "VIEWER"
               }
             }
           }
-        })
+        });
       },
     }),
     editableList: t.prismaConnection({
@@ -174,22 +181,30 @@ export const List = builder.prismaNode("List", {
     }),
     owner: t.prismaField({
       type: "User",
-      resolve: (query, parent, args, context) => {
+      resolve: async (query, parent, args, context) => {
+        const owner = await prisma.membership.findFirst({
+          where: {
+            listId: parent.id,
+            role: "OWNER"
+          }
+        });
+
         return prisma.user.findFirstOrThrow({
           ...query,
           where: {
             membership: {
               some: {
+                userId: owner?.userId,
                 listId: parent.id
               }
             }
           }
-        });
+        })
       }
     }),
     items: t.relation("items"),
     following: t.prismaConnection({
-      cursor: "userId_listId",
+      cursor: "id",
       type: "Membership",
       resolve(query, parent, args, context, info) {
         return prisma.membership.findMany({
@@ -202,7 +217,7 @@ export const List = builder.prismaNode("List", {
       },
     }),
     editors: t.prismaConnection({
-      cursor: "userId_listId",
+      cursor: "id",
       type: "Membership",
       resolve: async (query, parent, args, context, info) => {
         return prisma.membership.findMany({
@@ -285,11 +300,13 @@ export const Comment = builder.prismaNode("Comment", {
 
 export const Membership = builder.prismaNode("Membership", {
   id: {
-    field: "userId_listId"
+    field: "id"
   },
   fields: (t) => ({
     list: t.relation("list"),
     user: t.relation("user"),
-    role: t.exposeString("role")
+    role: t.expose("role", {
+      type: "String",
+    })
   })
 });

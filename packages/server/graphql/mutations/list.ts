@@ -137,7 +137,7 @@ builder.mutationField("FollowList", (t) => t.prismaField({
       return prisma.membership.delete({
         ...query,
         where: {
-          userId_listId: {
+          id: {
             listId: id,
             userId: userId
           }

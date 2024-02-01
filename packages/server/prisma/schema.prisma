@@ -65,7 +65,7 @@ model Membership {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   list   List   @relation(fields: [listId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@id([userId, listId])
+  @@id(name: "id", [userId, listId])
 }
 
 model Item {
