@@ -1,11 +1,17 @@
 import builder from "@/server/graphql/builder";
 import prisma from "@/server/prisma";
 import storage from "@/server/lib/storage";
+import { decodeGlobalID, encodeGlobalID } from "@pothos/plugin-relay";
 
 export enum Visibility {
   PUBLIC = "PUBLIC",
   PRIVATE = "PRIVATE",
   RESTRICTED = "RESTRICTED"
+}
+
+export enum ROLE_ACCESS {
+  FOLLOWING = "FOLLOWING",
+  EDITOR = "EDITOR"
 }
 
 builder.enumType(Visibility, {
@@ -39,11 +45,14 @@ export const User = builder.prismaNode("User", {
         // note: for now, we'll just display everything.
         // but eventually it will be tailored to the user.
         return prisma.list.findMany({
-          ...query
+          ...query,
+          orderBy: {
+            updatedAt: "desc"
+          }
         });
       },
     }),
-    membership: t.prismaConnection({
+    followingList: t.prismaConnection({
       cursor: "id",
       type: "List",
       resolve(query, parent, args, context, info) {
@@ -52,13 +61,34 @@ export const User = builder.prismaNode("User", {
           where: {
             members: {
               every: {
-                userId: parent.id
+                userId: parent.id,
+                role: "VIEWER"
               }
             }
           }
         })
       },
-    })
+    }),
+    editableList: t.prismaConnection({
+      cursor: "id",
+      type: "List",
+      resolve(query, parent, args, context, info) {
+        return prisma.list.findMany({
+          ...query,
+          where: {
+            members: {
+              every: {
+                userId: parent.id,
+                OR: [
+                  { role: "OWNER" },
+                  { role: "EDITOR"}
+                ]
+              }
+            }
+          }
+        })
+      },
+    }),
   })
 });
 
@@ -111,7 +141,8 @@ export const List = builder.prismaNode("List", {
         const query = await prisma.membership.findFirst({
           where: {
             userId: context.user?.id,
-            listId: parent.id
+            listId: parent.id,
+            role: "VIEWER"
           }
         });
 
@@ -164,14 +195,8 @@ export const List = builder.prismaNode("List", {
         return prisma.membership.findMany({
           ...query,
           where: {
-            AND: [
-              {
-                listId: parent.id
-              },
-              {
-                role: "VIEWER"
-              }
-            ]
+            listId: parent.id,
+            role: "VIEWER"
           }
         })
       },

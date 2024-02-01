@@ -16,8 +16,8 @@ import { ListDetailsQuery } from "./__generated__/ListDetailsQuery.graphql";
 import { ListDetailsEditorsFragment$key } from "./__generated__/ListDetailsEditorsFragment.graphql";
 
 type EditorsProps = {
-  list: ListDetailsEditorsFragment$key
-}
+  list: ListDetailsEditorsFragment$key;
+};
 
 const EditorsListFragment = graphql`
   fragment ListDetailsEditorsFragment on List {
@@ -83,7 +83,7 @@ function List() {
   const { listId } = parmas;
 
   const data = useLazyLoadQuery<ListDetailsQuery>(DetailsQuery, {
-    listId: listId as string
+    listId: listId as string,
   });
 
   const { title, description, thumbnail } = data.List;
@@ -95,18 +95,18 @@ function List() {
         source={{ uri: thumbnail }}
         imageStyle={{
           height: "100%",
-          objectFit: "cover"
+          objectFit: "cover",
         }}>
         <View safe style={{ width: "100%", height: "100%" }}>
-          <Back/>
+          <Back />
         </View>
       </ImageBackground>
       <View style={styles.container}>
         <Text style={styles.title}>{title}</Text>
         <Text>{description}</Text>
-        <Editors list={data.List}/>
+        <Editors list={data.List} />
       </View>
-      <StatusBar animated translucent style="inverted"/>
+      <StatusBar animated translucent style="inverted" />
     </View>
   );
 }
@@ -117,12 +117,12 @@ const styles = StyleSheet.create({
     height: "40%",
   },
   container: {
-    padding: 20
+    padding: 20,
   },
   title: {
     fontSize: 30,
-    fontWeight: "bold"
-  }
+    fontWeight: "bold",
+  },
 });
 
 const editorStyles = StyleSheet.create({
@@ -130,14 +130,14 @@ const editorStyles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    columnGap: 10
+    columnGap: 10,
   },
   avatar: {
     width: 30,
     height: 30,
     backgroundColor: colors.neutral[400],
-    borderRadius: 100
-  }
+    borderRadius: 100,
+  },
 });
 
 export default List;

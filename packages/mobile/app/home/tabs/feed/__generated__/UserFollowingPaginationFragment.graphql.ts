@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2ab04ecc574ad60ed8dbb4dc2032b4de>>
+ * @generated SignedSource<<6aedbe9dd9475052a704035d79ed226e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,19 +10,19 @@
 
 import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type UserEditablePaginationFragment$variables = {
+export type UserFollowingPaginationFragment$variables = {
   count?: number | null | undefined;
-  editableCursor?: string | null | undefined;
+  followingCursor?: string | null | undefined;
   id: string;
 };
-export type UserEditablePaginationFragment$data = {
+export type UserFollowingPaginationFragment$data = {
   readonly node: {
-    readonly " $fragmentSpreads": FragmentRefs<"FeedUserEditableListFragment">;
+    readonly " $fragmentSpreads": FragmentRefs<"FeedFollowingListFragment">;
   } | null | undefined;
 };
-export type UserEditablePaginationFragment = {
-  response: UserEditablePaginationFragment$data;
-  variables: UserEditablePaginationFragment$variables;
+export type UserFollowingPaginationFragment = {
+  response: UserFollowingPaginationFragment$data;
+  variables: UserFollowingPaginationFragment$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -35,7 +35,7 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "editableCursor"
+    "name": "followingCursor"
   },
   {
     "defaultValue": null,
@@ -68,7 +68,7 @@ v4 = [
   {
     "kind": "Variable",
     "name": "after",
-    "variableName": "editableCursor"
+    "variableName": "followingCursor"
   },
   {
     "kind": "Variable",
@@ -81,7 +81,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "UserEditablePaginationFragment",
+    "name": "UserFollowingPaginationFragment",
     "selections": [
       {
         "alias": null,
@@ -94,7 +94,7 @@ return {
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "FeedUserEditableListFragment"
+            "name": "FeedFollowingListFragment"
           }
         ],
         "storageKey": null
@@ -107,7 +107,7 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "UserEditablePaginationFragment",
+    "name": "UserFollowingPaginationFragment",
     "selections": [
       {
         "alias": null,
@@ -125,15 +125,15 @@ return {
               {
                 "alias": null,
                 "args": (v4/*: any*/),
-                "concreteType": "UserEditableListConnection",
+                "concreteType": "UserFollowingListConnection",
                 "kind": "LinkedField",
-                "name": "editableList",
+                "name": "followingList",
                 "plural": false,
                 "selections": [
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "UserEditableListConnectionEdge",
+                    "concreteType": "UserFollowingListConnectionEdge",
                     "kind": "LinkedField",
                     "name": "edges",
                     "plural": true,
@@ -255,9 +255,9 @@ return {
                 "args": (v4/*: any*/),
                 "filters": null,
                 "handle": "connection",
-                "key": "User_editableList",
+                "key": "User_followingList",
                 "kind": "LinkedHandle",
-                "name": "editableList"
+                "name": "followingList"
               }
             ],
             "type": "User",
@@ -269,16 +269,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "ac6a50a25b7d6ab287a017e896389478",
+    "cacheID": "4d258bbfaef77c697a81fbe53866fa7b",
     "id": null,
     "metadata": {},
-    "name": "UserEditablePaginationFragment",
+    "name": "UserFollowingPaginationFragment",
     "operationKind": "query",
-    "text": "query UserEditablePaginationFragment(\n  $count: Int\n  $editableCursor: ID\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...FeedUserEditableListFragment\n    id\n  }\n}\n\nfragment FeedUserEditableListFragment on User {\n  editableList(first: $count, after: $editableCursor) {\n    edges {\n      node {\n        id\n        ...ListFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ListFragment on List {\n  id\n  title\n  thumbnail\n  isFollowing\n  categories\n  description\n  updatedAt\n  owner {\n    name\n    id\n  }\n}\n"
+    "text": "query UserFollowingPaginationFragment(\n  $count: Int\n  $followingCursor: ID\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...FeedFollowingListFragment\n    id\n  }\n}\n\nfragment FeedFollowingListFragment on User {\n  followingList(first: $count, after: $followingCursor) {\n    edges {\n      node {\n        id\n        ...ListFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ListFragment on List {\n  id\n  title\n  thumbnail\n  isFollowing\n  categories\n  description\n  updatedAt\n  owner {\n    name\n    id\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "4b3a420f8855c220fdf373c426836903";
+(node as any).hash = "ebb83954cdf35c72935b58009bd330c1";
 
 export default node;

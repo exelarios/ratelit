@@ -1,5 +1,5 @@
 import { Suspense, useCallback, useState } from "react";
-import { TextInput, FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 import { graphql, useLazyLoadQuery, usePaginationFragment } from "react-relay";
 import { Feather, Ionicons } from '@expo/vector-icons';
 
@@ -30,7 +30,8 @@ const ExploreFeedFragment = graphql`
       edges {
       node {
         id
-        ...ListFragment
+        ...ArticleFragment
+        ...ArticleFragment_updateable
       }
     }
     }
@@ -90,15 +91,16 @@ function ExploreList(props: ExploreListProps) {
     <Suspense
       fallback={<Text>loading . . . </Text>}>
       <FlatList
+        snapToAlignment="start"
+        showsVerticalScrollIndicator={false}
         ListHeaderComponent={Header}
-        ListFooterComponent={Footer}
         refreshing={isLoading}
         onRefresh={handleOnRefresh}
         data={list.data.feed.edges}
         contentContainerStyle={styles.feed}
         keyExtractor={node => node.node.id}
         renderItem={({ item }) =>
-          <Article list={item.node}/>
+          <Article list={item.node} updateable={item.node}/>
         }
       />
     </Suspense>
@@ -136,18 +138,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral[200]
   },
   title: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: "bold"
   },
   feed: {
     display: "flex",
-    paddingHorizontal: 20,
     flexDirection: "column",
     justifyContent: "flex-start",
     rowGap: 10
   },
   heading: {
     display: "flex",
+    paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

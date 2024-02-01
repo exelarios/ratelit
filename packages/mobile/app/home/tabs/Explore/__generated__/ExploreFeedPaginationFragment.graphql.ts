@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<119a93ce888ba1e7c6731783184ae89f>>
+ * @generated SignedSource<<a0b5e357d9f2d63ddef2b3e7e10a34bd>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -75,7 +75,21 @@ v4 = [
     "name": "first",
     "variableName": "count"
   }
-];
+],
+v5 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "description",
+  "storageKey": null
+},
+v6 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+};
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
@@ -175,11 +189,26 @@ return {
                             "name": "categories",
                             "storageKey": null
                           },
+                          (v5/*: any*/),
                           {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
-                            "name": "description",
+                            "name": "updatedAt",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "createdAt",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "role",
                             "storageKey": null
                           },
                           {
@@ -190,13 +219,7 @@ return {
                             "name": "owner",
                             "plural": false,
                             "selections": [
-                              {
-                                "alias": null,
-                                "args": null,
-                                "kind": "ScalarField",
-                                "name": "name",
-                                "storageKey": null
-                              },
+                              (v6/*: any*/),
                               (v3/*: any*/)
                             ],
                             "storageKey": null
@@ -204,8 +227,15 @@ return {
                           {
                             "alias": null,
                             "args": null,
-                            "kind": "ScalarField",
-                            "name": "updatedAt",
+                            "concreteType": "Item",
+                            "kind": "LinkedField",
+                            "name": "items",
+                            "plural": true,
+                            "selections": [
+                              (v3/*: any*/),
+                              (v6/*: any*/),
+                              (v5/*: any*/)
+                            ],
                             "storageKey": null
                           },
                           (v2/*: any*/)
@@ -269,16 +299,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "85341450a7154673ee55eeed350a93f7",
+    "cacheID": "15b5e135fb5c346ba95a5aa94048c88e",
     "id": null,
     "metadata": {},
     "name": "ExploreFeedPaginationFragment",
     "operationKind": "query",
-    "text": "query ExploreFeedPaginationFragment(\n  $count: Int\n  $cursor: ID\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...ExploreFeedFragment\n    id\n  }\n}\n\nfragment ExploreFeedFragment on User {\n  feed(first: $count, after: $cursor) {\n    edges {\n      node {\n        id\n        ...ListFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ListFragment on List {\n  id\n  title\n  thumbnail\n  isFollowing\n  categories\n  description\n  owner {\n    name\n    id\n  }\n  updatedAt\n}\n"
+    "text": "query ExploreFeedPaginationFragment(\n  $count: Int\n  $cursor: ID\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...ExploreFeedFragment\n    id\n  }\n}\n\nfragment ArticleFragment on List {\n  id\n  title\n  thumbnail\n  isFollowing\n  categories\n  description\n  updatedAt\n  createdAt\n  role\n  owner {\n    name\n    id\n  }\n  items {\n    id\n    name\n    description\n  }\n}\n\nfragment ExploreFeedFragment on User {\n  feed(first: $count, after: $cursor) {\n    edges {\n      node {\n        id\n        ...ArticleFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "4b112f51e64c8e859733857ade9a17c0";
+(node as any).hash = "4fa8bec3148fe9db8834a4828576b484";
 
 export default node;

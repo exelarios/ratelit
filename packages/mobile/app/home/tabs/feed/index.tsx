@@ -12,12 +12,14 @@ import List from "@/mobile/components/List";
 
 import { FeedUserEditableListQuery } from "./__generated__/FeedUserEditableListQuery.graphql";
 import { FeedUserEditableListFragment$key } from "./__generated__/FeedUserEditableListFragment.graphql";
+import { FeedFollowingListFragment$key } from "./__generated__/FeedFollowingListFragment.graphql";
 import { useToast } from "@/mobile/context/ToastContext";
 
-const UserEditableListQuery = graphql`
-  query FeedUserEditableListQuery($email: String!, $count: Int!, $cusor: ID) {
+const UserQuery = graphql`
+  query FeedUserEditableListQuery($email: String!, $count: Int!, $followingCursor: ID, $editableCursor: ID) {
     User(email: $email) {
       ...FeedUserEditableListFragment
+      ...FeedFollowingListFragment
     }
   }
 `;
@@ -25,8 +27,23 @@ const UserEditableListQuery = graphql`
 const UserEditableListFragment = graphql`
   fragment FeedUserEditableListFragment on User
   @refetchable(queryName: "UserEditablePaginationFragment") {
-    membership(first: $count, after: $cusor)
-    @connection(key: "UserEditableList_membership") {
+    editableList(first: $count, after: $editableCursor)
+    @connection(key: "User_editableList") {
+      edges {
+        node {
+          id
+          ...ListFragment
+        }
+      }
+    }
+  }
+`;
+
+const UserFollowingListFragment = graphql`
+  fragment FeedFollowingListFragment on User
+  @refetchable(queryName: "UserFollowingPaginationFragment") {
+    followingList(first: $count, after: $followingCursor)
+    @connection(key: "User_followingList") {
       edges {
         node {
           id
@@ -41,7 +58,7 @@ interface ExploreListProps {
   user: FeedUserEditableListFragment$key;
 }
 
-function ExploreList(props: ExploreListProps) {
+function EditableList(props: ExploreListProps) {
   const toast = useToast();
   const [isLoading, setLoading] = useState(false);
   const list = usePaginationFragment(UserEditableListFragment, props.user);
@@ -67,11 +84,55 @@ function ExploreList(props: ExploreListProps) {
   return (
     <Suspense fallback={<Text>loading . . . </Text>}>
       <FlatList
-        data={list.data.membership.edges}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        automaticallyAdjustContentInsets={false}
+        data={list.data.editableList.edges}
         refreshing={isLoading}
         onRefresh={handleOnRefresh}
-        contentContainerStyle={styles.feed}
-        renderItem={({ item }) => <List variant="large" list={item.node}/>}
+        contentContainerStyle={styles.editable}
+        renderItem={({ item }) => <List variant="small" list={item.node}/>}
+        keyExtractor={node => node.node.id}
+      />
+    </Suspense>
+  );
+}
+
+interface FollowingListProps {
+  user: FeedFollowingListFragment$key;
+}
+
+function FollowingList(props: FollowingListProps) {
+  const toast = useToast();
+  const [isLoading, setLoading] = useState(false);
+  const list = usePaginationFragment(UserFollowingListFragment, props.user);
+
+  const handleOnRefresh = useCallback(() => {
+    setLoading(true);
+    list.refetch({
+      first: 10
+    }, {
+      onComplete(error) {
+        if (error) {
+          console.log(error);
+          toast.add({
+            message: error.message
+          });
+        }
+        setLoading(false);
+      },
+      fetchPolicy: "store-and-network"
+    });
+  }, [list]);
+
+  return (
+    <Suspense fallback={<Text>loading . . . </Text>}>
+      <FlatList
+        data={list.data.followingList.edges}
+        refreshing={isLoading}
+        onRefresh={handleOnRefresh}
+        contentContainerStyle={styles.following}
+        renderItem={({ item }) => <List list={item.node}/>}
         keyExtractor={node => node.node.id}
       />
     </Suspense>
@@ -82,9 +143,9 @@ function Explore() {
   const auth = useAuth();
   const user = auth.state.user;
 
-  const data = useLazyLoadQuery<FeedUserEditableListQuery>(UserEditableListQuery, {
+  const data = useLazyLoadQuery<FeedUserEditableListQuery>(UserQuery, {
     email: user.email,
-    count: 10
+    count: 10,
   });
 
   const plus = useMemo(() => {
@@ -103,16 +164,22 @@ function Explore() {
           Create a list
         </Button>
       </View>
-      <View style={styles.list}>
-        <Text style={styles.title}>Your List</Text>
-        <ExploreList user={data.User}/>
+      <View style={{ gap: 15 }}>
+        <View style={styles.section}>
+          <Text style={styles.title}>Your List</Text>
+          <EditableList user={data.User}/>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.title}>Your Following</Text>
+          <FollowingList user={data.User}/>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  feed: {
+  following: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "flex-start",
@@ -124,19 +191,29 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     alignItems: "center"
   },
+  section: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10
+  },
+  editable: {
+    display: "flex",
+    justifyContent: "flex-start",
+    flexDirection: "row",
+    gap: 10
+  },
   list: {
     display: "flex",
-    flex: 1,
     justifyContent: "flex-start",
-    flexDirection: "column",
+    flexDirection: "row",
     gap: 10
   },
   container: {
     flex: 1,
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: "bold"
   }
 });

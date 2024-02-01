@@ -45,6 +45,15 @@ type ItemCommentsConnectionEdge {
   node: Comment!
 }
 
+input ItemCreateInput {
+  description: String
+  name: String!
+  rank: Int!
+
+  """accepts only base64 encoding"""
+  thumbnail: Upload
+}
+
 type List implements Node {
   categories: [String!]!
   createdAt: Date!
@@ -111,6 +120,8 @@ type Membership implements Node {
 }
 
 type Mutation {
+  FollowList(listId: ID!): Membership!
+  createItem(data: ItemCreateInput!, listId: String!): Item!
   createList(data: ListCreateInput!): List!
   login(input: LoginInput!): LoginPayload!
   refreshToken(
@@ -167,14 +178,25 @@ scalar Upload
 type User implements Node {
   avatar: String!
   createdAt: Date!
+  editableList(after: ID, before: ID, first: Int, last: Int): UserEditableListConnection!
   email: String!
   feed(after: ID, before: ID, first: Int, last: Int): UserFeedConnection!
   firstName: String!
+  followingList(after: ID, before: ID, first: Int, last: Int): UserFollowingListConnection!
   id: ID!
   lastName: String!
-  membership(after: ID, before: ID, first: Int, last: Int): UserMembershipConnection!
   name: String!
   userId: ID!
+}
+
+type UserEditableListConnection {
+  edges: [UserEditableListConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserEditableListConnectionEdge {
+  cursor: ID!
+  node: List!
 }
 
 type UserFeedConnection {
@@ -187,12 +209,12 @@ type UserFeedConnectionEdge {
   node: List!
 }
 
-type UserMembershipConnection {
-  edges: [UserMembershipConnectionEdge]!
+type UserFollowingListConnection {
+  edges: [UserFollowingListConnectionEdge]!
   pageInfo: PageInfo!
 }
 
-type UserMembershipConnectionEdge {
+type UserFollowingListConnectionEdge {
   cursor: ID!
   node: List!
 }

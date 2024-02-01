@@ -7,9 +7,7 @@ import Text from "@/mobile/components/Text";
 import View from "@/mobile/components/View";
 import colors from "../design/colors";
 
-interface DropdownProps extends React.ComponentProps<typeof Select> {
-
-}
+interface DropdownProps extends React.ComponentProps<typeof Select> {}
 
 function Dropdown(props: DropdownProps) {
   const { label, onChange, children, ...otherProps } = props;
@@ -21,25 +19,26 @@ function Dropdown(props: DropdownProps) {
 }
 
 export interface ItemProps extends SelectItemProps {
-  icon: keyof (typeof MaterialIcons.glyphMap);
+  icon: keyof typeof MaterialIcons.glyphMap;
   description: string;
 }
 
 function Item(props: ItemProps) {
   const { selectedItem, onSelect } = useSelect();
   const { icon, label, value, description, ...otherProps } = props;
-  
+
   const handleOnPress = useCallback(() => {
     onSelect(value);
   }, [value]);
 
   const isActive = selectedItem === value;
-  
+
   return (
     <Pressable
       {...otherProps}
       onPress={handleOnPress}
-      style={[styles.container, isActive && styles.active]}>
+      style={[styles.container, isActive && styles.active]}
+    >
       <MaterialIcons name={icon} size={30} color={colors.neutral[700]} />
       <View>
         <Text style={styles.label}>{label}</Text>
@@ -56,18 +55,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10,
     padding: 10,
-    gap: 10
+    gap: 10,
   },
   active: {
-    backgroundColor: colors.neutral[200]
+    backgroundColor: colors.neutral[200],
   },
   label: {
     fontWeight: "bold",
-    color: colors.neutral[700]
+    color: colors.neutral[700],
   },
   description: {
-    color: colors.neutral[600]
-  }
+    color: colors.neutral[600],
+  },
 });
 
 Dropdown.Item = Item;

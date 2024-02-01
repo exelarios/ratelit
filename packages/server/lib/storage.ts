@@ -19,7 +19,6 @@ const client = new S3Client({
 });
 
 async function fetch(key: string) {
-  console.log(key);
   const command = new GetObjectCommand({
     Bucket: S3_BUCKET,
     Key: key,
@@ -29,8 +28,6 @@ async function fetch(key: string) {
     const url = await getSignedUrl(client, command, {
       expiresIn: 3600,
     });
-
-    console.log("URL", url);
 
     if (!url) {
       throw new Error("Failed to generate signed URL for fetching image");
@@ -43,10 +40,8 @@ async function fetch(key: string) {
 }
 
 async function upload(file: Blob, path: string) {
-  console.log("buffer", file);
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  console.log(file.type);
   const key = path;
 
   const command = new PutObjectCommand({
@@ -55,8 +50,6 @@ async function upload(file: Blob, path: string) {
     Body: buffer,
     ContentType: file.type
   });
-
-  console.log(command);
 
   try {
     await client.send(command);

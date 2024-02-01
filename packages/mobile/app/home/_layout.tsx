@@ -36,6 +36,7 @@ export default function AppLayout() {
       }}>
       <Stack.Screen name="tabs"/>
       <Stack.Screen name="ListDetails/index"/>
+      <Stack.Screen name="Article/index"/>
       <Stack.Screen name="Create"/>
     </Stack>
   );

@@ -3,6 +3,8 @@ import prisma from "@/server/prisma";
 import storage from "@/server/lib/storage";
 
 import { Visibility } from "@/server/graphql/types";
+import { createGraphQLError } from "graphql-yoga";
+import { decodeGlobalID } from "@pothos/plugin-relay";
 
 const base64ToFile = (b64Data: string, contentType: string, fileName: string, sliceSize=512) => {
   const byteCharacters = atob(b64Data);
@@ -95,5 +97,55 @@ builder.mutationField("createList", (t) => t.prismaField({
       ...data,
       thumbnail: image
     }
+  }
+}));
+
+builder.mutationField("FollowList", (t) => t.prismaField({
+  type: "Membership",
+  args: {
+    listId: t.arg({
+      type: "ID",
+      required: true
+    })
+  },
+  resolve: async (query, parent, args, context) => {
+    const listId = args.listId as string;
+    const userId = context.user?.id!;
+
+    const { id } = decodeGlobalID(listId);
+
+    const membership = await prisma.membership.findFirst({
+      ...query,
+      where: {
+        listId: id,
+        userId: userId
+      }
+    });
+
+    if (!membership) {
+      return prisma.membership.create({
+        ...query,
+        data: {
+          role: "VIEWER",
+          listId: id, 
+          userId: userId
+        }
+      });
+    }
+
+    if (membership.role === "VIEWER") {
+      return prisma.membership.delete({
+        ...query,
+        where: {
+          userId_listId: {
+            listId: id,
+            userId: userId
+          }
+        }
+      });
+    }
+
+    // If it isn't the `VIEWER` role, we will just ignore mutation.
+    throw createGraphQLError("The user already has a role for this list.");
   }
 }));

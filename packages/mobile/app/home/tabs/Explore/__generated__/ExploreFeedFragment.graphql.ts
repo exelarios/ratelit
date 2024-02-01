@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a440c0dd2dc345b64924c1056dd2feae>>
+ * @generated SignedSource<<b312bc91b10d4684ebef643d5009d376>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,8 +14,9 @@ export type ExploreFeedFragment$data = {
   readonly feed: {
     readonly edges: ReadonlyArray<{
       readonly node: {
+        readonly $updatableFragmentSpreads: FragmentRefs<"ArticleFragment_updateable">;
         readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"ListFragment">;
+        readonly " $fragmentSpreads": FragmentRefs<"ArticleFragment">;
       };
     } | null | undefined>;
   };
@@ -108,7 +109,12 @@ return {
                 {
                   "args": null,
                   "kind": "FragmentSpread",
-                  "name": "ListFragment"
+                  "name": "ArticleFragment"
+                },
+                {
+                  "args": null,
+                  "kind": "FragmentSpread",
+                  "name": "ArticleFragment_updateable"
                 },
                 {
                   "alias": null,
@@ -165,6 +171,6 @@ return {
 };
 })();
 
-(node as any).hash = "4b112f51e64c8e859733857ade9a17c0";
+(node as any).hash = "4fa8bec3148fe9db8834a4828576b484";
 
 export default node;

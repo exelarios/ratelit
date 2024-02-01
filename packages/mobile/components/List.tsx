@@ -12,6 +12,7 @@ import { ListFragment$key } from "./__generated__/ListFragment.graphql";
 
 type ListProps = {
   list: ListFragment$key;
+  variant?: "large" | "small";
 }
 
 const ListFragment = graphql`
@@ -22,16 +23,16 @@ const ListFragment = graphql`
     isFollowing
     categories
     description
+    updatedAt
     owner {
       name
     }
-    updatedAt
   }
 `;
 
 function List(props: ListProps) {
+  const { variant = "large" } = props;
   const data = useFragment(ListFragment, props.list);
-
   const { id, title, isFollowing, thumbnail, owner, description } = data;
 
   return (
@@ -39,7 +40,7 @@ function List(props: ListProps) {
       source={{ uri: thumbnail }}
       resizeMode="center"
       imageStyle={{ borderRadius: 10, objectFit: "cover" }}
-      style={styles.wrapper}>
+      style={[styles.wrapper, variant === "small" && { width: 150, height: 250 }]}>
       <LinearGradient
         colors={["transparent", "rgba(0,0,0,0.8)"]}
         style={styles.gradient}>
@@ -52,16 +53,18 @@ function List(props: ListProps) {
           }}>
             <View style={styles.container}>
               <View style={[styles.col, { justifyContent: "flex-end" }]}>
-                <Ionicons
-                  name={isFollowing ? "bookmark-sharp" : "bookmark-outline"}
-                  size={24}
-                  color="white"
-                />
+                {variant !== "small" &&
+                  <Ionicons
+                    name={isFollowing ? "bookmark-sharp" : "bookmark-outline"}
+                    size={24}
+                    color="white"
+                  />
+                }
               </View>
               <View style={{ display: "flex", flexDirection: "column" }}>
                 <Text style={[styles.text, styles.owner]}>{owner.name}</Text>
                 <Text style={styles.title}>{title}</Text>
-                <Text style={[styles.text, styles.description]}>{description}</Text>
+                <Text numberOfLines={1} style={[styles.text, styles.description]}>{description}</Text>
               </View>
             </View>
         </Link>
@@ -79,7 +82,7 @@ const styles = StyleSheet.create({
   },
   gradient: {
     width: "100%",
-    height: 150,
+    height: "100%",
     borderRadius: 10,
   },
   col: {
@@ -107,7 +110,7 @@ const styles = StyleSheet.create({
     fontWeight: "500"
   },
   description: {
-    fontSize: 12
+    fontSize: 12,
   }
 });
 

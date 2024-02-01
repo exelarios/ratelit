@@ -4,6 +4,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   TouchableWithoutFeedback
 } from "react-native";
@@ -47,7 +48,7 @@ function Create() {
   const form = useForm<ListCreateInput>({
     state: {
       title: "",
-      visibility: "PUBLIC",
+      visibility: "PRIVATE",
       categories: [],
       description: "",
       thumbnail: null
@@ -142,64 +143,66 @@ function Create() {
   return (
     <View safe style={styles.container}>
       <Back/>
-      <Text style={styles.title}>Create a list</Text>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.inner}>
-            <View style={styles.form}>
-              <ImageBackground
-                source={photo ? { uri: photo } : null}
-                style={[styles.thumbnail, photo ? { borderWidth: 0 } : null]}
-                imageStyle={{ borderRadius: 10 }}>
-                <Button
-                  onPress={handleOnImagePicker}>
-                  {!photo ? "Pick an image from camera roll" : null}
-                </Button>
-              </ImageBackground>
-              <TextInput
-                label="Name"
-                placeholder="Best 'Your Mom' Jokes of All Time"
-                onChangeText={(text) => form.handleOnChange("title", text)}
-                message={form.message?.title}
-              />
-              <Dropdown
-                label="Visibility"
-                defaultValue="Select a visibility"
-                message={form.message?.visibility}
-                onChange={handleOnSelectOnChange}>
-                <Dropdown.Item
-                  label="Private"
-                  value="Private"
-                  icon="lock-outline"
-                  description="Only you have access to this list."
+      <ScrollView>
+        <Text style={styles.title}>Create a list</Text>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.inner}>
+              <View style={styles.form}>
+                <ImageBackground
+                  source={photo ? { uri: photo } : null}
+                  style={[styles.thumbnail, photo ? { borderWidth: 0 } : null]}
+                  imageStyle={{ borderRadius: 10 }}>
+                  <Button
+                    onPress={handleOnImagePicker}>
+                    {!photo ? "Pick an image from camera roll" : null}
+                  </Button>
+                </ImageBackground>
+                <TextInput
+                  label="Name"
+                  placeholder="Best 'Your Mom' Jokes of All Time"
+                  onChangeText={(text) => form.handleOnChange("title", text)}
+                  message={form.message?.title}
                 />
-                <Dropdown.Item
-                  label="Public"
-                  value="Public"
-                  icon="public"
-                  description="Anyone can view to this list."
+                {/* <Dropdown
+                  label="Visibility"
+                  defaultValue="Select a visibility"
+                  message={form.message?.visibility}
+                  onChange={handleOnSelectOnChange}>
+                  <Dropdown.Item
+                    label="Private"
+                    value="Private"
+                    icon="lock-outline"
+                    description="Only you have access to this list."
+                  />
+                  <Dropdown.Item
+                    label="Public"
+                    value="Public"
+                    icon="public"
+                    description="Anyone can view to this list."
+                  />
+                  <Dropdown.Item
+                    label="Restricted"
+                    value="Restricted"
+                    icon="check-circle-outline"
+                    description="Only approved can view this list."
+                  />
+                </Dropdown> */}
+                <TextInput
+                  multiline
+                  message={form.message?.description}
+                  label="Description"
+                  placeholder="I have been bainstorming your mom jokes since I was in 7th grade. I am fully edcuated in ranking your mom."
+                  onChangeText={(text) => form.handleOnChange("description", text)}
                 />
-                <Dropdown.Item
-                  label="Restricted"
-                  value="Restricted"
-                  icon="check-circle-outline"
-                  description="Only approved can view this list."
-                />
-              </Dropdown>
-              <TextInput
-                multiline
-                message={form.message?.description}
-                label="Description"
-                placeholder="I have been bainstorming your mom jokes since I was in 7th grade. I am fully edcuated in ranking your mom."
-                onChangeText={(text) => form.handleOnChange("description", text)}
-              />
-              <Button variant="fill" onPress={form.onSubmit}>Create list</Button>
+                <Button variant="fill" onPress={form.onSubmit}>Create list</Button>
+              </View>
             </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </ScrollView>
     </View>
   );
 }
