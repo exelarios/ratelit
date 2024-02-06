@@ -46,7 +46,7 @@ function List(props: ListProps) {
         style={styles.gradient}>
         <Link
           href={{
-            pathname: "/Home/ListDetails",
+            pathname: "/Home/Article",
             params: {
               listId: id
             }
@@ -63,7 +63,7 @@ function List(props: ListProps) {
               </View>
               <View style={{ display: "flex", flexDirection: "column" }}>
                 <Text style={[styles.text, styles.owner]}>{owner.name}</Text>
-                <Text style={styles.title}>{title}</Text>
+                <Text numberOfLines={1} style={styles.title}>{title}</Text>
                 <Text numberOfLines={1} style={[styles.text, styles.description]}>{description}</Text>
               </View>
             </View>
@@ -75,8 +75,9 @@ function List(props: ListProps) {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: "bold",
+    fontFamily: "Georgia",
     color: colors.neutral[100],
     marginVertical: 3,
   },

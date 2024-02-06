@@ -9,26 +9,26 @@ import Text from "@/mobile/components/Text";
 import Button from "@/mobile/components/Button";
 import { useAuth } from "@/mobile/context/AuthContext";
 import List from "@/mobile/components/List";
+import colors from "@/mobile/design/colors";
+import { TabOptions } from "@ratelit/shared/types";
 
-import { FeedUserEditableListQuery } from "./__generated__/FeedUserEditableListQuery.graphql";
-import { FeedUserEditableListFragment$key } from "./__generated__/FeedUserEditableListFragment.graphql";
-import { FeedFollowingListFragment$key } from "./__generated__/FeedFollowingListFragment.graphql";
+import { FeedUserListQuery } from "./__generated__/FeedUserListQuery.graphql";
+import { FeedListFragment$key } from "./__generated__/FeedListFragment.graphql";
 import { useToast } from "@/mobile/context/ToastContext";
 
 const UserQuery = graphql`
-  query FeedUserEditableListQuery($email: String!, $count: Int!, $followingCursor: ID, $editableCursor: ID) {
+  query FeedUserListQuery($email: String!, $count: Int!, $cursor: ID, $tabOption: ListTabOptions) {
     User(email: $email) {
-      ...FeedUserEditableListFragment
-      ...FeedFollowingListFragment
+      ...FeedListFragment
     }
   }
 `;
 
-const UserEditableListFragment = graphql`
-  fragment FeedUserEditableListFragment on User
-  @refetchable(queryName: "UserEditablePaginationFragment") {
-    editableList(first: $count, after: $editableCursor)
-    @connection(key: "User_editableList") {
+const UserListFragemnt = graphql`
+  fragment FeedListFragment on User
+  @refetchable(queryName: "UserListPaginationFragment") {
+    list(first: $count, after: $cursor, tabOption: $tabOption)
+    @connection(key: "User_list") {
       edges {
         node {
           id
@@ -38,79 +38,23 @@ const UserEditableListFragment = graphql`
     }
   }
 `;
-
-const UserFollowingListFragment = graphql`
-  fragment FeedFollowingListFragment on User
-  @refetchable(queryName: "UserFollowingPaginationFragment") {
-    followingList(first: $count, after: $followingCursor)
-    @connection(key: "User_followingList") {
-      edges {
-        node {
-          id
-          ...ListFragment
-        }
-      }
-    }
-  }
-`;
-
-interface ExploreListProps {
-  user: FeedUserEditableListFragment$key;
-}
-
-function EditableList(props: ExploreListProps) {
-  const toast = useToast();
-  const [isLoading, setLoading] = useState(false);
-  const list = usePaginationFragment(UserEditableListFragment, props.user);
-
-  const handleOnRefresh = useCallback(() => {
-    setLoading(true);
-    list.refetch({
-      first: 10
-    }, {
-      onComplete(error) {
-        if (error) {
-          console.log(error);
-          toast.add({
-            message: error.message
-          });
-        }
-        setLoading(false);
-      },
-      fetchPolicy: "store-and-network"
-    });
-  }, [list]);
-
-  return (
-    <Suspense fallback={<Text>loading . . . </Text>}>
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        automaticallyAdjustContentInsets={false}
-        data={list.data.editableList.edges}
-        refreshing={isLoading}
-        onRefresh={handleOnRefresh}
-        contentContainerStyle={styles.editable}
-        renderItem={({ item }) => <List variant="small" list={item.node}/>}
-        keyExtractor={node => node.node.id}
-      />
-    </Suspense>
-  );
-}
 
 interface FollowingListProps {
-  user: FeedFollowingListFragment$key;
+  tab: TabOptions;
+  user: FeedListFragment$key;
 }
 
 function FollowingList(props: FollowingListProps) {
+  const { tab } = props;
   const toast = useToast();
   const [isLoading, setLoading] = useState(false);
-  const list = usePaginationFragment(UserFollowingListFragment, props.user);
+  const list = usePaginationFragment(UserListFragemnt, props.user);
 
   const handleOnRefresh = useCallback(() => {
     setLoading(true);
     list.refetch({
-      first: 10
+      first: 10,
+      TabOptions: tab
     }, {
       onComplete(error) {
         if (error) {
@@ -128,7 +72,7 @@ function FollowingList(props: FollowingListProps) {
   return (
     <Suspense fallback={<Text>loading . . . </Text>}>
       <FlatList
-        data={list.data.followingList.edges}
+        data={list.data.list.edges}
         refreshing={isLoading}
         onRefresh={handleOnRefresh}
         contentContainerStyle={styles.following}
@@ -142,10 +86,12 @@ function FollowingList(props: FollowingListProps) {
 function Explore() {
   const auth = useAuth();
   const user = auth.state.user;
+  const [currentTab, setCurrentTab] = useState<TabOptions>(TabOptions.All);
 
-  const data = useLazyLoadQuery<FeedUserEditableListQuery>(UserQuery, {
+  const data = useLazyLoadQuery<FeedUserListQuery>(UserQuery, {
     email: user.email,
     count: 10,
+    tabOption: currentTab
   });
 
   const plus = useMemo(() => {
@@ -156,7 +102,25 @@ function Explore() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Your List</Text>
       <View style={styles.topbar}>
+        <View style={{ display: "flex", flexDirection: "row" }}>
+          <Button
+            onPress={() => setCurrentTab(TabOptions.All)}
+            style={[styles.button, currentTab === TabOptions.All && styles.active]}>
+            All
+          </Button>
+          <Button
+            onPress={() => setCurrentTab(TabOptions.Following)}
+            style={[styles.button, currentTab === TabOptions.Following && styles.active]}>
+            Watchlist
+          </Button>
+          <Button
+            onPress={() => setCurrentTab(TabOptions.Author)}
+            style={[styles.button, currentTab === TabOptions.Author && styles.active]}>
+            Author
+          </Button>
+        </View>
         <Button
           icon={plus}
           fontWeight="500"
@@ -164,31 +128,24 @@ function Explore() {
           Create a list
         </Button>
       </View>
-      <View style={{ gap: 15 }}>
-        <View style={styles.section}>
-          <Text style={styles.title}>Your List</Text>
-          <EditableList user={data.User}/>
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.title}>Your Following</Text>
-          <FollowingList user={data.User}/>
-        </View>
-      </View>
+      <FollowingList tab={currentTab} user={data.User}/>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   following: {
+    paddingTop: 5,
     display: "flex",
     flexDirection: "column",
     justifyContent: "flex-start",
     rowGap: 10
   },
   topbar: {
+    paddingVertical: 10,
     display: "flex",
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     alignItems: "center"
   },
   section: {
@@ -215,6 +172,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold"
+  },
+  active: {
+    backgroundColor: colors.teal[300],
+    borderRadius: 10,
+  },
+  button: {
+    paddingVertical: 2,
+    paddingHorizontal: 10
   }
 });
 

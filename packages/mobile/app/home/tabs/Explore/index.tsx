@@ -31,7 +31,6 @@ const ExploreFeedFragment = graphql`
       node {
         id
         ...ArticleFragment
-        ...ArticleFragment_updateable
       }
     }
     }

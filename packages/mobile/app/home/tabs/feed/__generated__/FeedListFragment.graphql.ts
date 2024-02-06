@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<0b0b2bd5dd4804a37d038192465c1813>>
+ * @generated SignedSource<<014f05f35e45af93be405154cf8470a6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,8 +10,9 @@
 
 import { ReaderFragment, RefetchableFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type FeedUserEditableListFragment$data = {
-  readonly editableList: {
+export type FeedListFragment$data = {
+  readonly id: string;
+  readonly list: {
     readonly edges: ReadonlyArray<{
       readonly node: {
         readonly id: string;
@@ -19,17 +20,16 @@ export type FeedUserEditableListFragment$data = {
       };
     } | null | undefined>;
   };
-  readonly id: string;
-  readonly " $fragmentType": "FeedUserEditableListFragment";
+  readonly " $fragmentType": "FeedListFragment";
 };
-export type FeedUserEditableListFragment$key = {
-  readonly " $data"?: FeedUserEditableListFragment$data;
-  readonly " $fragmentSpreads": FragmentRefs<"FeedUserEditableListFragment">;
+export type FeedListFragment$key = {
+  readonly " $data"?: FeedListFragment$data;
+  readonly " $fragmentSpreads": FragmentRefs<"FeedListFragment">;
 };
 
 const node: ReaderFragment = (function(){
 var v0 = [
-  "editableList"
+  "list"
 ],
 v1 = {
   "alias": null,
@@ -46,7 +46,11 @@ return {
     },
     {
       "kind": "RootArgument",
-      "name": "editableCursor"
+      "name": "cursor"
+    },
+    {
+      "kind": "RootArgument",
+      "name": "tabOption"
     }
   ],
   "kind": "Fragment",
@@ -54,7 +58,7 @@ return {
     "connection": [
       {
         "count": "count",
-        "cursor": "editableCursor",
+        "cursor": "cursor",
         "direction": "forward",
         "path": (v0/*: any*/)
       }
@@ -63,7 +67,7 @@ return {
       "connection": {
         "forward": {
           "count": "count",
-          "cursor": "editableCursor"
+          "cursor": "cursor"
         },
         "backward": null,
         "path": (v0/*: any*/)
@@ -71,27 +75,33 @@ return {
       "fragmentPathInResult": [
         "node"
       ],
-      "operation": require('./UserEditablePaginationFragment.graphql'),
+      "operation": require('./UserListPaginationFragment.graphql'),
       "identifierInfo": {
         "identifierField": "id",
         "identifierQueryVariableName": "id"
       }
     }
   },
-  "name": "FeedUserEditableListFragment",
+  "name": "FeedListFragment",
   "selections": [
     {
-      "alias": "editableList",
-      "args": null,
-      "concreteType": "UserEditableListConnection",
+      "alias": "list",
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "tabOption",
+          "variableName": "tabOption"
+        }
+      ],
+      "concreteType": "UserListConnection",
       "kind": "LinkedField",
-      "name": "__User_editableList_connection",
+      "name": "__User_list_connection",
       "plural": false,
       "selections": [
         {
           "alias": null,
           "args": null,
-          "concreteType": "UserEditableListConnectionEdge",
+          "concreteType": "UserListConnectionEdge",
           "kind": "LinkedField",
           "name": "edges",
           "plural": true,
@@ -165,6 +175,6 @@ return {
 };
 })();
 
-(node as any).hash = "4b3a420f8855c220fdf373c426836903";
+(node as any).hash = "0fd06f522dae15b6857fd64aff24ca1d";
 
 export default node;

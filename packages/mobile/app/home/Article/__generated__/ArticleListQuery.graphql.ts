@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ddc99d42b29ab5271e00d52ab87065cd>>
+ * @generated SignedSource<<f5d3cfcc9e8ca3077264b2086faf5ef3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -23,10 +23,12 @@ export type ArticleListQuery$data = {
       readonly name: string;
     }>;
     readonly owner: {
+      readonly avatar: string;
       readonly name: string;
     };
     readonly thumbnail: string;
     readonly title: string;
+    readonly updatedAt: any;
   };
 };
 export type ArticleListQuery = {
@@ -95,7 +97,21 @@ v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
+  "name": "updatedAt",
+  "storageKey": null
+},
+v9 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
   "name": "name",
+  "storageKey": null
+},
+v10 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "avatar",
   "storageKey": null
 };
 return {
@@ -119,6 +135,7 @@ return {
           (v5/*: any*/),
           (v6/*: any*/),
           (v7/*: any*/),
+          (v8/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -127,7 +144,7 @@ return {
             "name": "items",
             "plural": true,
             "selections": [
-              (v8/*: any*/),
+              (v9/*: any*/),
               (v4/*: any*/)
             ],
             "storageKey": null
@@ -140,7 +157,8 @@ return {
             "name": "owner",
             "plural": false,
             "selections": [
-              (v8/*: any*/)
+              (v9/*: any*/),
+              (v10/*: any*/)
             ],
             "storageKey": null
           }
@@ -171,6 +189,7 @@ return {
           (v5/*: any*/),
           (v6/*: any*/),
           (v7/*: any*/),
+          (v8/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -179,7 +198,7 @@ return {
             "name": "items",
             "plural": true,
             "selections": [
-              (v8/*: any*/),
+              (v9/*: any*/),
               (v4/*: any*/),
               (v2/*: any*/)
             ],
@@ -193,7 +212,8 @@ return {
             "name": "owner",
             "plural": false,
             "selections": [
-              (v8/*: any*/),
+              (v9/*: any*/),
+              (v10/*: any*/),
               (v2/*: any*/)
             ],
             "storageKey": null
@@ -204,16 +224,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "a95acac21e33ac9056bd093f95596c5d",
+    "cacheID": "2916d4fac37f857ac91dc9830e2fe721",
     "id": null,
     "metadata": {},
     "name": "ArticleListQuery",
     "operationKind": "query",
-    "text": "query ArticleListQuery(\n  $listId: String!\n) {\n  List(id: $listId) {\n    id\n    title\n    description\n    thumbnail\n    isFollowing\n    createdAt\n    items {\n      name\n      description\n      id\n    }\n    owner {\n      name\n      id\n    }\n  }\n}\n"
+    "text": "query ArticleListQuery(\n  $listId: String!\n) {\n  List(id: $listId) {\n    id\n    title\n    description\n    thumbnail\n    isFollowing\n    createdAt\n    updatedAt\n    items {\n      name\n      description\n      id\n    }\n    owner {\n      name\n      avatar\n      id\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "26f28f837dbd6ac59abda9b5e5c129a1";
+(node as any).hash = "bacd947acff9577f3dea0040d60cb34e";
 
 export default node;

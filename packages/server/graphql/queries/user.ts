@@ -1,4 +1,5 @@
 import builder from "@/server/graphql/builder";
+import storage from "@/server/lib/storage";
 import prisma from "@/server/prisma";
 import { createGraphQLError } from "graphql-yoga";
 

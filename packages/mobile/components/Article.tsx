@@ -9,15 +9,16 @@ import Text from "@/mobile/components/Text";
 import colors from "@/mobile/design/colors";
 import formatTime from "@/mobile/utils/formatTime";
 
+import useFollowListMutation from "@/mobile/hooks/useFollowListMutation";
+
 import { ArticleFragment$key } from "./__generated__/ArticleFragment.graphql";
 import { Link } from "expo-router";
-import { ArticleFollowListMutation } from "./__generated__/ArticleFollowListMutation.graphql";
 import { useToast } from "../context/ToastContext";
-import { ArticleFragment_updateable$key } from "./__generated__/ArticleFragment_updateable.graphql";
+// import { ArticleFragment_updateable$key } from "./__generated__/ArticleFragment_updateable.graphql";
 
 type ArticleProps = {
   list: ArticleFragment$key;
-  updateable: ArticleFragment_updateable$key
+  updateable: any;
 }
 
 const ArticleFragment = graphql`
@@ -42,20 +43,12 @@ const ArticleFragment = graphql`
   }
 `;
 
-const FollowListMuatation = graphql`
-  mutation ArticleFollowListMutation($listId: ID!) {
-    FollowList(listId: $listId) {
-      role
-    }
-  }
-`;
-
 const windowWidth = Dimensions.get("window").width;
 
 function Article(props: ArticleProps) {
   const toast = useToast();
   const data = useFragment(ArticleFragment, props.list);
-  const [followingMutation, isInFlight] = useMutation<ArticleFollowListMutation>(FollowListMuatation);
+  const [commitFollowList, isInFlight] = useFollowListMutation();
   const { id, title, description, thumbnail, owner, isFollowing, createdAt } = data;
 
   const createdTimestamp = useMemo(() => {
@@ -63,33 +56,7 @@ function Article(props: ArticleProps) {
   }, [createdAt]);
 
   const handleOnFollowingMutation = useCallback(() => {
-    followingMutation({
-      variables: {
-        listId: id
-      },
-      onCompleted: () => {
-        toast.add({
-          message: isFollowing ? `You are no longer following ${title}` : `You are now following ${title}`,
-        });
-      },
-      onError(error) {
-        console.log(error);
-        toast.add({
-          message: error?.source.errors[0].message || error.message
-        });
-      },
-      updater: (store) => {
-        const fragment = graphql`
-          fragment ArticleFragment_updateable on List @updatable {
-            isFollowing
-            role
-          }
-        `;
-
-        const { updatableData } = store.readUpdatableFragment(fragment, props.updateable);
-        updatableData.isFollowing = !updatableData.isFollowing;
-      }
-    })
+    commitFollowList(id);
   }, [data]);
 
   return (
@@ -174,6 +141,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
+    fontFamily: "Georgia",
     fontWeight: "bold",
     marginVertical: 5
   },

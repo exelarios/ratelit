@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import schema from "@/server/graphql/schema";
 import type { User } from "@/server/graphql/builder";
 import secrets from "@/server/utils/secrets";
+import { encodeGlobalID } from "@pothos/plugin-relay";
 
 const PORT = Bun.env.PORT || 3000;
 const IS_PRODUCTION = process.env.PRODUCTION === "PRODUCTION";
@@ -41,7 +42,7 @@ const yoga = createYoga({
         ...output,
         user: {
           email: payload?.email,
-          id: payload?.id
+          id: payload?.id ? encodeGlobalID("User", payload.id) : undefined
         }
       }
     } catch (error) {

@@ -1,15 +1,16 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { StyleSheet, Image, Dimensions, ScrollView, NativeSyntheticEvent, TextLayoutEventData } from "react-native";
+import React, { useMemo } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { StyleSheet, Image, Dimensions, ScrollView } from "react-native";
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { Ionicons } from '@expo/vector-icons';
 
 import View from "@/mobile/components/View";
+import Back from "@/mobile/components/Back";
 import Text from "@/mobile/components/Text";
 import colors from "@/mobile/design/colors";
-import { Ionicons } from '@expo/vector-icons';
-import { graphql, useLazyLoadQuery } from "react-relay";
-import { useLocalSearchParams } from "expo-router";
+
+import useFollowListMutation from "@/mobile/hooks/useFollowListMutation";
 import { ArticleListQuery } from "./__generated__/ArticleListQuery.graphql";
-import formatTime from "@/mobile/utils/formatTime";
-import Back from "@/mobile/components/Back";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -22,12 +23,14 @@ const ArticleQuery = graphql`
       thumbnail
       isFollowing
       createdAt
+      updatedAt
       items {
         name
         description
       }
       owner {
         name
+        avatar
       }
     }
   }
@@ -37,15 +40,22 @@ function Article() {
   const parmas = useLocalSearchParams();
   const { listId } = parmas;
 
+  const [commitFollowList, isInFlight] = useFollowListMutation();
   const data = useLazyLoadQuery<ArticleListQuery>(ArticleQuery, {
     listId: listId as string
   });
 
-  const { title, description, thumbnail, isFollowing, owner, createdAt, items } = data.List;
+  const { id, title, description, thumbnail, isFollowing, owner, updatedAt, items } = data.List;
 
-  const createdTimestamp = useMemo(() => {
-    return formatTime(new Date(createdAt));
-  }, [createdAt]);
+  const updatedTimestamp = useMemo(() => {
+    const date = new Date(updatedAt);
+    return Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric"
+    }).format(date);
+  }, [updatedAt]);
 
   const listings = useMemo(() => {
     return items.map((item) => {
@@ -73,21 +83,35 @@ function Article() {
           />
           <View style={styles.content}>
             <View style={styles.heading}>
-              <Text style={[styles.text, styles.owner]}>{owner.name}</Text>
+              <Text style={[styles.text, styles.location]}>San Gabriel, CA</Text>
               <Ionicons
+                disabled={isInFlight}
+                onPress={() => commitFollowList(id)}
                 suppressHighlighting
                 name={isFollowing ? "bookmark" : "bookmark-outline"}
                 size={24}
               />
             </View>
             <Text style={styles.title}>{title}</Text>
-            <Text
-              style={[styles.text, styles.description]}>
-              {description}
-            </Text>
+            <View style={{ rowGap: 10 }}>
+              <View>
+                <Text style={styles.label}>Last updated</Text>
+                <Text style={[styles.text, styles.date]}>{updatedTimestamp}</Text>
+              </View>
+              <View style={{ rowGap: 5 }}>
+                <Text style={styles.label}>Authors</Text>
+                <View style={{ display: "flex", flexDirection: "row", alignItems: "center", columnGap: 10 }}>
+                  <Image source={{ uri: owner.avatar }} style={styles.avatar}/>
+                  <Text style={[styles.text, styles.owner]}>{owner.name}</Text>
+                </View>
+              </View>
+              <Text
+                style={[styles.text, styles.description]}>
+                {description}
+              </Text>
+            </View>
           </View>
           <View style={styles.footer}>
-            <Text style={styles.timestamp}>{createdTimestamp}</Text>
           </View>
         </View>
         <View style={styles.divider}/>
@@ -128,27 +152,44 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral[300]
   },
   title: {
-    fontSize: 28,
+    fontSize: 35,
+    fontFamily: "Georgia",
     fontWeight: "bold",
-    marginVertical: 5
+    marginBottom: 10
   },
   text: {
     color: "black"
   },
+  label: {
+    fontSize: 15,
+    fontFamily: "Georgia",
+  },
+  date: {
+    fontSize: 20,
+    fontFamily: "Georgia",
+    fontStyle: "italic"
+  },
+  location: {
+    fontFamily: "Georgia",
+  },
   owner: {
     fontSize: 15,
-    fontWeight: "500",
-    color: colors.neutral[600]
+    fontFamily: "Georgia",
   },
   description: {
+    paddingVertical: 10,
     color: colors.neutral[500]
   },
   close: {
     color: colors.neutral[600]
   },
+  avatar: {
+    borderRadius: 50,
+    width: 30,
+    aspectRatio: 1
+  },
   thumbnail: {
     width: "100%",
-    // height: 250,
     aspectRatio: 1,
     borderRadius: 10
   }

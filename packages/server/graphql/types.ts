@@ -1,6 +1,11 @@
 import builder from "@/server/graphql/builder";
 import prisma from "@/server/prisma";
 import storage from "@/server/lib/storage";
+import { Role } from "@prisma/client";
+
+import { TabOptions } from "@/shared/types";
+import { createGraphQLError } from "graphql-yoga";
+import { decodeGlobalID } from "@pothos/plugin-relay";
 
 export enum Visibility {
   PUBLIC = "PUBLIC",
@@ -12,6 +17,10 @@ builder.enumType(Visibility, {
   name: "Visibility"
 });
 
+builder.enumType(TabOptions, {
+  name: "ListTabOptions"
+});
+
 export const User = builder.prismaNode("User", {
   id: {
     field: "id",
@@ -20,7 +29,24 @@ export const User = builder.prismaNode("User", {
     firstName: t.exposeString("firstName"),
     lastName: t.exposeString("lastName"),
     email: t.exposeString("email"),
-    avatar: t.exposeString("avatar"),
+    avatar: t.string({
+      select: {
+        avatar: true
+      },
+      resolve: async (parent, args) => {
+        const image = await storage.fetch(parent.avatar);
+
+        if (!image) {
+          throw createGraphQLError(`The user's avatar failed to load.`, {
+            extensions: {
+              code: "USER_AVATAER_FAILED"
+            }
+          });
+        }
+
+        return image;
+      }
+    }),
     name: t.string({
       select: {
         firstName: true,
@@ -48,53 +74,63 @@ export const User = builder.prismaNode("User", {
     list: t.prismaConnection({
       type: "List",
       cursor: "id",
-      resolve: async (query, parent, args, context, info) => {
-        return prisma.list.findMany({
-          include: {
-            members: {
-              where: {
-                userId: parent.id,
-              }
-            }
-          }
+      args: {
+        tabOption: t.arg({
+          type: TabOptions
         })
-      }
-    }),
-    followingList: t.prismaConnection({
-      cursor: "id",
-      type: "List",
-      resolve: async (query, parent, args, context, info) => {
-        return prisma.list.findMany({
-          include: {
-            members: {
-              where: {
-                userId: parent.id,
-                role: "VIEWER"
-              }
-            }
-          }
-        });
       },
-    }),
-    editableList: t.prismaConnection({
-      cursor: "id",
-      type: "List",
-      resolve(query, parent, args, context, info) {
+      resolve: async (query, parent, args, context, info) => {
+        if (args.tabOption === TabOptions.Author) {
+          return prisma.list.findMany({
+            ...query,
+            where: {
+              members: {
+                every: {
+                  userId: parent.id,
+                  OR: [
+                    { role: Role.EDITOR },
+                    { role: Role.OWNER }
+                  ]
+                }
+              }
+            },
+            orderBy: {
+              updatedAt: "desc"
+            }
+          });
+        }
+
+        if (args.tabOption === TabOptions.Following) {
+          return prisma.list.findMany({
+            ...query,
+            where: {
+              members: {
+                some: {
+                  role: Role.VIEWER,
+                  userId: parent.id
+                }
+              }
+            },
+            orderBy: {
+              updatedAt: "desc"
+            }
+          });
+        }
+
         return prisma.list.findMany({
           ...query,
           where: {
             members: {
-              every: {
-                userId: parent.id,
-                OR: [
-                  { role: "OWNER" },
-                  { role: "EDITOR"}
-                ]
+              some: {
+                userId: parent.id
               }
             }
+          },
+          orderBy: {
+            updatedAt: "desc"
           }
-        })
-      },
+        });
+      }
     }),
   })
 });
@@ -145,11 +181,13 @@ export const List = builder.prismaNode("List", {
     isFollowing: t.field({
       type: "Boolean",
       resolve: async (parent, args, context) => {
+        const { id } = decodeGlobalID(context.user?.id!);
+
         const query = await prisma.membership.findFirst({
           where: {
-            userId: context.user?.id,
+            userId: id,
             listId: parent.id,
-            role: "VIEWER"
+            role: Role.VIEWER
           }
         });
 
@@ -162,12 +200,14 @@ export const List = builder.prismaNode("List", {
     }),
     role: t.string({
       resolve: async (parent, args, context) => {
+        const { id } = decodeGlobalID(context.user?.id!);
+
         const query = await prisma.membership.findFirst({
           select: {
             role: true
           },
           where: {
-            userId: context.user?.id,
+            userId: id,
             listId: parent.id
           }
         });
@@ -185,7 +225,7 @@ export const List = builder.prismaNode("List", {
         const owner = await prisma.membership.findFirst({
           where: {
             listId: parent.id,
-            role: "OWNER"
+            role: Role.OWNER
           }
         });
 
@@ -211,7 +251,7 @@ export const List = builder.prismaNode("List", {
           ...query,
           where: {
             listId: parent.id,
-            role: "VIEWER"
+            role: Role.VIEWER
           }
         })
       },
@@ -229,12 +269,8 @@ export const List = builder.prismaNode("List", {
               },
               {
                 OR: [
-                  {
-                    role: "EDITOR"
-                  },
-                  {
-                    role: "OWNER"
-                  }
+                  { role: Role.EDITOR },
+                  { role: Role.OWNER }
                 ]
               }
             ]
@@ -305,8 +341,6 @@ export const Membership = builder.prismaNode("Membership", {
   fields: (t) => ({
     list: t.relation("list"),
     user: t.relation("user"),
-    role: t.expose("role", {
-      type: "String",
-    })
+    role: t.exposeString("role")
   })
 });

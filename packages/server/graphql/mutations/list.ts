@@ -101,7 +101,7 @@ builder.mutationField("createList", (t) => t.prismaField({
 }));
 
 builder.mutationField("FollowList", (t) => t.prismaField({
-  type: "Membership",
+  type: "List",
   args: {
     listId: t.arg({
       type: "ID",
@@ -112,40 +112,42 @@ builder.mutationField("FollowList", (t) => t.prismaField({
     const listId = args.listId as string;
     const userId = context.user?.id!;
 
-    const { id } = decodeGlobalID(listId);
+    const { id: decodeListId } = decodeGlobalID(listId);
+    const { id: decodeUserId } = decodeGlobalID(userId);
 
     const membership = await prisma.membership.findFirst({
-      ...query,
       where: {
-        listId: id,
-        userId: userId
+        listId: decodeListId,
+        userId: decodeUserId
       }
     });
 
+    // If the user doesn't have any association for this list.
     if (!membership) {
-      return prisma.membership.create({
-        ...query,
+      await prisma.membership.create({
         data: {
           role: "VIEWER",
-          listId: id, 
-          userId: userId
+          listId: decodeListId, 
+          userId: decodeUserId
         }
       });
-    }
-
-    if (membership.role === "VIEWER") {
-      return prisma.membership.delete({
-        ...query,
+    } else if (membership.role === "VIEWER") {
+      // If the user has association with this list, we will remove it.
+      await prisma.membership.delete({
         where: {
           id: {
-            listId: id,
-            userId: userId
+            listId: decodeListId,
+            userId: decodeUserId
           }
         }
       });
     }
 
-    // If it isn't the `VIEWER` role, we will just ignore mutation.
-    throw createGraphQLError("The user already has a role for this list.");
+    return prisma.list.findUniqueOrThrow({
+      ...query,
+      where: {
+        id: decodeListId
+      }
+    });
   }
 }));

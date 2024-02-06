@@ -101,6 +101,12 @@ type ListFollowingConnectionEdge {
   node: Membership!
 }
 
+enum ListTabOptions {
+  All
+  Author
+  Following
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -120,7 +126,7 @@ type Membership implements Node {
 }
 
 type Mutation {
-  FollowList(listId: ID!): Membership!
+  FollowList(listId: ID!): List!
   createItem(data: ItemCreateInput!, listId: String!): Item!
   createList(data: ListCreateInput!): List!
   login(input: LoginInput!): LoginPayload!
@@ -178,24 +184,13 @@ scalar Upload
 type User implements Node {
   avatar: String!
   createdAt: Date!
-  editableList(after: ID, before: ID, first: Int, last: Int): UserEditableListConnection!
   email: String!
   feed(after: ID, before: ID, first: Int, last: Int): UserFeedConnection!
   firstName: String!
-  followingList(after: ID, before: ID, first: Int, last: Int): UserFollowingListConnection!
   id: ID!
   lastName: String!
+  list(after: ID, before: ID, first: Int, last: Int, tabOption: ListTabOptions): UserListConnection!
   name: String!
-}
-
-type UserEditableListConnection {
-  edges: [UserEditableListConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type UserEditableListConnectionEdge {
-  cursor: ID!
-  node: List!
 }
 
 type UserFeedConnection {
@@ -208,12 +203,12 @@ type UserFeedConnectionEdge {
   node: List!
 }
 
-type UserFollowingListConnection {
-  edges: [UserFollowingListConnectionEdge]!
+type UserListConnection {
+  edges: [UserListConnectionEdge]!
   pageInfo: PageInfo!
 }
 
-type UserFollowingListConnectionEdge {
+type UserListConnectionEdge {
   cursor: ID!
   node: List!
 }

@@ -6,10 +6,17 @@ export type ErrorCode =
   | "USER_INCORRECT_PASSWORD"
   | "REFRESH_TOKEN_BEFORE_EXPIRED"
   | "INVALID_AUTH_TOKEN"
+  | "USER_AVATAER_FAILED"
 
 export type GraphQLError = {
   extensions: {
     code: ErrorCode
   },
   message: string;
+}
+
+export enum TabOptions {
+  All = "All",
+  Following = "Following",
+  Author = "Author"
 }

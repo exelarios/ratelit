@@ -4,6 +4,7 @@ import { Tokens } from "@/server/graphql/types";
 import { generateTokens, verifyRefreshToken } from "@/server/utils/auth";
 import jwt from "jsonwebtoken";
 import prisma from "@/server/prisma";
+import { decodeGlobalID } from "@pothos/plugin-relay";
 
 builder.mutationField("verifyToken", t => t.prismaField({
   type: "User",
@@ -11,10 +12,11 @@ builder.mutationField("verifyToken", t => t.prismaField({
     isLoggedIn: true
   },
   resolve: async (query, parent, args, context) => {
+    const { typename, id } = decodeGlobalID(context.user?.id!);
     return prisma.user.findFirstOrThrow({
       ...query,
       where: {
-        id: context.user?.id
+        id: id
       }
     });
   }

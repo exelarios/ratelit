@@ -29,7 +29,8 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
     color, 
     style,
     fontWeight = "normal",
-    children, 
+    children,
+    onPress,
     ...otherProps 
   } = props;
 
@@ -37,15 +38,15 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
 
   const fill = useMemo(() => {
     return composeStyles(styles.base, styles.fill, style);
-  }, [hovering]);
+  }, [hovering, onPress]);
 
   const outline = useMemo(() => {
     return composeStyles(styles.base, styles.outline, style);
-  }, [hovering]);
+  }, [hovering, onPress]);
 
   const none = useMemo(() => {
-    return composeStyles(styles.base, style);
-  }, [hovering]);
+    return composeStyles(styles.none, style);
+  }, [hovering, onPress]);
 
   const selection = useMemo(() => {
     return {
@@ -53,7 +54,7 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
       outline,
       none
     }
-  }, [fill, outline]);
+  }, [fill, outline, none]);
 
   if (!selection[variant]) {
     throw new Error("The variant doesn't exist.");
@@ -62,7 +63,8 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
   const currentVarient = selection[variant];
 
   const composedStyles = composeStyles(
-    currentVarient, 
+    currentVarient,
+    icon != undefined && styles.icon,
     iconAligin === "end" && { flexDirection: "row-reverse" }, 
     style as StyleProp<ViewStyle>
   );
@@ -91,6 +93,7 @@ const Button = React.forwardRef<Pressable, ButtonProps>((props, forwardedRef) =>
     <Pressable
       style={composedStyles}
       ref={forwardedRef}
+      onPress={onPress}
       {...otherProps}>
       {icon}
       {child}
@@ -124,6 +127,12 @@ const styles = StyleSheet.create({
   },
   hovering: {
     backgroundColor: colors.neutral[700]
+  },
+  icon: {
+    display: "flex",
+    columnGap: 8,
+    flexDirection: "row",
+    alignItems: "center" 
   }
 });
 
