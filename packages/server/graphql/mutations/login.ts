@@ -18,6 +18,8 @@ builder.relayMutationField("login", {
   })
 }, {
   resolve: async (parent, args, context) => {
+    // todo: remove duplication for checks for user,
+    // since context function checks if user exist or not.
     const user = await prisma.user.findFirst({
       select: {
         id: true,

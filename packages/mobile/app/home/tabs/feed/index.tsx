@@ -77,7 +77,7 @@ function FollowingList(props: FollowingListProps) {
         onRefresh={handleOnRefresh}
         contentContainerStyle={styles.following}
         renderItem={({ item }) => <List list={item.node}/>}
-        keyExtractor={node => node.node.id}
+        keyExtractor={item => item.node.id}
       />
     </Suspense>
   );

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6b2aa580a91628fdfc2762e38ba5135e>>
+ * @generated SignedSource<<7f0533ecc0c81ce259d0a16e439b140e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type ArticleFragment$data = {
   readonly createdAt: any;
   readonly description: string | null | undefined;
   readonly id: string;
+  readonly isAuthor: boolean;
   readonly isFollowing: boolean;
   readonly items: ReadonlyArray<{
     readonly description: string | null | undefined;
@@ -22,6 +23,7 @@ export type ArticleFragment$data = {
     readonly name: string;
   }>;
   readonly owner: {
+    readonly id: string;
     readonly name: string;
   };
   readonly role: string;
@@ -117,12 +119,20 @@ return {
     {
       "alias": null,
       "args": null,
+      "kind": "ScalarField",
+      "name": "isAuthor",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
       "concreteType": "User",
       "kind": "LinkedField",
       "name": "owner",
       "plural": false,
       "selections": [
-        (v2/*: any*/)
+        (v2/*: any*/),
+        (v0/*: any*/)
       ],
       "storageKey": null
     },
@@ -146,6 +156,6 @@ return {
 };
 })();
 
-(node as any).hash = "5a6454cc7754cf2294da9677f3945960";
+(node as any).hash = "f68fcb11d0b9f9ffdde08cb2c0b08d5d";
 
 export default node;

@@ -9,6 +9,7 @@ import Text from "@/mobile/components/Text";
 import colors from "@/mobile/design/colors";
 
 import { ListFragment$key } from "./__generated__/ListFragment.graphql";
+import useFollowListMutation from "../hooks/useFollowListMutation";
 
 type ListProps = {
   list: ListFragment$key;
@@ -21,6 +22,7 @@ const ListFragment = graphql`
     title
     thumbnail
     isFollowing
+    isAuthor
     categories
     description
     updatedAt
@@ -33,7 +35,8 @@ const ListFragment = graphql`
 function List(props: ListProps) {
   const { variant = "large" } = props;
   const data = useFragment(ListFragment, props.list);
-  const { id, title, isFollowing, thumbnail, owner, description } = data;
+  const { id, title, isFollowing, thumbnail, owner, description, isAuthor } = data;
+  const [commitFollowList, isInFlight] = useFollowListMutation();
 
   return (
     <ImageBackground
@@ -55,6 +58,13 @@ function List(props: ListProps) {
               <View style={[styles.col, { justifyContent: "flex-end" }]}>
                 {variant !== "small" &&
                   <Ionicons
+                    suppressHighlighting
+                    disabled={isInFlight}
+                    onPress={() => commitFollowList(id, {
+                      title,
+                      isFollowing,
+                      isAuthor
+                    })}
                     name={isFollowing ? "bookmark-sharp" : "bookmark-outline"}
                     size={24}
                     color="white"

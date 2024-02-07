@@ -163,6 +163,7 @@ export const List = builder.prismaNode("List", {
       },
       resolve: async (parent) => {
         const key = parent.thumbnail;
+        // todo: throw an error instead
         if (!key) {
           return "";
         }
@@ -181,42 +182,63 @@ export const List = builder.prismaNode("List", {
     isFollowing: t.field({
       type: "Boolean",
       resolve: async (parent, args, context) => {
-        const { id } = decodeGlobalID(context.user?.id!);
+        const userId = context.user?.id!;
+        const { id: decodedUserId } = decodeGlobalID(userId);
 
         const query = await prisma.membership.findFirst({
           where: {
-            userId: id,
+            userId: decodedUserId,
             listId: parent.id,
             role: Role.VIEWER
           }
         });
 
-        if (!query) {
-          return false;
-        }
+        return !!query;
+      }
+    }),
+    isAuthor: t.field({
+      type: "Boolean",
+      resolve: async (parent, args, context) => {
+        const userId = context.user?.id!;
+        const { id: decodedUserId } = decodeGlobalID(userId);
+        const list = await prisma.list.findUnique({
+          where: {
+            id: parent.id,
+            members: {
+              some: {
+                userId: decodedUserId,
+                OR: [
+                  { role: "OWNER" },
+                  { role: "EDITOR" }
+                ]
+              }
+            }
+          },
+        });
 
-        return true;
+        return !!list;
       }
     }),
     role: t.string({
       resolve: async (parent, args, context) => {
-        const { id } = decodeGlobalID(context.user?.id!);
+        const userId = context.user?.id!;
+        const { id: decodedUserId } = decodeGlobalID(userId);
 
         const query = await prisma.membership.findFirst({
           select: {
             role: true
           },
           where: {
-            userId: id,
-            listId: parent.id
+            listId: parent.id,
+            userId: decodedUserId
           }
         });
 
         if (!query) {
-          return "GUEST"
+          return "GUEST";
         }
 
-        return query.role;
+        return query?.role!;
       }
     }),
     owner: t.prismaField({

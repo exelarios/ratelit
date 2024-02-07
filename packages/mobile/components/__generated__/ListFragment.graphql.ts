@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7e4d4babd100127ef59e10220fbc214d>>
+ * @generated SignedSource<<59ba74961c519b96b13dd69974bfbcf5>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,6 +14,7 @@ export type ListFragment$data = {
   readonly categories: ReadonlyArray<string>;
   readonly description: string | null | undefined;
   readonly id: string;
+  readonly isAuthor: boolean;
   readonly isFollowing: boolean;
   readonly owner: {
     readonly name: string;
@@ -66,6 +67,13 @@ const node: ReaderFragment = {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
+      "name": "isAuthor",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
       "name": "categories",
       "storageKey": null
     },
@@ -106,6 +114,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "3dd34b8f23136b5c9fccbb0d3976cc34";
+(node as any).hash = "ec6ab542a3cebb40b0e1e47f8e2af997";
 
 export default node;

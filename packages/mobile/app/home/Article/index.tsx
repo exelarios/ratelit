@@ -24,6 +24,7 @@ const ArticleQuery = graphql`
       isFollowing
       createdAt
       updatedAt
+      isAuthor
       items {
         name
         description
@@ -45,7 +46,7 @@ function Article() {
     listId: listId as string
   });
 
-  const { id, title, description, thumbnail, isFollowing, owner, updatedAt, items } = data.List;
+  const { id, title, description, thumbnail, isFollowing, isAuthor, owner, updatedAt, items } = data.List;
 
   const updatedTimestamp = useMemo(() => {
     const date = new Date(updatedAt);
@@ -86,7 +87,11 @@ function Article() {
               <Text style={[styles.text, styles.location]}>San Gabriel, CA</Text>
               <Ionicons
                 disabled={isInFlight}
-                onPress={() => commitFollowList(id)}
+                onPress={() => commitFollowList(id, {
+                  title,
+                  isAuthor,
+                  isFollowing
+                })}
                 suppressHighlighting
                 name={isFollowing ? "bookmark" : "bookmark-outline"}
                 size={24}

@@ -1,7 +1,7 @@
 import { Suspense, useCallback, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import { graphql, useLazyLoadQuery, usePaginationFragment } from "react-relay";
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 import View from "@/mobile/components/View";
 import Text from "@/mobile/components/Text";
@@ -28,11 +28,11 @@ const ExploreFeedFragment = graphql`
     feed(first: $count, after: $cursor)
     @connection(key: "ExploreFeedLists_feed") {
       edges {
-      node {
-        id
-        ...ArticleFragment
+        node {
+          id
+          ...ArticleFragment
+        }
       }
-    }
     }
   }
 `;
@@ -76,7 +76,7 @@ function ExploreList(props: ExploreListProps) {
       onComplete(error) {
         if (error) {
           console.log(error);
-          toast.add({
+        toast.add({
             message: error.message
           });
         }
@@ -90,16 +90,15 @@ function ExploreList(props: ExploreListProps) {
     <Suspense
       fallback={<Text>loading . . . </Text>}>
       <FlatList
-        snapToAlignment="start"
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={Header}
         refreshing={isLoading}
         onRefresh={handleOnRefresh}
         data={list.data.feed.edges}
         contentContainerStyle={styles.feed}
-        keyExtractor={node => node.node.id}
+        keyExtractor={item => item.node.id}
         renderItem={({ item }) =>
-          <Article list={item.node} updateable={item.node}/>
+          <Article list={item.node}/>
         }
       />
     </Suspense>

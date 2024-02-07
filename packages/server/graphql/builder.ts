@@ -8,6 +8,7 @@ import prisma from "@/server/prisma";
 // import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 
 import type PrismaTypes from "@pothos/plugin-prisma/generated";
+import { createGraphQLError } from "graphql-yoga";
 // import type { FileUpload } from "graphql-upload/Upload.mjs";
 
 interface Upload {
@@ -54,9 +55,18 @@ const builder = new SchemaBuilder<Builder>({
   },
   authScopes: async (context) => ({
     isLoggedIn(param) {
-      return context.user !== null;
+      return context?.user != null;
     },
-  })
+  }),
+  scopeAuthOptions: {
+    unauthorizedError(parent, context) {
+      throw createGraphQLError("Failed to authorize user.", {
+        extensions: {
+          code: "UNAUTHORIZED_ACCESS"
+        }
+      })
+    }
+  }
 });
 
 builder.addScalarType("Date", DateTimeISOResolver);

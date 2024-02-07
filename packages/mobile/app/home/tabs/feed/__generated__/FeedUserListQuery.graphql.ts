@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<35a29a448a9b761a4de8f7fde48f5b3b>>
+ * @generated SignedSource<<a919718f008abaad7f9e79bb7c7af9be>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -180,6 +180,13 @@ return {
                         "alias": null,
                         "args": null,
                         "kind": "ScalarField",
+                        "name": "isAuthor",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
                         "name": "categories",
                         "storageKey": null
                       },
@@ -282,12 +289,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "626113827b11e930e396ecd53c02abb3",
+    "cacheID": "f77e8a2f2416cd4a0bc1d76fee27818b",
     "id": null,
     "metadata": {},
     "name": "FeedUserListQuery",
     "operationKind": "query",
-    "text": "query FeedUserListQuery(\n  $email: String!\n  $count: Int!\n  $cursor: ID\n  $tabOption: ListTabOptions\n) {\n  User(email: $email) {\n    ...FeedListFragment\n    id\n  }\n}\n\nfragment FeedListFragment on User {\n  list(first: $count, after: $cursor, tabOption: $tabOption) {\n    edges {\n      node {\n        id\n        ...ListFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ListFragment on List {\n  id\n  title\n  thumbnail\n  isFollowing\n  categories\n  description\n  updatedAt\n  owner {\n    name\n    id\n  }\n}\n"
+    "text": "query FeedUserListQuery(\n  $email: String!\n  $count: Int!\n  $cursor: ID\n  $tabOption: ListTabOptions\n) {\n  User(email: $email) {\n    ...FeedListFragment\n    id\n  }\n}\n\nfragment FeedListFragment on User {\n  list(first: $count, after: $cursor, tabOption: $tabOption) {\n    edges {\n      node {\n        id\n        ...ListFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ListFragment on List {\n  id\n  title\n  thumbnail\n  isFollowing\n  isAuthor\n  categories\n  description\n  updatedAt\n  owner {\n    name\n    id\n  }\n}\n"
   }
 };
 })();

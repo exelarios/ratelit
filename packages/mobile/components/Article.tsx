@@ -13,12 +13,10 @@ import useFollowListMutation from "@/mobile/hooks/useFollowListMutation";
 
 import { ArticleFragment$key } from "./__generated__/ArticleFragment.graphql";
 import { Link } from "expo-router";
-import { useToast } from "../context/ToastContext";
-// import { ArticleFragment_updateable$key } from "./__generated__/ArticleFragment_updateable.graphql";
+import { useAuth } from "../context/AuthContext";
 
 type ArticleProps = {
   list: ArticleFragment$key;
-  updateable: any;
 }
 
 const ArticleFragment = graphql`
@@ -32,8 +30,10 @@ const ArticleFragment = graphql`
     updatedAt
     createdAt
     role
+    isAuthor
     owner {
       name
+      id
     }
     items {
       id
@@ -46,17 +46,22 @@ const ArticleFragment = graphql`
 const windowWidth = Dimensions.get("window").width;
 
 function Article(props: ArticleProps) {
-  const toast = useToast();
+  const auth = useAuth();
+  const user = auth.state.user;
   const data = useFragment(ArticleFragment, props.list);
   const [commitFollowList, isInFlight] = useFollowListMutation();
-  const { id, title, description, thumbnail, owner, isFollowing, createdAt } = data;
+  const { id, title, description, thumbnail, owner, isFollowing, isAuthor, createdAt } = data;
 
   const createdTimestamp = useMemo(() => {
     return formatTime(new Date(createdAt));
   }, [createdAt]);
 
   const handleOnFollowingMutation = useCallback(() => {
-    commitFollowList(id);
+    commitFollowList(id, {
+      title,
+      isFollowing,
+      isAuthor
+    });
   }, [data]);
 
   return (

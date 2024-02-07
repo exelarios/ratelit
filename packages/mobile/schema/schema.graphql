@@ -61,6 +61,7 @@ type List implements Node {
   editors(after: ID, before: ID, first: Int, last: Int): ListEditorsConnection!
   following(after: ID, before: ID, first: Int, last: Int): ListFollowingConnection!
   id: ID!
+  isAuthor: Boolean!
   isFollowing: Boolean!
   items: [Item!]!
   owner: User!

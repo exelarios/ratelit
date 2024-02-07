@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<46d536a5f51bad280fc347b3789af336>>
+ * @generated SignedSource<<038a05b4fa6ee152de55bdd17375d5ea>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -214,6 +214,13 @@ return {
                           {
                             "alias": null,
                             "args": null,
+                            "kind": "ScalarField",
+                            "name": "isAuthor",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
                             "concreteType": "User",
                             "kind": "LinkedField",
                             "name": "owner",
@@ -299,12 +306,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "15b5e135fb5c346ba95a5aa94048c88e",
+    "cacheID": "957022a4259914141ac1b3a9bb22e383",
     "id": null,
     "metadata": {},
     "name": "ExploreFeedPaginationFragment",
     "operationKind": "query",
-    "text": "query ExploreFeedPaginationFragment(\n  $count: Int\n  $cursor: ID\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...ExploreFeedFragment\n    id\n  }\n}\n\nfragment ArticleFragment on List {\n  id\n  title\n  thumbnail\n  isFollowing\n  categories\n  description\n  updatedAt\n  createdAt\n  role\n  owner {\n    name\n    id\n  }\n  items {\n    id\n    name\n    description\n  }\n}\n\nfragment ExploreFeedFragment on User {\n  feed(first: $count, after: $cursor) {\n    edges {\n      node {\n        id\n        ...ArticleFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query ExploreFeedPaginationFragment(\n  $count: Int\n  $cursor: ID\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...ExploreFeedFragment\n    id\n  }\n}\n\nfragment ArticleFragment on List {\n  id\n  title\n  thumbnail\n  isFollowing\n  categories\n  description\n  updatedAt\n  createdAt\n  role\n  isAuthor\n  owner {\n    name\n    id\n  }\n  items {\n    id\n    name\n    description\n  }\n}\n\nfragment ExploreFeedFragment on User {\n  feed(first: $count, after: $cursor) {\n    edges {\n      node {\n        id\n        ...ArticleFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();

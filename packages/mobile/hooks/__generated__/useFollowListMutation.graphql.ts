@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1183d58838148d6ac0a38f7b2bbd770c>>
+ * @generated SignedSource<<af9d015d490646fbba5e5235022d1dcd>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,8 +15,6 @@ export type useFollowListMutation$variables = {
 export type useFollowListMutation$data = {
   readonly FollowList: {
     readonly isFollowing: boolean;
-    readonly role: string;
-    readonly title: string;
   };
 };
 export type useFollowListMutation = {
@@ -43,21 +41,7 @@ v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "title",
-  "storageKey": null
-},
-v3 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
   "name": "isFollowing",
-  "storageKey": null
-},
-v4 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "role",
   "storageKey": null
 };
 return {
@@ -75,9 +59,7 @@ return {
         "name": "FollowList",
         "plural": false,
         "selections": [
-          (v2/*: any*/),
-          (v3/*: any*/),
-          (v4/*: any*/)
+          (v2/*: any*/)
         ],
         "storageKey": null
       }
@@ -100,8 +82,6 @@ return {
         "plural": false,
         "selections": [
           (v2/*: any*/),
-          (v3/*: any*/),
-          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -115,16 +95,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "11599ed915fe45bf8aa67eead0ff517e",
+    "cacheID": "1c9c1f41e11c9f4bb7b6b1b881f6179a",
     "id": null,
     "metadata": {},
     "name": "useFollowListMutation",
     "operationKind": "mutation",
-    "text": "mutation useFollowListMutation(\n  $listId: ID!\n) {\n  FollowList(listId: $listId) {\n    title\n    isFollowing\n    role\n    id\n  }\n}\n"
+    "text": "mutation useFollowListMutation(\n  $listId: ID!\n) {\n  FollowList(listId: $listId) {\n    isFollowing\n    id\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "2e6fc440fd80d9c87df930cc69821319";
+(node as any).hash = "407a3de1dae95f920e823d0aa2ae6c8a";
 
 export default node;
